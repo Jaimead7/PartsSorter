@@ -1,0 +1,14 @@
+Dockerfile
+.dockerignore
+
+__pycache__
+.venv
+.env
+
+build
+*.egg-info
+
+*.db
+*.log
+
+README.md

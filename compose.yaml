@@ -1,0 +1,117 @@
+name: parts-sorter
+
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - path: ./postgres/dist/.env
+        required: true
+    volumes:
+      - postgres-volume:/var/lib/postgresql
+    networks:
+      - my-db-network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+    env_file:
+      - path: ./api/dist/.env
+        required: true
+    volumes:
+      - images-volume:/app/dist/images
+      - models-volume:/app/dist/models
+      - datasets-volume:/app/dist/datasets
+    networks:
+      - my-db-network
+      - my-api-network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: web
+    restart: unless-stopped
+    depends_on:
+      - api
+    env_file:
+      - path: ./web/dist/.env
+        required: true
+    ports:
+      - "5000:5000"
+    networks:
+      - my-api-network
+
+  label-studio:
+    image: heartexlabs/label-studio:latest
+    container_name: label-studio
+    ports:
+      - "8080:8080"
+    volumes:
+      - label-studio-volume:/label-studio/data
+      - images-volume:/local-storage/images
+    environment:
+      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
+      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/local-storage/images/training
+
+
+volumes:
+  postgres-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${POSTGRES_VOLUME_PATH:-/mnt/shared/postgresql}
+    external: false
+    labels:
+      - "description=PostgreSQL data volume."
+  label-studio-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LABEL_STUDIO_VOLUME:-/mnt/shared/label-studio}
+    external: false
+    labels:
+      - "description=Label studio data volume."
+  images-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${IMAGES_VOLUME:-/mnt/shared/images}
+    external: false
+    labels:
+      - "description=Images volume."
+  models-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MODELS_VOLUME:-/mnt/shared/models}
+    external: false
+    labels:
+      - "description=Models volume."
+  datasets-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATASETS_VOLUME:-/mnt/shared/datasets}
+    external: false
+    labels:
+      - "description=Datasets volume."
+
+
+networks:
+  my-db-network:
+    driver: bridge
+  my-api-network:
+    driver: bridge
