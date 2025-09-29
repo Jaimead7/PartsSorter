@@ -1,0 +1,37 @@
+[project]
+    name = "jaimead7-parts-sorter-api"
+    version = "0.0.1"
+    description = "API for a parts sorter system."
+    authors = [
+        {name = "Jaime Álvarez", email = "alvarez.diaz.jaime1@gmail.com"},
+    ]
+    maintainers = [
+        {name = "Jaime Álvarez", email = "alvarez.diaz.jaime1@gmail.com"},
+    ]
+    readme = {file = "README.md", content-type = "text/markdown"}
+    license = "AGPL-3.0"
+    license-files = [
+        "LICENSE",
+    ]
+    keywords = [
+        "API",
+    ]
+    classifiers = [
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+    ]
+    dependencies = [
+        "jaimead7-pyutils >= 0.2.0",
+        "jaimead7-yolo-model-manager >= 0.0.1",
+        "fastapi[standard] >= 0.116.0",
+        "sqlmodel >= 0.0.24",
+        "aiosqlite >= 0.21.0",
+        "ultralytics >= 8.3.179",
+        "python-dotenv >= 1.1.1"
+    ]
+    requires-python = ">=3.10, <3.13"
+
+    [project.urls]
+        Homepage = "https://github.com/Jaimead7/PartsSorter/api"
+        Repository = "https://github.com/Jaimead7/PartsSorter"

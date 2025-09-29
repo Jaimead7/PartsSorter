@@ -1,0 +1,33 @@
+[project]
+    name = "jaimead7-parts-sorter-web-app"
+    version = "0.0.1"
+    description = "WebApp for a parts sorter system."
+    authors = [
+        {name = "Jaime Álvarez", email = "alvarez.diaz.jaime1@gmail.com"},
+    ]
+    maintainers = [
+        {name = "Jaime Álvarez", email = "alvarez.diaz.jaime1@gmail.com"},
+    ]
+    readme = {file = "README.md", content-type = "text/markdown"}
+    license = "MIT"
+    license-files = [
+        "LICENSE",
+    ]
+    keywords = [
+        "WebApp",
+    ]
+    classifiers = [
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+    ]
+    dependencies = [
+        "quart >= 0.20.0",
+        "uvicorn[standard] >= 0.35.0"
+    ]
+    requires-python = ">=3.10, <3.14"
+
+    [project.urls]
+        Homepage = "https://github.com/Jaimead7/PartsSorter/web"
+        Repository = "https://github.com/Jaimead7/PartsSorter"

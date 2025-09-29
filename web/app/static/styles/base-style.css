@@ -1,0 +1,215 @@
+
+/* General style */
+@font-face {
+    font-family: 'ITCAvantGarde';
+    src: url('/static/fonts/ITCAvantGardeGothicBook.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'ITCAvantGarde';
+    src: url('/static/fonts/ITCAvantGardeGothicBold.otf');
+    font-weight: bold;
+    font-style: normal;
+}
+
+:root {
+    --menu-icon-size: 5.3vh;
+    --sidebar-width: 35vh;
+    --global-padding: 2.5vh;
+    --sidebar-collapsed-width: 2rem;
+    --sidebar-collaps-time: 1s;
+    --copo-dark-blue: #152e49;
+    --copo-dark-blue-opacity: #44586d;
+    --copo-light-blue: #00557f;
+    --copo-orange: #ed7a18;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: default;
+    user-select: none;
+}
+
+body {
+    font-family: ITCAvantGarde, sans-serif;
+    background-color: var(--copo-dark-blue);
+    color: white;
+    max-height: 100vh;
+}
+
+.row-div {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+/* Menu styles */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--copo-dark-blue);
+    padding: var(--global-padding);
+    /*transition: width var(--sidebar-collaps-time) ease;*/
+}
+
+.sidebar-collapsed {
+    width: calc(var(--menu-icon-size) + 2*var(--global-padding));
+}
+
+.sidebar-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: min(2vh, 15px);
+}
+
+.sidebar-header h3 {
+    font-size: 5vh;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-header > *:not(.toggle-button) {
+    white-space: nowrap;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.sidebar-collapsed .sidebar-header > *:not(.toggle-button) {
+    width: 0;
+}
+
+.toggle-button {
+    background: none;
+    border: none;
+    padding: 0;
+    height: fit-content;
+    align-self: center;
+}
+
+.button-icon {
+    cursor: pointer;
+    display: block;
+    width: var(--menu-icon-size);
+    height: var(--menu-icon-size);
+    transition: transform 0.1s linear;
+}
+
+.menu-icon:hover {
+    transform: scale(1.2);
+}
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    font-size: 3vh;
+}
+
+.sidebar-collapsed .menu-list {
+    width: 0;
+}
+
+.menu-item {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.menu-item:last-child {
+    margin-bottom: 0;
+}
+
+.menu-link {
+    cursor: pointer;
+    color: white;
+    display: block;
+    text-decoration: none;
+    padding: 1.5vh 3vh;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-radius: 0.2rem;
+}
+
+.menu-link:hover {
+    background-color: var(--copo-dark-blue-opacity);
+}
+
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
+
+.dropdown-content {
+    margin-left: 1rem;
+    display: none;
+    position: absolute;
+    background-color: var(--copo-dark-blue);
+    border-radius: 0.2rem;
+    box-shadow: 0px 0px 5px 2px var(--copo-orange);
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Main content styles */
+.main-content {
+    height: 100vh;
+    width: calc(100% - var(--sidebar-width));
+    background-color: var(--copo-dark-blue-opacity);
+    padding: var(--global-padding);
+    overflow: hidden;
+    /*transition: width var(--sidebar-collaps-time) ease;*/
+}
+
+.main-content-expanded {
+    width: calc(100% - var(--menu-icon-size) - 2*var(--global-padding));
+}
+
+.main-content-header {
+    height: 8%;
+    font-size: 5vh;
+    font-weight: bold;
+    max-width: fit-content;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.main-content-div {
+    height: 92%;
+    width: 100%;
+    padding-top: min(2vh, 15px);;
+}
+
+/* Alerts */
+.alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+.alert-warning {
+    background-color: #ffe89d;
+    color: #6d5200;
+}
+
+.alert-error {
+    background-color: #ffabab;
+    color: #800000;
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            {% block title %}
+                Airbag cut inspection
+            {% endblock %}
+        </title>
+        <link href="{{ url_for('static', filename='images/copoLogo.png') }}" rel="shortcut icon" type="image/x-icon">
+        <link href="{{ url_for('static', filename='styles/base-style.css') }}" rel="stylesheet">
+        {% block styles %}{% endblock %}
+    </head>
+    <body class="row-div">
+        {% include 'sidebar.html' %}
+        <div class="main-content" id="main-content">
+            <div class="main-content-header">Airbag cut inspection</div>
+            <div class="main-content-div">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='js/menu.js') }}"></script>
+        {% block scripts %}{% endblock %}
+    </body>
+</html>

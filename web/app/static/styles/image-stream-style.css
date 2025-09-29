@@ -1,0 +1,132 @@
+.image-stream-body {
+    height: 100%;
+}
+
+.live-image-content {
+    align-items: center;
+    height: 70%;
+}
+
+.live-image-image {
+    border: 0.5vh solid white;
+    border-radius: 2vh;
+    object-fit: scale-down;
+    height: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1vh;
+}
+
+.live-image-image p {
+    text-align: center;
+    font-weight: bold;
+    font-size: 10vh;
+    padding: var(--sidebar-padding);
+}
+
+.live-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 2vh;
+}
+
+.live-image-info {
+    width: calc(100% - var(--live-image-width));
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    overflow: hidden;
+    padding-left: 2vh;
+    gap: 4vh;
+}
+
+.live-image-info p {
+    max-width: fit-content;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: var(--sidebar-padding);
+}
+
+.live-image-info p.live-image-info-attr {
+    font-size: 4vh;
+    font-style: italic;
+    padding-bottom: 0px;
+}
+
+.live-image-info p.live-image-info-value {
+    font-size: 5vh;
+    font-weight: bold;
+    padding-top: 0px;
+}
+
+.image-history-content {
+    height: 30%;
+    display: flex;
+    align-items: center;
+    padding-top: var(--global-padding);
+}
+
+.image-history-list {
+    display: flex;
+    overflow: hidden;
+    gap: var(--global-padding);
+}
+
+.image-history-element {
+    padding: 1vh;
+    border: 0.3vh solid white;
+    border-radius: 1vh;
+    align-items: center;
+}
+
+.image-history-image {
+    border: 0.3vh solid white;
+    border-radius: 1vh;
+    align-content: space-evenly;
+    object-fit: scale-down;
+    height: 17vh;
+    aspect-ratio: 1/1;
+    text-align: center;
+    font-size: 2.5vh;
+}
+
+.image-history-info {
+    width: calc(100% - var(--live-image-width));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    padding-left: 1vh;
+    gap: 2vh;
+}
+
+.image-history-info p {
+    text-wrap: nowrap;
+}
+
+.image-history-info-attr {
+    font-size: 3vh;
+    font-style: italic;
+    padding-bottom: 0px;
+}
+
+.image-history-info-value {
+    font-size: 3vh;
+    font-weight: bold;
+    padding-top: 0px;
+}
+
+.nok {
+    color: white;
+    background-color: #800000;
+}
+
+.ok {
+    color: white;
+    background-color: #0f800f;
+}

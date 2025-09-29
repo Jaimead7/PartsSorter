@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Airbag cut inspection - Live view
+{% endblock %}
+
+{% block styles %}
+    <link href="{{ url_for('static', filename='styles/image-stream-style.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="image-stream-body">
+        <div class="live-image-content row-div" id="live-image-content">
+            <div class="live-image-image" id="live-image-image">
+                <p id="no-live-image">No image to show</p>
+            </div>
+            <div class="live-image-info" id="image-info">
+                <div>
+                    <p class="live-image-info-attr">Origin:</p>
+                    <p class="live-image-info-value" id="live-image-origin" data-default-text="Unknown">Unknown</p>
+                </div>
+                <div>
+                    <p class="live-image-info-attr">Type:</p>
+                    <p class="live-image-info-value" id="live-image-type" data-default-text="No result">No result</p>
+                </div>
+            </div>
+        </div>
+        <div class="image-history-content" id="image-history-content">
+            <ol class="image-history-list" id="image-history-list">
+                <li class="image-history-element row-div" id="image-history-element-1">
+                    <img class="image-history-image" id="image-history-image-1" src="" alt="No image to show">
+                    <div class="image-history-info">
+                        <div>
+                            <p class="image-history-info-attr">Origin:</p>
+                            <p class="image-history-info-value" id="image-history-origin-1" data-default-text="Unknown">Unknown</p>
+                        </div>
+                        <div>
+                            <p class="image-history-info-attr">Type:</p>
+                            <p class="image-history-info-value" id="image-history-type-1" data-default-text="No result">No result</p>
+                        </div>
+                    </div>
+                </li>
+                <li class="image-history-element row-div" id="image-history-element-2">
+                    <img class="image-history-image" id="image-history-image-2" src="" alt="No image to show">
+                    <div class="image-history-info">
+                        <div>
+                            <p class="image-history-info-attr">Origin:</p>
+                            <p class="image-history-info-value" id="image-history-origin-2" data-default-text="Unknown">Unknown</p>
+                        </div>
+                        <div>
+                            <p class="image-history-info-attr">Type:</p>
+                            <p class="image-history-info-value" id="image-history-type-2" data-default-text="No result">No result</p>
+                        </div>
+                    </div>
+                </li>
+                <li class="image-history-element row-div" id="image-history-element-3">
+                    <img class="image-history-image" id="image-history-image-3" src="" alt="No image to show">
+                    <div class="image-history-info">
+                        <div>
+                            <p class="image-history-info-attr">Origin:</p>
+                            <p class="image-history-info-value" id="image-history-origin-3" data-default-text="Unknown">Unknown</p>
+                        </div>
+                        <div>
+                            <p class="image-history-info-attr">Type:</p>
+                            <p class="image-history-info-value" id="image-history-type-3" data-default-text="No result">No result</p>
+                        </div>
+                    </div>
+                </li>
+                <li class="image-history-element row-div" id="image-history-element-4">
+                    <img class="image-history-image" id="image-history-image-4" src="" alt="No image to show">
+                    <div class="image-history-info">
+                        <div>
+                            <p class="image-history-info-attr">Origin:</p>
+                            <p class="image-history-info-value" id="image-history-origin-4" data-default-text="Unknown">Unknown</p>
+                        </div>
+                        <div>
+                            <p class="image-history-info-attr">Type:</p>
+                            <p class="image-history-info-value" id="image-history-type-4" data-default-text="No result">No result</p>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/webSocket.js') }}"></script>
+{% endblock %}

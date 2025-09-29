@@ -1,0 +1,32 @@
+[project]
+    name = "jaimead7-parts-sorter-camera-app"
+    version = "0.0.1"
+    description = "Image capture for a parts sorter system."
+    authors = [
+        {name = "Jaime Álvarez", email = "alvarez.diaz.jaime1@gmail.com"},
+    ]
+    maintainers = [
+        {name = "Jaime Álvarez", email = "alvarez.diaz.jaime1@gmail.com"},
+    ]
+    readme = {file = "README.md", content-type = "text/markdown"}
+    license = "AGPL-3.0"
+    license-files = [
+        "LICENSE",
+    ]
+    keywords = [
+        "Camera",
+    ]
+    classifiers = [
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+    ]
+    dependencies = [
+        "jaimead7-yolo-model-manager",
+        "gpiod >= 2.3.0; sys_platform == 'linux' and platform_machine == 'aarch64'"
+    ]
+    requires-python = ">=3.10, <3.13"
+
+    [project.urls]
+        Homepage = "https://github.com/Jaimead7/PartsSorter/capture"
+        Repository = "https://github.com/Jaimead7/PartsSorter"
