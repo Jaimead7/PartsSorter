@@ -99,7 +99,7 @@ async def get_models(
     )
 
 @models_router.get(
-    '/model-classes',
+    '/{name}/model-classes',
     response_model= list[ModelClass],
     summary= 'Get the ModelClass\'s of a Model of the database.',
     response_description= 'The ModelClass\'s list.',
@@ -107,15 +107,15 @@ async def get_models(
 )
 async def get_model_model_classes(
     session: Annotated[AsyncSession, Depends(get_session)],
-    model_name: str
+    name: str
 ) -> Optional[list[ModelClass]]:
     return await db_get_model_model_classes(
         session= session,
-        model_name= model_name
+        model_name= name
     )
 
 @models_router.get(
-    '/origins',
+    '/{name}/origins',
     response_model= list[Origin],
     summary= 'Get the Origin\'s of a Model of the database.',
     response_description= 'The Origin\'s list.',
@@ -123,19 +123,19 @@ async def get_model_model_classes(
 )
 async def get_model_origins(
     session: Annotated[AsyncSession, Depends(get_session)],
-    model_name: str,
+    name: str,
     limit: int = DATABASE_GET_LIMIT,
     offset: int = 0
 ) -> list[Origin] | None:
     return await db_get_model_origins(
         session= session,
-        model_name= model_name,
+        model_name= name,
         limit= limit,
         offset= offset
     )
 
 @models_router.get(
-    '/metadata',
+    '/{name}/metadata',
     response_model= ModelMetadataDict,
     summary= 'Get the metadata of a Model.',
     response_description= 'The metadata.',
@@ -143,9 +143,9 @@ async def get_model_origins(
 )
 async def get_model_metadata(
     session: Annotated[AsyncSession, Depends(get_session)],
-    model_name: str
+    name: str
 ) -> ModelMetadataDict:
     return await db_get_model_metadata(
         session= session,
-        model_name= model_name
+        model_name= name
     )

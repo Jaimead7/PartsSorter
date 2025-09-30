@@ -97,7 +97,7 @@ async def get_inspection_results(
     )
 
 @inspection_results_router.get(
-    '/images',
+    '/{name}/images',
     response_model= list[Image],
     summary= 'Get the images of an InspectionResult of the database.',
     response_description= 'The Image\'s list.',

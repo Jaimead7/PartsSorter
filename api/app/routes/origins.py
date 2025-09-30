@@ -95,7 +95,7 @@ async def get_origins(
     )
 
 @origins_router.get(
-    '/images',
+    '/{name}/images',
     response_model= list[Image],
     summary= 'Get the images of an Origin of the database.',
     response_description= 'The Image\'s list.',
