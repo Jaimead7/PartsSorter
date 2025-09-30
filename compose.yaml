@@ -23,7 +23,7 @@ services:
     depends_on:
       - postgres-db
     env_file:
-      - path: ./api/dist/.env
+      - path: ./api/.env
         required: true
     volumes:
       - images-volume:/app/dist/images
@@ -42,7 +42,7 @@ services:
     depends_on:
       - api
     env_file:
-      - path: ./web/dist/.env
+      - path: ./web/.env
         required: true
     ports:
       - "5000:5000"
