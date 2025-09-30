@@ -35,12 +35,12 @@ from utils.data_types import Result
 results_queue: asyncio.Queue[Result] = asyncio.Queue()
 
 async def main() -> None:
-    my_logger.info('CameraApp starting...')
+    my_logger.info('Capture starting...')
     await asyncio.gather(
         camera_cycle(results_queue),
         actuator_cycle(results_queue)
     )
-    my_logger.info('CameraApp stopping...')
+    my_logger.info('Capture stopping...')
 
 
 if __name__ == "__main__":
