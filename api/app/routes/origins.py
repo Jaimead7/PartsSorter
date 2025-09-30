@@ -21,10 +21,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.manager import get_session
 from ..database.origins import (db_create_new_origin, db_delete_origins,
+                                db_get_origin_camera_props,
                                 db_get_origin_images, db_get_origins,
                                 db_update_origin)
 from ..dependencies.serverConfig import DATABASE_GET_LIMIT
 from ..models.database import Image, Origin
+from ..models.typing import CameraProps
 
 origins_router = APIRouter()
 
@@ -112,4 +114,20 @@ async def get_origin_images(
         origin_name= name,
         limit= limit,
         offset= offset
+    )
+
+@origins_router.get(
+    '/{name}/camera-prop',
+    response_model= CameraProps,
+    summary= 'Get the proprerties of the camera from a origin.',
+    response_description= 'The camera properties.',
+    status_code= status.HTTP_200_OK
+)
+async def get_origin_camera_props(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: str
+) -> CameraProps:
+    return await db_get_origin_camera_props(
+        session= session,
+        origin_name = name
     )

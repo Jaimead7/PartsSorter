@@ -55,3 +55,13 @@ class ModelMetadataDict(DatasetMetadataDict):
     test_images: int
     task: str
     name: dict[int, str]
+
+
+class CameraProps(TypedDict):
+    camera_width: int
+    camera_height: int
+    brightness: float
+    contrast: float
+    saturation: float
+    exposure: float
+    wb: float
