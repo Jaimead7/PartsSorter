@@ -9,4 +9,4 @@
     tape_speed = 125  # mm/s
 
 [camera]
-    id = 0
+    index = 0

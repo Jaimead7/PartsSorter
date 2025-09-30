@@ -28,16 +28,17 @@ load_dotenv(
 import asyncio
 
 from actuator import actuator_cycle
-from camera import camera_cycle
-from utils.config import my_logger
+from camera import CameraManager
+from utils.config import CAMERA_INDEX, my_logger
 from utils.data_types import Result
 
 results_queue: asyncio.Queue[Result] = asyncio.Queue()
 
 async def main() -> None:
+    my_camera = CameraManager(CAMERA_INDEX)
     my_logger.info('Capture starting...')
     await asyncio.gather(
-        camera_cycle(results_queue),
+        my_camera.cycle(results_queue),
         actuator_cycle(results_queue)
     )
     my_logger.info('Capture stopping...')

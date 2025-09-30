@@ -21,14 +21,13 @@ from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
-from pyUtils import ConfigFileManager, MyLogger, ProjectPathsDict
-from yoloModelManager import (save_yolo_manager_logs,
-                              set_yolo_manager_logging_level,
-                              set_yolo_manager_logs_path)
+from pyUtils import (ConfigFileManager, MyLogger, ProjectPathsDict,
+                     save_pyutils_logs, set_pyutils_logging_level,
+                     set_pyutils_logs_path)
 
 
 class EnvVars(Enum):
-    SOURCE_NAME = 'SOURCE_NAME'
+    ORIGIN_NAME = 'ORIGIN_NAME'
     API_IP = 'API_IP'
     LOGGING_LVL = 'LOGGING_LVL'
 
@@ -50,15 +49,15 @@ my_logger = MyLogger(
 
 def set_capture_app_logs_path(new_path: Path | str) -> None:
     my_logger.logs_file_path = new_path
-    set_yolo_manager_logs_path(new_path)
+    set_pyutils_logs_path(new_path)
 
 def save_capture_app_logs(value: bool) -> None:
     my_logger.save_logs = value
-    save_yolo_manager_logs(value)
+    save_pyutils_logs(value)
 
 def set_capture_app_logging_level(lvl: int = logging.DEBUG) -> None:
     my_logger.set_logging_level(lvl)
-    set_yolo_manager_logging_level(lvl)
+    set_pyutils_logging_level(lvl)
 
 set_capture_app_logging_level(logging.WARNING)
 set_capture_app_logs_path('captureApp.log')
@@ -71,26 +70,26 @@ load_dotenv(
     dotenv_path= MY_APP[ProjectPathsDict.DIST_PATH] / '.env',
     override= False
 )
-_env_aux: Optional[str] = getenv(EnvVars.SOURCE_NAME.value, None)
+_env_aux: Optional[str] = getenv(EnvVars.ORIGIN_NAME.value, None)
 if _env_aux is None:
-    msg: str = f'Could not import "{EnvVars.SOURCE_NAME.value}" from env vars.'
-    my_logger.critical(msg)
+    msg: str = f'Could not import "{EnvVars.ORIGIN_NAME.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
     raise ImportError(msg)
-SOURCE_NAME: str = _env_aux
+ORIGIN_NAME: str = _env_aux
 _env_aux: Optional[str] = getenv(EnvVars.API_IP.value, None)
 if _env_aux is None:
     msg: str = f'Could not import "{EnvVars.API_IP.value}" from env vars.'
-    my_logger.critical(msg)
+    my_logger.critical(f'ImportError: {msg}')
     raise ImportError(msg)
-API_IP: Optional[str] = getenv(EnvVars.SOURCE_NAME.value, None)
+API_IP: Optional[str] = getenv(EnvVars.ORIGIN_NAME.value, None)
 del(_env_aux)
 
 # CONFIG
-CAMERA: int = int(MY_CFG.camera.id)
+CAMERA_INDEX: int = int(MY_CFG.camera.index)
 GPIO_CHIP: str = str(MY_CFG.gpio.chip)
 ACTUATOR_PIN: int = int(MY_CFG.gpio.actuator_pin)
 CAMERA_SENSOR_PIN: int = int(MY_CFG.gpio.camera_sensor_pin)
 ACTUATOR_SENSOR_PIN: int = int(MY_CFG.gpio.actuator_sensor_pin)
 _SENSORS_DISTANCE: float = float(MY_CFG.calibration.sensors_distance)
 _TAPE_SPEED: float = float(MY_CFG.calibration.tape_speed)
-SENSORS_INTERVAL: float = _SENSORS_DISTANCE / _TAPE_SPEED
+SENSORS_INTERVAL_MS: float = (_SENSORS_DISTANCE / _TAPE_SPEED)*1000

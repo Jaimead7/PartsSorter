@@ -19,20 +19,12 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from gpio.gpio import GPIO
-from utils.config import (ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, SENSORS_INTERVAL,
-                          my_logger)
+from utils.config import (ACTUATOR_PIN, ACTUATOR_SENSOR_PIN,
+                          SENSORS_INTERVAL_MS, my_logger)
 from utils.data_types import Result
 
 
 async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
-    if ACTUATOR_PIN is None:
-        msg: str = 'No pin is selected as "ACTUATOR_PIN".'
-        my_logger.critical(msg)
-        exit(1)
-    if ACTUATOR_SENSOR_PIN is None:
-        msg: str = 'No pin is selected as "ACTUATOR_SENSOR_PIN".'
-        my_logger.critical(msg)
-        exit(1)
     last_sensor_val: bool = False
     new_result: Result = Result(
         date= datetime.now(timezone.utc),
@@ -44,18 +36,18 @@ async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
         if new_sensor_value is None:
             continue
         if new_sensor_value and not last_sensor_val:
-            new_result: Result = Result(
-                date= datetime.now(timezone.utc),
-                result= False
-            )
             my_logger.debug(f'New part on the actuator.')
             now: datetime = datetime.now(timezone.utc)
+            new_result: Result = Result(
+                date= now,
+                result= False
+            )
             while not results_queue.empty():
                 try:
                     new_result = results_queue.get_nowait()
                 except asyncio.QueueEmpty:
                     pass
-                if now - new_result['date'] < timedelta(milliseconds= SENSORS_INTERVAL):
+                if now - new_result['date'] < timedelta(milliseconds= SENSORS_INTERVAL_MS):
                     break
                 new_result['result'] = False
         if not new_sensor_value and last_sensor_val:
