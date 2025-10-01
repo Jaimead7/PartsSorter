@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,14 +14,14 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional, Sequence
+from typing import Sequence
 
 from fastapi import HTTPException, status
 from pyUtils import Styles
 from sqlalchemy import ScalarResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import func, select
+from sqlmodel import select
 
 from ..dependencies.serverConfig import my_logger
 from ..models.database import OriginResult
