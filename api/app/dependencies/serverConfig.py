@@ -30,6 +30,7 @@ class TAGS(Enum):
     MODEL_CLASSES = 'Model classes'
     MODELS = 'Models'
     ORIGINS = 'Origins'
+    ORIGIN_RESULTS = 'Origin results'
 
 
 class EnvVars(Enum):

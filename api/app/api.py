@@ -25,7 +25,7 @@ from .database.manager import initDB
 from .dependencies.serverConfig import (SERVER_IP, SERVER_PORT, STATIC_PATH,
                                         TAGS)
 from .routes import (images, inspection_results, model_classes, models,
-                     origins, web_sockets)
+                     origin_results, origins, web_sockets)
 
 
 @asynccontextmanager
@@ -63,6 +63,11 @@ app.include_router(
     origins.origins_router,
     prefix= '/origin',
     tags= [TAGS.ORIGINS]
+)
+app.include_router(
+    origin_results.origin_results_router,
+    prefix= '/origin-result',
+    tags= [TAGS.ORIGIN_RESULTS]
 )
 
 STATIC_PATH.mkdir(parents= True, exist_ok= True)
