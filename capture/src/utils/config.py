@@ -81,7 +81,7 @@ if _env_aux is None:
     msg: str = f'Could not import "{EnvVars.API_IP.value}" from env vars.'
     my_logger.critical(f'ImportError: {msg}')
     raise ImportError(msg)
-API_IP: Optional[str] = getenv(EnvVars.ORIGIN_NAME.value, None)
+API_IP: Optional[str] = getenv(EnvVars.API_IP.value, None)
 del(_env_aux)
 
 # CONFIG

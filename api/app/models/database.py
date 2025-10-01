@@ -119,9 +119,7 @@ class Model(SQLModel, table= True):
 
 
 #********** IMAGES **********
-class Image(SQLModel, table= True):
-    __tablename__: str = 'images' # type: ignore
-
+class BaseImage(SQLModel):
     id: UUID = Field(
         default_factory= uuid4,
         primary_key= True,
@@ -153,13 +151,6 @@ class Image(SQLModel, table= True):
         ondelete= 'SET NULL'
     )
 
-    result_of_image: Optional['InspectionResult'] = Relationship(
-        back_populates= 'images_of_result'
-    )
-    origin_of_image: Optional['Origin'] = Relationship(
-        back_populates= 'images_of_origin'
-    )
-
     @property
     def file_name(self) -> str:
         return f'{self.id}{self.extension}'
@@ -181,7 +172,19 @@ class Image(SQLModel, table= True):
         relativePath = Path(self.file_name)
         return EXTERNAL_IMAGES_URL + relativePath.as_posix()
 
-class ImageProcessed(Image):
+
+class Image(BaseImage, table= True):
+    __tablename__: str = 'images' # type: ignore
+
+    result_of_image: Optional['InspectionResult'] = Relationship(
+        back_populates= 'images_of_result'
+    )
+    origin_of_image: Optional['Origin'] = Relationship(
+        back_populates= 'images_of_origin'
+    )
+
+
+class ImageProcessed(BaseImage):
     result: bool = False
 
     @classmethod
@@ -198,6 +201,7 @@ class ImageProcessed(Image):
             origin= image.origin,
             result= result if result is not None else False
         )
+
 
 #********** MODEL CLASS **********
 class ModelClass(SQLModel, table= True):
