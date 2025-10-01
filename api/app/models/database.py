@@ -42,7 +42,10 @@ class InspectionResult(SQLModel, table= True):
         back_populates= 'result_of_image'
     )
     model_classes_of_result: Optional[list['ModelClass']] = Relationship(
-        back_populates= 'result_of_model_class',
+        back_populates= 'result_of_model_class'
+    )
+    origin_results_of_inspection_result: Optional[list['OriginResult']] = Relationship(
+        back_populates= 'inspection_result_of_origin_result'
     )
 
 
@@ -61,8 +64,11 @@ class Origin(SQLModel, table= True):
         ondelete= 'SET NULL'
     )
 
-    images_of_origin: Optional[list["Image"]] = Relationship(
+    images_of_origin: Optional[list['Image']] = Relationship(
         back_populates= 'origin_of_image'
+    )
+    origin_results_of_origin: Optional[list['OriginResult']] = Relationship(
+        back_populates= 'origin_of_origin_result'
     )
     model_of_origin: Optional['Model'] = Relationship(
         back_populates= 'origins_of_model',
@@ -201,4 +207,33 @@ class ModelClass(SQLModel, table= True):
     )
     result_of_model_class: Optional['InspectionResult'] = Relationship(
         back_populates= 'model_classes_of_result'
+    )
+
+
+#********** ORIGIN RESULT **********
+class OriginResult(SQLModel, table= True):
+    __tablename__: str = 'origin_results' # type: ignore
+
+    origin: str = Field(
+        primary_key= True,
+        foreign_key= 'origin.name',
+        ondelete= 'CASCADE',
+        index= True
+    )
+    inspection_result: str = Field(
+        primary_key= True,
+        foreign_key= 'inspection_result.name',
+        ondelete= 'CASCADE',
+        index= True
+    )
+    result: bool = Field(
+        default= False,
+        nullable= False
+    )
+
+    origin_of_origin_result: Optional['Origin'] = Relationship(
+        back_populates= 'origin_results_of_origin'
+    )
+    inspection_result_of_origin_result: Optional['InspectionResult'] = Relationship(
+        back_populates= 'origin_results_of_inspection_result'
     )
