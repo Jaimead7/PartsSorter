@@ -21,11 +21,12 @@ from fastapi import APIRouter, Depends, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.images import (db_create_new_image, db_delete_images,
-                               db_get_images, db_process_new_file,
+                               db_get_images, db_process_new_image,
                                db_update_image)
 from ..database.manager import get_session
+from ..database.origin_results import db_get_origin_result
 from ..dependencies.serverConfig import DATABASE_GET_LIMIT
-from ..models.database import Image
+from ..models.database import Image, ImageProcessed, OriginResult
 
 images_router = APIRouter()
 
@@ -130,7 +131,7 @@ async def get_images(
 
 @images_router.post(
     '/process',
-    response_model= Image,
+    response_model= ImageProcessed,
     summary= 'Process new Image and save it to the database.',
     response_description= 'The new Image created.',
     status_code= status.HTTP_201_CREATED
@@ -139,8 +140,8 @@ async def process_new_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     file: UploadFile,
     origin: Optional[str] = None
-) -> Image:
-    return await db_process_new_file(
+) -> ImageProcessed:
+    return await db_process_new_image(
         session= session,
         file= file,
         origin= origin

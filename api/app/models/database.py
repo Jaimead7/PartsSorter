@@ -21,6 +21,7 @@ from uuid import UUID, uuid4
 
 import yaml
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
+from typing_extensions import Self
 
 from ..dependencies.serverConfig import (EXTERNAL_IMAGES_URL,
                                          INTERNAL_IMAGES_FOLDER,
@@ -180,6 +181,23 @@ class Image(SQLModel, table= True):
         relativePath = Path(self.file_name)
         return EXTERNAL_IMAGES_URL + relativePath.as_posix()
 
+class ImageProcessed(Image):
+    result: bool = False
+
+    @classmethod
+    def factory(
+        cls,
+        image: Image,
+        result: Optional[bool] = None
+    ) -> Self:
+        return cls(
+            id= image.id,
+            extension= image.extension,
+            processed_date= image.processed_date,
+            inspection_result= image.inspection_result,
+            origin= image.origin,
+            result= result if result is not None else False
+        )
 
 #********** MODEL CLASS **********
 class ModelClass(SQLModel, table= True):

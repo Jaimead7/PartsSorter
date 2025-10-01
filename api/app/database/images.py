@@ -30,9 +30,11 @@ from ..dependencies.exceptions import StopBlock
 from ..dependencies.serverConfig import my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.inspection import inspect
-from ..models.database import Image, InspectionResult, Model, Origin
+from ..models.database import (Image, ImageProcessed, InspectionResult, Model,
+                               Origin, OriginResult)
 from .inspection_results import db_get_inspection_result
 from .models import db_get_model_inspection_result
+from .origin_results import db_get_origin_result
 from .origins import db_get_origin
 
 
@@ -183,11 +185,11 @@ def db_delete_image_file(
         file_path.unlink()
     return file_path
 
-async def db_process_new_file(
+async def db_process_new_image(
     session: AsyncSession,
     file: UploadFile,
     origin: Optional[str]
-) -> Image:
+) -> ImageProcessed:
     db_image: Image = await db_create_new_image(
         session= session,
         file= file,
@@ -236,4 +238,19 @@ async def db_process_new_file(
         insp_result= db_image.inspection_result,
         origin= db_image.origin
     )
-    return db_image
+    image_processed: ImageProcessed = ImageProcessed.factory(image= db_image)
+    if db_image.origin is not None and db_image.inspection_result is not None:
+        try:
+            db_origin_result: OriginResult = await db_get_origin_result(
+                session= session,
+                origin_result= OriginResult(
+                    origin= db_image.origin,
+                    inspection_result= db_image.inspection_result
+                )
+            )
+            image_processed.result = db_origin_result.result
+        except HTTPException:
+            image_processed.result = False
+    else:
+        image_processed.result = False
+    return image_processed
