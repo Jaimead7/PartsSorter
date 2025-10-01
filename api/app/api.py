@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,17 +14,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-#---------- LOAD ENV VARIABLES FIRST ----------#
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-load_dotenv(
-    Path(__file__).parents[1] / 'dist' / '.env',
-    override= False
-)
-#---------------------------------------------#
-
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
@@ -33,9 +22,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from .database.manager import initDB
-from .dependencies.serverConfig import SERVER_IP, SERVER_PORT, TAGS
+from .dependencies.serverConfig import (SERVER_IP, SERVER_PORT, STATIC_PATH,
+                                        TAGS)
 from .routes import (images, inspection_results, model_classes, models,
-                     origins, web_sockets)
+                     origin_results, origins, web_sockets)
 
 
 @asynccontextmanager
@@ -74,10 +64,14 @@ app.include_router(
     prefix= '/origin',
     tags= [TAGS.ORIGINS]
 )
+app.include_router(
+    origin_results.origin_results_router,
+    prefix= '/origin-result',
+    tags= [TAGS.ORIGIN_RESULTS]
+)
 
-staticPath: Path = Path(__file__).parent / 'static'
-staticPath.mkdir(parents= True, exist_ok= True)
-app.mount('/static', StaticFiles(directory= staticPath), name='static')
+STATIC_PATH.mkdir(parents= True, exist_ok= True)
+app.mount('/static', StaticFiles(directory= STATIC_PATH), name='static')
 
 if __name__ == "__main__":
     uvicorn.run(

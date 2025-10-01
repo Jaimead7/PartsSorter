@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -55,3 +55,13 @@ class ModelMetadataDict(DatasetMetadataDict):
     test_images: int
     task: str
     name: dict[int, str]
+
+
+class CameraProps(TypedDict):
+    camera_width: int
+    camera_height: int
+    brightness: float
+    contrast: float
+    saturation: float
+    exposure: float
+    wb: float

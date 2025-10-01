@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -108,7 +108,7 @@ async def db_get_model_classes(
     )
     db_model_classes_list: Sequence[ModelClass] = db_model_classes.all()
     if len(db_model_classes_list) == 0:
-        msg: str = f'Inspection results not found.'
+        msg: str = f'InspectionResult\'s not found.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_404_NOT_FOUND,

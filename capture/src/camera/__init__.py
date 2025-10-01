@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,4 +14,4 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from .camera import *
+from .manager import CameraManager

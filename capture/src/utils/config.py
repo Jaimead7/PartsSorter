@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -21,53 +21,75 @@ from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
-from pyUtils import ConfigFileManager, MyLogger, ProjectPathsDict
-from yoloModelManager import (save_yolo_manager_logs,
-                              set_yolo_manager_logging_level,
-                              set_yolo_manager_logs_path)
+from pyUtils import (ConfigFileManager, MyLogger, ProjectPathsDict,
+                     save_pyutils_logs, set_pyutils_logging_level,
+                     set_pyutils_logs_path)
 
 
 class EnvVars(Enum):
+    ORIGIN_NAME = 'ORIGIN_NAME'
+    API_IP = 'API_IP'
     LOGGING_LVL = 'LOGGING_LVL'
-    CAMERA = 'CAMERA'
-    GPIO_CHIP = 'GPIO_CHIP'
-    ACTUATOR_PIN = 'ACTUATOR_PIN'
-    CAMERA_SENSOR_PIN = 'CAMERA_SENSOR_PIN'
-    ACTUATOR_SENSOR_PIN = 'ACTUATOR_SENSOR_PIN'
-    SENSORS_INTERVAL = 'SENSORS_INTERVAL'
 
 
-_MY_APP: ProjectPathsDict = ProjectPathsDict().set_app_path(Path(__file__).parents[2])
-_MY_APP[ProjectPathsDict.DIST_PATH] = _MY_APP[ProjectPathsDict.APP_PATH] / 'dist'
-_MY_APP[ProjectPathsDict.CONFIG_PATH] = _MY_APP[ProjectPathsDict.DIST_PATH] / 'config'
-_MY_APP[ProjectPathsDict.CONFIG_FILE_PATH] = _MY_APP[ProjectPathsDict.CONFIG_PATH] / 'config.toml'
-MY_CFG: ConfigFileManager = ConfigFileManager(_MY_APP[ProjectPathsDict.CONFIG_FILE_PATH])
-load_dotenv(
-    dotenv_path= _MY_APP[ProjectPathsDict.DIST_PATH] / '.env',
-    override= False
-)
+# APP
+MY_APP: ProjectPathsDict = ProjectPathsDict().set_app_path(Path(__file__).parents[2])
+MY_APP[ProjectPathsDict.DIST_PATH] = MY_APP[ProjectPathsDict.APP_PATH] / 'dist'
+MY_APP[ProjectPathsDict.CONFIG_PATH] = MY_APP[ProjectPathsDict.DIST_PATH] / 'config'
+MY_APP[ProjectPathsDict.CONFIG_FILE_PATH] = MY_APP[ProjectPathsDict.CONFIG_PATH] / 'config.toml'
+MY_CFG: ConfigFileManager = ConfigFileManager(MY_APP[ProjectPathsDict.CONFIG_FILE_PATH])
 
-# ENV VARS
-CAMERA: int = int(getenv(EnvVars.CAMERA.value, 0))
-GPIO_CHIP: Optional[str] = getenv(EnvVars.GPIO_CHIP.value, None)
-_aux: Optional[str] = getenv(EnvVars.ACTUATOR_PIN.value, None)
-ACTUATOR_PIN: Optional[int] = _aux if _aux is None else int(_aux)
-_aux = getenv(EnvVars.CAMERA_SENSOR_PIN.value, None)
-CAMERA_SENSOR_PIN: Optional[int] = _aux if _aux is None else int(_aux)
-_aux = getenv(EnvVars.ACTUATOR_SENSOR_PIN.value, None)
-ACTUATOR_SENSOR_PIN: Optional[int] = _aux if _aux is None else int(_aux)
-SENSORS_INTERVAL: int = int(getenv(EnvVars.SENSORS_INTERVAL.value, 60000))
-
-# LOGGING LEVELS
+# LOGGING
 LOGGING_LVL: int = MyLogger.get_logging_lvl_from_env(EnvVars.LOGGING_LVL.value)
-set_yolo_manager_logging_level(logging.WARNING)
-set_yolo_manager_logs_path('cameraApp.log')
-set_yolo_manager_logging_level(LOGGING_LVL)
-save_yolo_manager_logs(True)
 
 my_logger = MyLogger(
-    logger_name= f'CameraApp',
-    logging_level= LOGGING_LVL,
-    file_path= 'cameraApp.log',
-    save_logs= True
+    logger_name= f'CaptureApp',
+    logging_level= LOGGING_LVL
 )
+
+def set_capture_app_logs_path(new_path: Path | str) -> None:
+    my_logger.logs_file_path = new_path
+    set_pyutils_logs_path(new_path)
+
+def save_capture_app_logs(value: bool) -> None:
+    my_logger.save_logs = value
+    save_pyutils_logs(value)
+
+def set_capture_app_logging_level(lvl: int = logging.DEBUG) -> None:
+    my_logger.set_logging_level(lvl)
+    set_pyutils_logging_level(lvl)
+
+set_capture_app_logging_level(logging.WARNING)
+set_capture_app_logs_path('captureApp.log')
+set_capture_app_logging_level(LOGGING_LVL)
+save_capture_app_logs(True)
+
+
+# ENV VARS
+load_dotenv(
+    dotenv_path= MY_APP[ProjectPathsDict.DIST_PATH] / '.env',
+    override= False
+)
+_env_aux: Optional[str] = getenv(EnvVars.ORIGIN_NAME.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.ORIGIN_NAME.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+ORIGIN_NAME: str = _env_aux
+_env_aux: Optional[str] = getenv(EnvVars.API_IP.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.API_IP.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+API_IP: Optional[str] = getenv(EnvVars.ORIGIN_NAME.value, None)
+del(_env_aux)
+
+# CONFIG
+CAMERA_INDEX: int = int(MY_CFG.camera.index)
+GPIO_CHIP: str = str(MY_CFG.gpio.chip)
+ACTUATOR_PIN: int = int(MY_CFG.gpio.actuator_pin)
+CAMERA_SENSOR_PIN: int = int(MY_CFG.gpio.camera_sensor_pin)
+ACTUATOR_SENSOR_PIN: int = int(MY_CFG.gpio.actuator_sensor_pin)
+_SENSORS_DISTANCE: float = float(MY_CFG.calibration.sensors_distance)
+_TAPE_SPEED: float = float(MY_CFG.calibration.tape_speed)
+SENSORS_INTERVAL_MS: float = (_SENSORS_DISTANCE / _TAPE_SPEED)*1000

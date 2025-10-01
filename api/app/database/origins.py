@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -25,7 +25,8 @@ from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.serverConfig import my_logger
-from ..models.database import Image, Model, Origin
+from ..models.database import Image, Model, Origin, OriginResult
+from ..models.typing import CameraProps
 from .models import db_get_model
 
 
@@ -163,3 +164,44 @@ async def db_get_origin_images(
     if db_origin.images_of_origin is None:
         return None
     return db_origin.images_of_origin[offset:offset+limit]
+
+async def db_get_origin_origin_result(
+    session: AsyncSession,
+    origin_name: str,
+    limit: int,
+    offset: int
+) -> Optional[list[OriginResult]]:
+    #CHECK: Performance
+    db_origin: Origin = await db_get_origin(
+        session= session,
+        origin= Origin(name= origin_name)
+    )
+    await session.refresh(
+        db_origin,
+        attribute_names= ['origin_results_of_origin']
+    )
+    if db_origin.origin_results_of_origin is None:
+        return None
+    return db_origin.origin_results_of_origin[offset:offset+limit]
+
+async def db_get_origin_camera_props(
+    session: AsyncSession,
+    origin_name: str,
+) -> CameraProps:
+    db_origin: Origin = await db_get_origin(
+        session= session,
+        origin= Origin(name= origin_name)
+    )
+    await session.refresh(
+        db_origin,
+        attribute_names= ['model_of_origin']
+    )
+    db_model: Optional[Model] = db_origin.model_of_origin
+    if db_model is None:
+        msg: str = f'Origin("{db_origin.name}") don\'t have model.'
+        my_logger.error(msg)
+        raise HTTPException(
+            status_code= status.HTTP_404_NOT_FOUND,
+            detail= msg
+        )
+    return db_model.model_metadata

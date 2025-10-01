@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -25,7 +25,7 @@ from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.serverConfig import my_logger
-from ..models.database import Image, InspectionResult
+from ..models.database import Image, InspectionResult, ModelClass, OriginResult
 
 
 async def db_create_new_inspection_result(
@@ -138,7 +138,7 @@ async def db_get_inspection_result_images(
     limit: int,
     offset: int
 ) -> Optional[list[Image]]:
-    #CHECK: Performance with big number of images
+    #CHECK: Performance with big number of images as this loads all images and then slice
     db_inpection_result: InspectionResult = await db_get_inspection_result(
         session= session,
         inspection_result= InspectionResult(name= inspection_result_name)
@@ -150,3 +150,41 @@ async def db_get_inspection_result_images(
     if db_inpection_result.images_of_result is None:
         return None
     return db_inpection_result.images_of_result[offset:offset+limit]
+
+async def db_get_inspection_result_model_classes(
+    session: AsyncSession,
+    inspection_result_name: str,
+    limit: int,
+    offset: int
+) -> Optional[list[ModelClass]]:
+    #CHECK: Performance
+    db_inpection_result: InspectionResult = await db_get_inspection_result(
+        session= session,
+        inspection_result= InspectionResult(name= inspection_result_name)
+    )
+    await session.refresh(
+        db_inpection_result,
+        attribute_names= ['model_classes_of_result']
+    )
+    if db_inpection_result.model_classes_of_result is None:
+        return None
+    return db_inpection_result.model_classes_of_result[offset:offset+limit]
+
+async def db_get_inspection_result_origin_results(
+    session: AsyncSession,
+    inspection_result_name: str,
+    limit: int,
+    offset: int
+) -> Optional[list[OriginResult]]:
+    #CHECK: Performance
+    db_inpection_result: InspectionResult = await db_get_inspection_result(
+        session= session,
+        inspection_result= InspectionResult(name= inspection_result_name)
+    )
+    await session.refresh(
+        db_inpection_result,
+        attribute_names= ['origin_results_of_result']
+    )
+    if db_inpection_result.origin_results_of_result is None:
+        return None
+    return db_inpection_result.origin_results_of_result[offset:offset+limit]

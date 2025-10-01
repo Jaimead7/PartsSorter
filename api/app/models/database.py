@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -16,11 +16,12 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 from uuid import UUID, uuid4
 
 import yaml
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
+from typing_extensions import Self
 
 from ..dependencies.serverConfig import (EXTERNAL_IMAGES_URL,
                                          INTERNAL_IMAGES_FOLDER,
@@ -42,7 +43,10 @@ class InspectionResult(SQLModel, table= True):
         back_populates= 'result_of_image'
     )
     model_classes_of_result: Optional[list['ModelClass']] = Relationship(
-        back_populates= 'result_of_model_class',
+        back_populates= 'result_of_model_class'
+    )
+    origin_results_of_result: Optional[list['OriginResult']] = Relationship(
+        back_populates= 'result_of_origin_result'
     )
 
 
@@ -61,8 +65,11 @@ class Origin(SQLModel, table= True):
         ondelete= 'SET NULL'
     )
 
-    images_of_origin: Optional[list["Image"]] = Relationship(
+    images_of_origin: Optional[list['Image']] = Relationship(
         back_populates= 'origin_of_image'
+    )
+    origin_results_of_origin: Optional[list['OriginResult']] = Relationship(
+        back_populates= 'origin_of_origin_result'
     )
     model_of_origin: Optional['Model'] = Relationship(
         back_populates= 'origins_of_model',
@@ -174,6 +181,23 @@ class Image(SQLModel, table= True):
         relativePath = Path(self.file_name)
         return EXTERNAL_IMAGES_URL + relativePath.as_posix()
 
+class ImageProcessed(Image):
+    result: bool = False
+
+    @classmethod
+    def factory(
+        cls,
+        image: Image,
+        result: Optional[bool] = None
+    ) -> Self:
+        return cls(
+            id= image.id,
+            extension= image.extension,
+            processed_date= image.processed_date,
+            inspection_result= image.inspection_result,
+            origin= image.origin,
+            result= result if result is not None else False
+        )
 
 #********** MODEL CLASS **********
 class ModelClass(SQLModel, table= True):
@@ -201,4 +225,33 @@ class ModelClass(SQLModel, table= True):
     )
     result_of_model_class: Optional['InspectionResult'] = Relationship(
         back_populates= 'model_classes_of_result'
+    )
+
+
+#********** ORIGIN RESULT **********
+class OriginResult(SQLModel, table= True):
+    __tablename__: str = 'origin_results' # type: ignore
+
+    origin: str = Field(
+        primary_key= True,
+        foreign_key= 'origins.name',
+        ondelete= 'CASCADE',
+        index= True
+    )
+    inspection_result: str = Field(
+        primary_key= True,
+        foreign_key= 'inspection_results.name',
+        ondelete= 'CASCADE',
+        index= True
+    )
+    result: bool = Field(
+        default= False,
+        nullable= False
+    )
+
+    origin_of_origin_result: Optional['Origin'] = Relationship(
+        back_populates= 'origin_results_of_origin'
+    )
+    result_of_origin_result: Optional['InspectionResult'] = Relationship(
+        back_populates= 'origin_results_of_result'
     )

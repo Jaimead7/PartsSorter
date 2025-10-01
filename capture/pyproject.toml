@@ -1,5 +1,5 @@
 [project]
-    name = "jaimead7-parts-sorter-camera-app"
+    name = "jaimead7-parts-sorter-capture"
     version = "0.0.1"
     description = "Image capture for a parts sorter system."
     authors = [
@@ -22,10 +22,13 @@
         "Programming Language :: Python :: 3.12",
     ]
     dependencies = [
-        "jaimead7-yolo-model-manager",
+        "jaimead7-pyutils >= 0.2.0",
+        "python-dotenv >= 1.1.1",
+        "httpx >= 0.28.1",
+        "opencv-python >= 4.11.0.86",
         "gpiod >= 2.3.0; sys_platform == 'linux' and platform_machine == 'aarch64'"
     ]
-    requires-python = ">=3.10, <3.13"
+    requires-python = ">=3.10"
 
     [project.urls]
         Homepage = "https://github.com/Jaimead7/PartsSorter/capture"

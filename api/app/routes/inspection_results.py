@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmial.com>
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,19 +14,19 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Annotated, Sequence
+from typing import Annotated, Optional, Sequence
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database.inspection_results import (db_create_new_inspection_result,
-                                           db_delete_inspection_results,
-                                           db_get_inspection_result_images,
-                                           db_get_inspection_results,
-                                           db_update_inspection_result)
+from ..database.inspection_results import (
+    db_create_new_inspection_result, db_delete_inspection_results,
+    db_get_inspection_result_images, db_get_inspection_result_model_classes,
+    db_get_inspection_result_origin_results, db_get_inspection_results,
+    db_update_inspection_result)
 from ..database.manager import get_session
 from ..dependencies.serverConfig import DATABASE_GET_LIMIT
-from ..models.database import Image, InspectionResult
+from ..models.database import Image, InspectionResult, ModelClass, OriginResult
 
 inspection_results_router = APIRouter()
 
@@ -97,9 +97,9 @@ async def get_inspection_results(
     )
 
 @inspection_results_router.get(
-    '/images',
+    '/{name}/images',
     response_model= list[Image],
-    summary= 'Get the images of an InspectionResult of the database.',
+    summary= 'Get the Image\'s of an InspectionResult of the database.',
     response_description= 'The Image\'s list.',
     status_code= status.HTTP_200_OK
 )
@@ -108,8 +108,48 @@ async def get_inspection_result_images(
     name: str,
     limit: int = DATABASE_GET_LIMIT,
     offset: int = 0
-) -> list[Image] | None:
+) -> Optional[list[Image]]:
     return await db_get_inspection_result_images(
+        session= session,
+        inspection_result_name= name,
+        limit= limit,
+        offset= offset
+    )
+
+@inspection_results_router.get(
+    '/{name}/model-classes',
+    response_model= list[ModelClass],
+    summary= 'Get the ModelClass\'s of an InspectionResult of the database.',
+    response_description= 'The ModelClass\'s list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_inspection_result_model_classes(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: str,
+    limit: int = DATABASE_GET_LIMIT,
+    offset: int = 0
+) -> Optional[list[ModelClass]]:
+    return await db_get_inspection_result_model_classes(
+        session= session,
+        inspection_result_name= name,
+        limit= limit,
+        offset= offset
+    )
+
+@inspection_results_router.get(
+    '/{name}/origin-results',
+    response_model= list[OriginResult],
+    summary= 'Get the OriginResult\'s of an InspectionResult of the database.',
+    response_description= 'The OriginResult\'s list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_inspection_result_origin_results(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: str,
+    limit: int = DATABASE_GET_LIMIT,
+    offset: int = 0
+) -> Optional[list[OriginResult]]:
+    return await db_get_inspection_result_origin_results(
         session= session,
         inspection_result_name= name,
         limit= limit,
