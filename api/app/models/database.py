@@ -16,7 +16,7 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 from uuid import UUID, uuid4
 
 import yaml
@@ -44,8 +44,8 @@ class InspectionResult(SQLModel, table= True):
     model_classes_of_result: Optional[list['ModelClass']] = Relationship(
         back_populates= 'result_of_model_class'
     )
-    origin_results_of_inspection_result: Optional[list['OriginResult']] = Relationship(
-        back_populates= 'inspection_result_of_origin_result'
+    origin_results_of_result: Optional[list['OriginResult']] = Relationship(
+        back_populates= 'result_of_origin_result'
     )
 
 
@@ -234,6 +234,6 @@ class OriginResult(SQLModel, table= True):
     origin_of_origin_result: Optional['Origin'] = Relationship(
         back_populates= 'origin_results_of_origin'
     )
-    inspection_result_of_origin_result: Optional['InspectionResult'] = Relationship(
-        back_populates= 'origin_results_of_inspection_result'
+    result_of_origin_result: Optional['InspectionResult'] = Relationship(
+        back_populates= 'origin_results_of_result'
     )

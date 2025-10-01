@@ -19,14 +19,13 @@ from typing import Annotated, Sequence
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database.inspection_results import (db_create_new_inspection_result,
-                                           db_delete_inspection_results,
-                                           db_get_inspection_result_images,
-                                           db_get_inspection_results,
-                                           db_update_inspection_result)
+from ..database.inspection_results import (
+    db_create_new_inspection_result, db_delete_inspection_results,
+    db_get_inspection_result_images, db_get_inspection_result_model_classes,
+    db_get_inspection_results, db_update_inspection_result)
 from ..database.manager import get_session
 from ..dependencies.serverConfig import DATABASE_GET_LIMIT
-from ..models.database import Image, InspectionResult
+from ..models.database import Image, InspectionResult, ModelClass
 
 inspection_results_router = APIRouter()
 
@@ -99,7 +98,7 @@ async def get_inspection_results(
 @inspection_results_router.get(
     '/{name}/images',
     response_model= list[Image],
-    summary= 'Get the images of an InspectionResult of the database.',
+    summary= 'Get the Image\'s of an InspectionResult of the database.',
     response_description= 'The Image\'s list.',
     status_code= status.HTTP_200_OK
 )
@@ -110,6 +109,26 @@ async def get_inspection_result_images(
     offset: int = 0
 ) -> list[Image] | None:
     return await db_get_inspection_result_images(
+        session= session,
+        inspection_result_name= name,
+        limit= limit,
+        offset= offset
+    )
+
+@inspection_results_router.get(
+    '/{name}/model-classes',
+    response_model= list[ModelClass],
+    summary= 'Get the ModelClass\'s of an InspectionResult of the database.',
+    response_description= 'The ModelClass\'s list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_inspection_result_model_classes(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: str,
+    limit: int = DATABASE_GET_LIMIT,
+    offset: int = 0
+) -> list[ModelClass] | None:
+    return await db_get_inspection_result_model_classes(
         session= session,
         inspection_result_name= name,
         limit= limit,
