@@ -16,7 +16,7 @@
 
 from typing import Annotated, Sequence
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Body, Depends, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.manager import get_session
@@ -39,7 +39,7 @@ origin_results_router = APIRouter()
 )
 async def create_new_origin_result(
     session: Annotated[AsyncSession, Depends(get_session)],
-    origin_result: Annotated[OriginResult, Query()]
+    origin_result: Annotated[OriginResult, Body()]
 ) -> OriginResult:
     return await db_create_new_origin_result(
         session= session,
@@ -47,7 +47,7 @@ async def create_new_origin_result(
     )
 
 @origin_results_router.put(
-    '/',
+    '/{origin}/{inspection_result}',
     response_model= OriginResult,
     summary= 'Update OriginResult on the database.',
     response_description= 'The OriginResult updated.',
@@ -55,22 +55,28 @@ async def create_new_origin_result(
 )
 async def update_origin_result(
     session: Annotated[AsyncSession, Depends(get_session)],
-    origin_result: Annotated[OriginResult, Query()]
+    origin: Annotated[str, Path()],
+    inspection_result: Annotated[str, Path()],
+    result: Annotated[bool, Body()]
 ) -> OriginResult:
     return await db_update_origin_result(
         session= session,
-        origin_result= origin_result
+        origin_result= OriginResult(
+            origin= origin,
+            inspection_result= inspection_result,
+            result= result
+        )
     )
 
 @origin_results_router.delete(
-    '/',
+    '/{origin}/{inspection_result}',
     summary= 'Delete OriginResult from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
 async def delete_origin_result(
     session: Annotated[AsyncSession, Depends(get_session)],
-    origin: str,
-    inspection_result: str
+    origin: Annotated[str, Path()],
+    inspection_result: Annotated[str, Path()],
 ) -> None:
     origin_result: OriginResult = OriginResult(
         origin= origin,
@@ -90,8 +96,8 @@ async def delete_origin_result(
 )
 async def get_origin_results(
     session: Annotated[AsyncSession, Depends(get_session)],
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> Sequence[OriginResult]:
     return await db_get_origin_results(
         session= session,

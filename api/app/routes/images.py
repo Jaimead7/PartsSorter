@@ -17,16 +17,15 @@
 from typing import Annotated, Any, Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, UploadFile, status
+from fastapi import APIRouter, Body, Depends, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.images import (db_create_new_image, db_delete_images,
-                               db_get_images, db_process_new_image,
-                               db_update_image)
+                               db_get_image, db_get_images,
+                               db_process_new_image, db_update_image)
 from ..database.manager import get_session
-from ..database.origin_results import db_get_origin_result
 from ..dependencies.serverConfig import DATABASE_GET_LIMIT
-from ..models.database import Image, ImageProcessed, OriginResult
+from ..models.database import Image, ImageProcessed
 
 images_router = APIRouter()
 
@@ -40,15 +39,8 @@ images_router = APIRouter()
 async def create_new_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     file: UploadFile,
-    origin: Optional[str] = None
+    origin: Annotated[Optional[str], Body()] = None
 ) -> Image:
-    """Create new image on the database.  
-    - Args:  
-        - files (UploadFile): File of the Image to create.  
-        - origin (Optional[str]): Origin of the image.  
-    - Returns:  
-        - Image: Image created.  
-    """
     return await db_create_new_image(
         session= session,
         file= file,
@@ -56,7 +48,7 @@ async def create_new_image(
     )
 
 @images_router.put(
-    '/',
+    '/{uuid}',
     response_model= Image,
     summary= 'Update Image on the database.',
     response_description= 'The Image updated.',
@@ -64,9 +56,9 @@ async def create_new_image(
 )
 async def update_image(
     session: Annotated[AsyncSession, Depends(get_session)],
-    uuid: UUID,
-    inspection_result: Optional[str],
-    origin: Optional[str]
+    uuid: Annotated[UUID, Path()],
+    inspection_result: Annotated[Optional[str], Body()] = None,
+    origin: Annotated[Optional[str], Body()] = None
 ) -> Image:
     image = Image(
         id= uuid,
@@ -79,24 +71,48 @@ async def update_image(
     )
 
 @images_router.delete(
-    '/',
+    '/{uuid}',
     summary= 'Delete Image from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_image(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    uuid: Annotated[UUID, Path()]
+) -> None:
+    await db_delete_images(
+        session= session,
+        images= [Image(id= uuid)]
+    )
+
+@images_router.delete(
+    '/',
+    summary= 'Delete Image\'s from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
 async def delete_images(
     session: Annotated[AsyncSession, Depends(get_session)],
-    uuids: list[UUID] = Query([])
+    uuids: Annotated[list[UUID], Body()]
 ) -> None:
-    """Delete Image from database.  
-    - Args:  
-        - uuids: list[UUID]: Images to be deleted (Deleted by id).  
-    - Raises:  
-        - HTTPException: ID not found.  
-    """
     images: list[Any] = [Image(id= uuid) for uuid in uuids]
     await db_delete_images(
         session= session,
         images= images
+    )
+
+@images_router.get(
+    '/{uuid}',
+    response_model= list[Image],
+    summary= 'Get an Image of the database.',
+    response_description= 'The Image list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_image(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    uuid: Annotated[UUID, Path()]
+) -> Image:
+    return await db_get_image(
+        session= session,
+        image= Image(id= uuid)
     )
 
 @images_router.get(
@@ -108,20 +124,10 @@ async def delete_images(
 )
 async def get_images(
     session: Annotated[AsyncSession, Depends(get_session)],
-    uuids: list[UUID] = Query([]),
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    uuids: Annotated[list[UUID], Query()] = [],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> Sequence[Image]:
-    """Get Image\'s from the database.  
-    - Args:  
-        - uuids (list[UUID], optional): List of the Image\'s uuids to read. If empty get all. Defaults to Query([]).  
-        - limit (int, optional): Max numbre of values to return. Defaults to DATABASE_GET_LIMIT.  
-        - offset (int, optional): Offset of the SELECT. Defaults to 0.  
-    - Raises:  
-        - HTTPException: If Image\'s not found raise HTTP 404.  
-    - Returns:  
-        - Sequence[Image]: List of Image\'s readed.  
-    """
     return await db_get_images(
         session= session,
         images= [Image(id= uuid) for uuid in uuids],
@@ -139,7 +145,7 @@ async def get_images(
 async def process_new_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     file: UploadFile,
-    origin: Optional[str] = None
+    origin: Annotated[Optional[str], Body()] = None
 ) -> ImageProcessed:
     return await db_process_new_image(
         session= session,

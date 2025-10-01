@@ -16,12 +16,12 @@
 
 from typing import Annotated, Optional, Sequence
 
-from fastapi import APIRouter, Depends, Query, UploadFile, status
+from fastapi import APIRouter, Body, Depends, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.manager import get_session
 from ..database.models import (db_create_new_model, db_delete_models,
-                               db_get_model_metadata,
+                               db_get_model, db_get_model_metadata,
                                db_get_model_model_classes,
                                db_get_model_origins, db_get_models,
                                db_update_model)
@@ -48,7 +48,7 @@ async def create_new_model(
     )
 
 @models_router.put(
-    '/',
+    '/{name}',
     response_model= Model,
     summary= 'Update Model on the database.',
     response_description= 'The Model updated.',
@@ -56,26 +56,56 @@ async def create_new_model(
 )
 async def update_model(
     session: Annotated[AsyncSession, Depends(get_session)],
-    model: Annotated[Model, Query()]
+    name: Annotated[str, Path()]
 ) -> Model:
     return await db_update_model(
         session= session,
-        model= model
+        model= Model(name= name)
     )
 
 @models_router.delete(
-    '/',
+    '/{name}',
     summary= 'Delete Model from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
 async def delete_model(
     session: Annotated[AsyncSession, Depends(get_session)],
-    names: list[str] = Query([]),
+    name: Annotated[str, Path()]
+) -> None:
+    await db_delete_models(
+        session= session,
+        models= [Model(name= name)]
+    )
+
+@models_router.delete(
+    '/',
+    summary= 'Delete Model\'s from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_models(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    names: Annotated[list[str], Body()]
 ) -> None:
     models: list[Model] = [Model(name= name) for name in names]
     await db_delete_models(
         session= session,
         models= models
+    )
+
+@models_router.get(
+    '/{name}',
+    response_model= list[Model],
+    summary= 'Get Model of the database.',
+    response_description= 'The Model list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_model(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> Model:
+    return await db_get_model(
+        session= session,
+        model= Model(name= name)
     )
 
 @models_router.get(
@@ -87,9 +117,9 @@ async def delete_model(
 )
 async def get_models(
     session: Annotated[AsyncSession, Depends(get_session)],
-    names: list[str] = Query([]),
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    names: Annotated[list[str], Query()] = [],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> Sequence[Model]:
     return await db_get_models(
         session= session,
@@ -107,7 +137,7 @@ async def get_models(
 )
 async def get_model_model_classes(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: str
+    name: Annotated[str, Path()]
 ) -> Optional[list[ModelClass]]:
     return await db_get_model_model_classes(
         session= session,
@@ -123,9 +153,9 @@ async def get_model_model_classes(
 )
 async def get_model_origins(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: str,
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    name: Annotated[str, Path()],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> list[Origin] | None:
     return await db_get_model_origins(
         session= session,
@@ -143,7 +173,7 @@ async def get_model_origins(
 )
 async def get_model_metadata(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: str
+    name: Annotated[str, Path()]
 ) -> ModelMetadataDict:
     return await db_get_model_metadata(
         session= session,

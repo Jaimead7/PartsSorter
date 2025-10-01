@@ -16,12 +16,12 @@
 
 from typing import Annotated, Optional, Sequence
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Body, Depends, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.manager import get_session
 from ..database.origins import (db_create_new_origin, db_delete_origins,
-                                db_get_origin_camera_props,
+                                db_get_origin, db_get_origin_camera_props,
                                 db_get_origin_images,
                                 db_get_origin_origin_result, db_get_origins,
                                 db_update_origin)
@@ -39,7 +39,7 @@ origins_router = APIRouter()
 )
 async def create_new_origin(
     session: Annotated[AsyncSession, Depends(get_session)],
-    origin: Annotated[Origin, Query()]
+    origin: Annotated[Origin, Body()]
 ) -> Origin:
     return await db_create_new_origin(
         session= session,
@@ -47,7 +47,7 @@ async def create_new_origin(
     )
 
 @origins_router.put(
-    '/',
+    '/{name}',
     response_model= Origin,
     summary= 'Update Origin on the database.',
     response_description= 'The Origin updated.',
@@ -55,26 +55,60 @@ async def create_new_origin(
 )
 async def update_origin(
     session: Annotated[AsyncSession, Depends(get_session)],
-    origin: Annotated[Origin, Query()]
+    name: Annotated[str, Path()],
+    model: Annotated[Optional[str], Body()] = None
 ) -> Origin:
     return await db_update_origin(
         session= session,
-        origin= origin
+        origin= Origin(
+            name= name,
+            model= model
+        )
+    )
+
+@origins_router.delete(
+    '/{name}',
+    summary= 'Delete Origin from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_origin(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> None:
+    await db_delete_origins(
+        session= session,
+        origins= [Origin(name= name)]
     )
 
 @origins_router.delete(
     '/',
-    summary= 'Delete Origin from the database.',
+    summary= 'Delete Origin\'s from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
 async def delete_origins(
     session: Annotated[AsyncSession, Depends(get_session)],
-    names: list[str] = Query([])
+    names: Annotated[list[str], Query()] = []
 ) -> None:
     origins: list[Origin] = [Origin(name= name) for name in names]
     await db_delete_origins(
         session= session,
         origins= origins
+    )
+
+@origins_router.get(
+    '/{name}',
+    response_model= list[Origin],
+    summary= 'Get Origin of the database.',
+    response_description= 'The Origin list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_origin(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> Origin:
+    return await db_get_origin(
+        session= session,
+        origin= Origin(name= name)
     )
 
 @origins_router.get(
@@ -86,9 +120,9 @@ async def delete_origins(
 )
 async def get_origins(
     session: Annotated[AsyncSession, Depends(get_session)],
-    names: list[str] = Query([]),
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    names: Annotated[list[str], Query()] = [],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> Sequence[Origin]:
     return await db_get_origins(
         session= session,
@@ -100,15 +134,15 @@ async def get_origins(
 @origins_router.get(
     '/{name}/images',
     response_model= list[Image],
-    summary= 'Get the images of an Origin of the database.',
+    summary= 'Get the Image\'s of an Origin of the database.',
     response_description= 'The Image\'s list.',
     status_code= status.HTTP_200_OK
 )
 async def get_origin_images(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: str,
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    name: Annotated[str, Path()],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> Optional[list[Image]]:
     return await db_get_origin_images(
         session= session,
@@ -126,9 +160,9 @@ async def get_origin_images(
 )
 async def get_origin_origin_result(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: str,
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    name: Annotated[str, Path()],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> Optional[list[OriginResult]]:
     return await db_get_origin_origin_result(
         session= session,
@@ -146,7 +180,7 @@ async def get_origin_origin_result(
 )
 async def get_origin_camera_props(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: str
+    name: Annotated[str, Path()]
 ) -> CameraProps:
     return await db_get_origin_camera_props(
         session= session,
