@@ -25,7 +25,7 @@ from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.serverConfig import my_logger
-from ..models.database import Image, Model, Origin
+from ..models.database import Image, Model, Origin, OriginResult
 from ..models.typing import CameraProps
 from .models import db_get_model
 
@@ -164,6 +164,25 @@ async def db_get_origin_images(
     if db_origin.images_of_origin is None:
         return None
     return db_origin.images_of_origin[offset:offset+limit]
+
+async def db_get_origin_origin_result(
+    session: AsyncSession,
+    origin_name: str,
+    limit: int,
+    offset: int
+) -> Optional[list[OriginResult]]:
+    #CHECK: Performance
+    db_origin: Origin = await db_get_origin(
+        session= session,
+        origin= Origin(name= origin_name)
+    )
+    await session.refresh(
+        db_origin,
+        attribute_names= ['origin_results_of_origin']
+    )
+    if db_origin.origin_results_of_origin is None:
+        return None
+    return db_origin.origin_results_of_origin[offset:offset+limit]
 
 async def db_get_origin_camera_props(
     session: AsyncSession,

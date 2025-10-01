@@ -14,7 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Annotated, Sequence
+from typing import Annotated, Optional, Sequence
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,10 +22,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..database.manager import get_session
 from ..database.origins import (db_create_new_origin, db_delete_origins,
                                 db_get_origin_camera_props,
-                                db_get_origin_images, db_get_origins,
+                                db_get_origin_images,
+                                db_get_origin_origin_result, db_get_origins,
                                 db_update_origin)
 from ..dependencies.serverConfig import DATABASE_GET_LIMIT
-from ..models.database import Image, Origin
+from ..models.database import Image, Origin, OriginResult
 from ..models.typing import CameraProps
 
 origins_router = APIRouter()
@@ -108,8 +109,28 @@ async def get_origin_images(
     name: str,
     limit: int = DATABASE_GET_LIMIT,
     offset: int = 0
-) -> list[Image] | None:
+) -> Optional[list[Image]]:
     return await db_get_origin_images(
+        session= session,
+        origin_name= name,
+        limit= limit,
+        offset= offset
+    )
+
+@origins_router.get(
+    '/{name}/origin-results',
+    response_model= list[OriginResult],
+    summary= 'Get the OriginResult\'s of an Origin of the database.',
+    response_description= 'The OriginResult\'s list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_origin_origin_result(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: str,
+    limit: int = DATABASE_GET_LIMIT,
+    offset: int = 0
+) -> Optional[list[OriginResult]]:
+    return await db_get_origin_origin_result(
         session= session,
         origin_name= name,
         limit= limit,
