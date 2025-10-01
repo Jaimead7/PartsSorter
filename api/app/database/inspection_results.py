@@ -25,7 +25,7 @@ from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.serverConfig import my_logger
-from ..models.database import Image, InspectionResult, ModelClass
+from ..models.database import Image, InspectionResult, ModelClass, OriginResult
 
 
 async def db_create_new_inspection_result(
@@ -169,3 +169,22 @@ async def db_get_inspection_result_model_classes(
     if db_inpection_result.model_classes_of_result is None:
         return None
     return db_inpection_result.model_classes_of_result[offset:offset+limit]
+
+async def db_get_inspection_result_origin_results(
+    session: AsyncSession,
+    inspection_result_name: str,
+    limit: int,
+    offset: int
+) -> Optional[list[OriginResult]]:
+    #CHECK: Performance
+    db_inpection_result: InspectionResult = await db_get_inspection_result(
+        session= session,
+        inspection_result= InspectionResult(name= inspection_result_name)
+    )
+    await session.refresh(
+        db_inpection_result,
+        attribute_names= ['origin_results_of_result']
+    )
+    if db_inpection_result.origin_results_of_result is None:
+        return None
+    return db_inpection_result.origin_results_of_result[offset:offset+limit]

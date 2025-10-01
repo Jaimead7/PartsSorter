@@ -216,13 +216,13 @@ class OriginResult(SQLModel, table= True):
 
     origin: str = Field(
         primary_key= True,
-        foreign_key= 'origin.name',
+        foreign_key= 'origins.name',
         ondelete= 'CASCADE',
         index= True
     )
     inspection_result: str = Field(
         primary_key= True,
-        foreign_key= 'inspection_result.name',
+        foreign_key= 'inspection_results.name',
         ondelete= 'CASCADE',
         index= True
     )
