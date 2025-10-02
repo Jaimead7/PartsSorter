@@ -17,6 +17,7 @@
 from typing import Optional
 
 import numpy as np
+from pyUtils import NoInstantiable
 from torch import Tensor
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
@@ -24,29 +25,48 @@ from ultralytics.engine.results import Results
 from ..models.database import Image, Model
 
 
-#TODO: Abstract
-async def inspect(
-    db_img: Image,
-    db_model: Model,
-) -> Optional[int]:
-    model = YOLO(
-        db_model.internal_absolute_ncnn_path,
-        task= 'detect'
-    )
-    return await get_best_result_class_n(model(db_img.internal_absolute_path)[0])
+class ModelsManager(NoInstantiable):
+    models: dict[str, YOLO] = {}
 
-async def get_best_result_class_n(
-    results: Results
-) -> Optional[int]:
-    if results.boxes is None:
-        return None
-    if isinstance(results.boxes.data, Tensor):
-        results_array: np.ndarray = results.boxes.data.numpy()
-    else:
-        results_array = results.boxes.data
-    best: np.ndarray = results_array[0]
-    #result = np.ndarray(x0, y0, x1, y1, conf, obj_n)
-    for result in results_array:
-        if result[-2] > best[-2]:
-            best = result
-    return int(best[-1])
+    @classmethod
+    def get_model(
+        cls,
+        db_model: Model
+    ) -> YOLO:
+        try:
+            model: YOLO = cls.models[db_model.name]
+        except KeyError:
+            model = YOLO(
+                db_model.internal_absolute_ncnn_path,
+                task= 'detect'
+            )
+            cls.models[db_model.name] = model
+        return model
+
+    @classmethod
+    async def inspect(
+        cls,
+        db_image: Image,
+        db_model: Model
+    ) -> Optional[int]:
+        model: YOLO = cls.get_model(db_model)
+        return await cls.get_best_result_class_n(model(db_image.internal_absolute_path)[0])
+
+    @staticmethod
+    async def get_best_result_class_n(
+        results: Results
+    ) -> Optional[int]:
+        if results.boxes is None:
+            return None
+        if isinstance(results.boxes.data, Tensor):
+            results_array: np.ndarray = results.boxes.data.numpy()
+        else:
+            results_array = results.boxes.data
+        if len(results_array) == 0:
+            return False
+        best: np.ndarray = results_array[0]
+        #result = np.ndarray(x0, y0, x1, y1, conf, obj_n)
+        for result in results_array:
+            if result[-2] > best[-2]:
+                best = result
+        return int(best[-1])

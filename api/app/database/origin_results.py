@@ -89,7 +89,7 @@ async def db_get_origin_result(
             }
         )
     except NoResultFound:
-        msg: str = f'ModelClass("{origin_result.origin}, {origin_result.inspection_result}") not found.'
+        msg: str = f'OriginResult("{origin_result.origin}, {origin_result.inspection_result}") not found.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_404_NOT_FOUND,

@@ -29,7 +29,7 @@ from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from ..dependencies.exceptions import StopBlock
 from ..dependencies.serverConfig import my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
-from ..engine.inspection import inspect
+from ..engine.inspection import ModelsManager
 from ..models.database import (Image, ImageProcessed, InspectionResult, Model,
                                Origin, OriginResult)
 from .inspection_results import db_get_inspection_result
@@ -210,8 +210,8 @@ async def db_process_new_image(
         db_model: Optional[Model] = db_origin.model_of_origin
         if db_model is None:
             raise StopBlock
-        result: Optional[int] = await inspect(
-            db_img= db_image,
+        result: Optional[int] = await ModelsManager.inspect(
+            db_image= db_image,
             db_model= db_model
         )
         if result is None:
