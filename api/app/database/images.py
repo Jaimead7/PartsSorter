@@ -14,10 +14,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Sequence
 
+import aiofiles
 from fastapi import HTTPException, UploadFile, status
 from pyUtils import ImageFileValidator
 from sqlalchemy import ScalarResult
@@ -38,6 +40,15 @@ from .origin_results import db_get_origin_result
 from .origins import db_get_origin
 
 
+async def _db_add_image(
+    session: AsyncSession,
+    image: Image
+) -> Image:
+    session.add(image)
+    await session.commit()
+    await session.refresh(image)
+    return image
+    
 async def db_create_new_image(
     session: AsyncSession,
     file: UploadFile,
@@ -63,14 +74,21 @@ async def db_create_new_image(
             detail= msg
         )
     image: Image = Image(extension= file_ext, origin= origin)
-    session.add(image)
-    await session.commit()
-    await session.refresh(image)
-    await db_save_image(
-        image= image,
-        file= file
+    save_task: asyncio.Task[Image] = asyncio.create_task(
+        db_save_image(
+            image= image,
+            file= file
+        )
     )
-    return image
+    update_task: asyncio.Task[Image] = asyncio.create_task(
+        _db_add_image(
+            session= session,
+            image= image
+        )
+    )
+    await save_task
+    db_image: Image = await update_task
+    return db_image
 
 async def db_update_image(
     session: AsyncSession,
@@ -103,10 +121,10 @@ async def db_update_image(
     except HTTPException:
         ...
     db_image.processed_date = datetime.now(timezone.utc)
-    session.add(db_image)
-    await session.commit()
-    await session.refresh(db_image)
-    return db_image
+    return await _db_add_image(
+        session= session,
+        image= db_image
+    )
 
 async def db_delete_images(
     session: AsyncSession,
@@ -173,8 +191,8 @@ async def db_save_image(
     image: Image,
     file: UploadFile
 ) -> Image:
-    with open(image.internal_absolute_path, 'wb') as f:
-        f.write(await file.read())
+    async with aiofiles.open(image.internal_absolute_path, 'wb') as f:
+        await f.write(await file.read())
     return image
 
 def db_delete_image_file(
@@ -188,38 +206,34 @@ def db_delete_image_file(
 async def db_process_new_image(
     session: AsyncSession,
     file: UploadFile,
-    origin: Optional[str]
+    origin_name: Optional[str]
 ) -> ImageProcessed:
     db_image: Image = await db_create_new_image(
         session= session,
         file= file,
-        origin= origin
+        origin= origin_name
     )
     try:
-        await session.refresh(
-            db_image,
-            attribute_names= ['origin_of_image']
+        if origin_name is None:
+            raise StopBlock
+        db_origin: Optional[Origin] = await db_get_origin(
+            session= session,
+            origin= Origin(name= origin_name)
         )
-        db_origin: Optional[Origin] = db_image.origin_of_image
         if db_origin is None:
             raise StopBlock
-        await session.refresh(
-            db_origin,
-            attribute_names= ['model_of_origin']
-        )
-        db_model: Optional[Model] = db_origin.model_of_origin
-        if db_model is None:
+        if db_origin.model is None:
             raise StopBlock
         result: Optional[int] = await ModelsManager.inspect(
             db_image= db_image,
-            db_model= db_model
+            model_name= db_origin.model
         )
         if result is None:
             raise StopBlock
         try:
             inpection_result: Optional[InspectionResult] = await db_get_model_inspection_result(
                 session= session,
-                model= db_model,
+                model_name= db_origin.model,
                 result= result
             )
         except HTTPException:
@@ -228,16 +242,12 @@ async def db_process_new_image(
             raise StopBlock
         db_image.inspection_result = inpection_result.name
         db_image.processed_date = datetime.now(timezone.utc)
-        session.add(db_image)
-        await session.commit()
-        await session.refresh(db_image)
+        db_image = await _db_add_image(
+            session= session,
+            image= db_image
+        )
     except StopBlock:
         pass
-    await ImageStreamSocketManager.broadcast_new_result(
-        image_url= db_image.external_url,
-        insp_result= db_image.inspection_result,
-        origin= db_image.origin
-    )
     image_processed: ImageProcessed = ImageProcessed.factory(image= db_image)
     if db_image.origin is not None and db_image.inspection_result is not None:
         try:
@@ -253,4 +263,9 @@ async def db_process_new_image(
             image_processed.result = False
     else:
         image_processed.result = False
+    await ImageStreamSocketManager.broadcast_new_result(
+        image_url= db_image.external_url,
+        insp_result= db_image.inspection_result,
+        origin= db_image.origin
+    )
     return image_processed

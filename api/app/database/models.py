@@ -186,13 +186,13 @@ async def db_get_models(
 
 async def db_get_model_inspection_result(
     session: AsyncSession,
-    model: Model,
+    model_name: str,
     result: int
 ) -> Optional[InspectionResult]:
     db_model_class: ModelClass = await db_get_model_class(
         session= session,
         model_class= ModelClass(
-            model= model.name,
+            model= model_name,
             number= result
         )
     )

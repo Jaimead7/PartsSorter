@@ -150,5 +150,5 @@ async def process_new_image(
     return await db_process_new_image(
         session= session,
         file= file,
-        origin= origin
+        origin_name= origin
     )

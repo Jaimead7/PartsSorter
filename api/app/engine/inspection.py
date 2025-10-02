@@ -31,25 +31,25 @@ class ModelsManager(NoInstantiable):
     @classmethod
     def get_model(
         cls,
-        db_model: Model
+        model_name: str
     ) -> YOLO:
         try:
-            model: YOLO = cls.models[db_model.name]
+            model: YOLO = cls.models[model_name]
         except KeyError:
             model = YOLO(
-                db_model.internal_absolute_ncnn_path,
+                Model(name= model_name).internal_absolute_ncnn_path,
                 task= 'detect'
             )
-            cls.models[db_model.name] = model
+            cls.models[model_name] = model
         return model
 
     @classmethod
     async def inspect(
         cls,
         db_image: Image,
-        db_model: Model
+        model_name: str
     ) -> Optional[int]:
-        model: YOLO = cls.get_model(db_model)
+        model: YOLO = cls.get_model(model_name)
         return await cls.get_best_result_class_n(model(db_image.internal_absolute_path)[0])
 
     @staticmethod
