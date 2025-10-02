@@ -29,11 +29,12 @@ async def process_image(image: Optional[np.ndarray]) -> bool:
             headers= {
                 'accept': 'application/json'
             },
-            params= {
+            data= {
                 'origin': ORIGIN_NAME
             },
             files= {
                 'file': ('image.png', img_bytes, 'image/png')
-            }
+            },
+            timeout= httpx.Timeout(timeout= 10.0)
         )
     return bool(response.json()['result'])
