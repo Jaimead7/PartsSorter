@@ -63,7 +63,7 @@ class ModelsManager(NoInstantiable):
         else:
             results_array = results.boxes.data
         if len(results_array) == 0:
-            return False
+            return None
         best: np.ndarray = results_array[0]
         #result = np.ndarray(x0, y0, x1, y1, conf, obj_n)
         for result in results_array:
