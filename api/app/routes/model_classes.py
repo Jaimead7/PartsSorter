@@ -16,7 +16,7 @@
 
 from typing import Annotated, Sequence
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Body, Depends, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.manager import get_session
@@ -37,7 +37,7 @@ model_classes_router = APIRouter()
 )
 async def create_new_model_class(
     session: Annotated[AsyncSession, Depends(get_session)],
-    model_class: Annotated[ModelClass, Query()]
+    model_class: Annotated[ModelClass, Body()]
 ) -> ModelClass:
     return await db_create_new_model_class(
         session= session,
@@ -45,7 +45,7 @@ async def create_new_model_class(
     )
 
 @model_classes_router.put(
-    '/',
+    '/{model}/{number}',
     response_model= ModelClass,
     summary= 'Update ModelClass on the database.',
     response_description= 'The ModelClass updated.',
@@ -53,22 +53,28 @@ async def create_new_model_class(
 )
 async def update_model_class(
     session: Annotated[AsyncSession, Depends(get_session)],
-    model_class: Annotated[ModelClass, Query()]
+    model: Annotated[str, Path()],
+    number: Annotated[int, Path()],
+    inspection_result: Annotated[str, Body()]
 ) -> ModelClass:
     return await db_update_model_class(
         session= session,
-        model_class= model_class
+        model_class= ModelClass(
+            model= model,
+            number= number,
+            inspection_result= inspection_result
+        )
     )
 
 @model_classes_router.delete(
-    '/',
+    '/{model}/{number}',
     summary= 'Delete ModelClass from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
 async def delete_model_class(
     session: Annotated[AsyncSession, Depends(get_session)],
-    model: str,
-    number: int
+    model: Annotated[str, Path()],
+    number: Annotated[int, Path()],
 ) -> None:
     model_class: ModelClass = ModelClass(model= model, number= number)
     await db_delete_model_class(
@@ -85,8 +91,8 @@ async def delete_model_class(
 )
 async def get_model_classes(
     session: Annotated[AsyncSession, Depends(get_session)],
-    limit: int = DATABASE_GET_LIMIT,
-    offset: int = 0
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
 ) -> Sequence[ModelClass]:
     return await db_get_model_classes(
         session= session,

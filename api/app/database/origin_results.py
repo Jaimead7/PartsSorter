@@ -37,7 +37,7 @@ async def db_create_new_origin_result(
             origin_result= origin_result
         )
         my_logger.debug(
-            f'OriginResult("{db_origin_result.origin}-{db_origin_result.inspection_result}") already created.'
+            f'OriginResult("{db_origin_result.origin}, {db_origin_result.inspection_result}") already created.'
         )
         return db_origin_result
     except HTTPException:
@@ -46,7 +46,7 @@ async def db_create_new_origin_result(
     await session.commit()
     await session.refresh(origin_result)
     my_logger.debug(
-        f'OriginResult("{origin_result.origin}-{origin_result.inspection_result}") created.',
+        f'OriginResult("{origin_result.origin}, {origin_result.inspection_result}") created.',
         Styles.SUCCEED
     )
     return origin_result
@@ -89,7 +89,7 @@ async def db_get_origin_result(
             }
         )
     except NoResultFound:
-        msg: str = f'ModelClass("{origin_result.origin}-{origin_result.inspection_result}") not found.'
+        msg: str = f'OriginResult("{origin_result.origin}, {origin_result.inspection_result}") not found.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_404_NOT_FOUND,

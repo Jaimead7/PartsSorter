@@ -37,7 +37,7 @@ async def db_create_new_model_class(
             model_class= model_class
         )
         my_logger.debug(
-            f'ModelClass("{db_model_class.model}-{db_model_class.number}") already created.'
+            f'ModelClass("{db_model_class.model}, {db_model_class.number}") already created.'
         )
         return db_model_class
     except HTTPException:
@@ -46,7 +46,7 @@ async def db_create_new_model_class(
     await session.commit()
     await session.refresh(model_class)
     my_logger.debug(
-        f'ModelClass("{model_class.model}-{model_class.number}") created.',
+        f'ModelClass("{model_class.model}, {model_class.number}") created.',
         Styles.SUCCEED
     )
     return model_class
@@ -89,7 +89,7 @@ async def db_get_model_class(
             }
         )
     except NoResultFound:
-        msg: str = f'ModelClass("{model_class.model}-{model_class.number}") not found.'
+        msg: str = f'ModelClass("{model_class.model}, {model_class.number}") not found.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_404_NOT_FOUND,
