@@ -1,0 +1,40 @@
+.row-div {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.align-top-left {
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.align-mid {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.align-center {
+    align-items: center;
+    justify-content: center;
+}
+
+.align-expand {
+    align-items: center;
+    justify-content: space-between;
+}
+
+.col-div {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.col-menu-align {
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+.header-div {
+    margin-bottom: 1rem;
+}

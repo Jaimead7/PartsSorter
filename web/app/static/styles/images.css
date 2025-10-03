@@ -1,0 +1,55 @@
+.live-img-div {
+    height: 70vh;
+    font-size: calc(var(--text-size) * 2);
+}
+
+.hist-div {
+    height: 30%;
+}
+
+.img-display {
+    border: 0.3vh solid var(--text-color);
+    border-radius: 1vh;
+    height: 100%; /*DELETE*/
+    max-width: fit-content;
+    padding: 1vh;
+}
+
+.img-display .img-view {
+    border: 0.3vh solid var(--text-color);
+    border-radius: 1vh;
+    padding: 1vh;
+    aspect-ratio: 1/1;
+    height: 100%;
+    max-width: 75%;
+}
+
+.img-display .img-view span {
+    font-weight: bold;
+    text-align: center;
+}
+
+.img-display .img-view img {
+    height: 100%;
+    object-fit: scale-down;
+}
+
+.img-display .info-view {
+    padding-left: 2vh;
+    gap: 2vh;
+    width: fit-content;
+}
+
+.info-view .info-title {
+    font-style: italic;
+}
+
+.info-view .info-value {
+    font-weight: bold;
+}
+
+.img-hist-list {
+    padding-top: 2vh;
+    gap: 2vh;
+    height: 100%;
+}

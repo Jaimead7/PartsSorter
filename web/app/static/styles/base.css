@@ -1,0 +1,75 @@
+@font-face {
+    font-family: 'ITCAvantGarde';
+    src: url('/static/fonts/ITCAvantGardeGothicBook.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'ITCAvantGarde';
+    src: url('/static/fonts/ITCAvantGardeGothicBold.otf');
+    font-weight: bold;
+    font-style: normal;
+}
+
+:root {
+    --text-size: 2.5vh;
+    --menu-icon-size: 5.3vh;
+    --sidebar-width: 35vh;
+    --global-padding: 2.5vh;
+    --sidebar-collaps-time: 1s;
+    --main-contente-header-height: 8%;
+    /* COLORS */
+    --copo-dark-blue: #152e49;
+    --copo-dark-blue-opacity: #44586d;
+    --copo-light-blue: #00557f;
+    --copo-orange: #ed7a18;
+    --text-color: white;
+    --ok-color: #0f800f;
+    --nok-color: #800000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: default;
+    user-select: none;
+}
+
+body {
+    font-family: ITCAvantGarde, sans-serif;
+    background-color: var(--copo-dark-blue-opacity);
+    color: var(--text-color);
+    font-size: var(--text-size);
+}
+
+.sidebar {
+    background-color: var(--copo-dark-blue);
+    width: var(--sidebar-width);
+    padding: var(--global-padding);
+    /*transition: width var(--sidebar-collaps-time) ease;*/
+}
+
+.sidebar-collapsed {
+    width: calc(var(--menu-icon-size) + 2*var(--global-padding));
+}
+
+.sidebar-collapsed .menu-list {
+    width: 0;
+}
+
+.main-content {
+    background-color: var(--copo-dark-blue-opacity);
+    padding: var(--global-padding);
+    overflow: hidden;
+    /*transition: width var(--sidebar-collaps-time) ease;*/
+}
+
+.main-content-header {
+    height: var(--main-contente-header-height);
+}
+
+.main-content-div {
+    height: calc(100% - var(--main-contente-header-height));
+    width: 100%;
+}

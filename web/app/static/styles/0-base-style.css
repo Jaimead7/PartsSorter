@@ -17,12 +17,14 @@
     --menu-icon-size: 5.3vh;
     --sidebar-width: 35vh;
     --global-padding: 2.5vh;
-    --sidebar-collapsed-width: 2rem;
+    --sidebar-width: 35vh;
     --sidebar-collaps-time: 1s;
+    /* COLORS */
     --copo-dark-blue: #152e49;
     --copo-dark-blue-opacity: #44586d;
     --copo-light-blue: #00557f;
     --copo-orange: #ed7a18;
+    --text-color: white;
 }
 
 * {
@@ -109,11 +111,11 @@ body {
 .menu-list {
     display: flex;
     flex-direction: column;
-    list-style: none;
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: stretch;
     font-size: 3vh;
+    list-style: none;
 }
 
 .sidebar-collapsed .menu-list {
@@ -130,14 +132,14 @@ body {
 }
 
 .menu-link {
-    cursor: pointer;
-    color: white;
-    display: block;
-    text-decoration: none;
-    padding: 1.5vh 3vh;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 1.5vh 3vh;
     border-radius: 0.2rem;
 }
 
@@ -179,10 +181,10 @@ body {
 
 .main-content-header {
     height: 8%;
-    font-size: 5vh;
-    font-weight: bold;
     max-width: fit-content;
     text-align: left;
+    font-size: 5vh;
+    font-weight: bold;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

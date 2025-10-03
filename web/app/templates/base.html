@@ -9,13 +9,19 @@
             {% endblock %}
         </title>
         <link href="{{ url_for('static', filename='images/copoLogo.png') }}" rel="shortcut icon" type="image/x-icon">
-        <link href="{{ url_for('static', filename='styles/base-style.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/alerts.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/base.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/buttons.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/divs.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/images.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/menu.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/texts.css') }}" rel="stylesheet">
         {% block styles %}{% endblock %}
     </head>
     <body class="row-div">
         {% include 'sidebar.html' %}
         <div class="main-content" id="main-content">
-            <div class="main-content-header">Airbag cut inspection</div>
+            <div class="text-title text-hidden main-content-header">Airbag cut inspection</div>
             <div class="main-content-div">
                 {% block content %}{% endblock %}
             </div>

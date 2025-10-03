@@ -5,82 +5,95 @@
 {% endblock %}
 
 {% block styles %}
-    <link href="{{ url_for('static', filename='styles/image-stream-style.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-    <div class="image-stream-body">
-        <div class="live-image-content row-div" id="live-image-content">
-            <div class="live-image-image" id="live-image-image">
-                <p id="no-live-image">No image to show</p>
+    <div class="live-img-div">
+        <div class="img-display row-div align-mid">
+            <div class="img-view col-div align-center">
+                <span id="no-live-img">No image to show</span>
+                <img id="live-img" src="" hidden>
             </div>
-            <div class="live-image-info" id="image-info">
-                <div>
-                    <p class="live-image-info-attr">Origin:</p>
-                    <p class="live-image-info-value" id="live-image-origin" data-default-text="Unknown">Unknown</p>
+            <div class="info-view col-div">
+                <div class="col-div">
+                    <span class="info-title text-hidden">Origin:</span>
+                    <span class="info-value text-hidden" id="live-img-origin" data-default-text="Unknown">Unknown</span>
                 </div>
-                <div>
-                    <p class="live-image-info-attr">Type:</p>
-                    <p class="live-image-info-value" id="live-image-type" data-default-text="No result">No result</p>
+                <div class="col-div">
+                    <span class="info-title text-hidden">Type:</span>
+                    <span class="info-value text-hidden" id="live-img-type" data-default-text="No result">No result</span>
                 </div>
             </div>
         </div>
-        <div class="image-history-content" id="image-history-content">
-            <ol class="image-history-list" id="image-history-list">
-                <li class="image-history-element row-div" id="image-history-element-1">
-                    <img class="image-history-image" id="image-history-image-1" src="" alt="No image to show">
-                    <div class="image-history-info">
-                        <div>
-                            <p class="image-history-info-attr">Origin:</p>
-                            <p class="image-history-info-value" id="image-history-origin-1" data-default-text="Unknown">Unknown</p>
-                        </div>
-                        <div>
-                            <p class="image-history-info-attr">Type:</p>
-                            <p class="image-history-info-value" id="image-history-type-1" data-default-text="No result">No result</p>
-                        </div>
+    </div>
+    <div class="hist-div">
+        <ol class="img-hist-list row-div" id="img-hist-list">
+            <li class="img-display row-div align-mid">
+                <div class="img-view col-div align-center">
+                    <span id="no-hist-img-1">No image to show</span>
+                    <img id="hist-img-1" src="" hidden>
+                </div>
+                <div class="info-view col-div">
+                    <div class="col-div">
+                        <span class="info-title">Origin:</span>
+                        <span class="info-value" id="img-hist-origin-1" data-default-text="Unknown">Unknown</span>
                     </div>
-                </li>
-                <li class="image-history-element row-div" id="image-history-element-2">
-                    <img class="image-history-image" id="image-history-image-2" src="" alt="No image to show">
-                    <div class="image-history-info">
-                        <div>
-                            <p class="image-history-info-attr">Origin:</p>
-                            <p class="image-history-info-value" id="image-history-origin-2" data-default-text="Unknown">Unknown</p>
-                        </div>
-                        <div>
-                            <p class="image-history-info-attr">Type:</p>
-                            <p class="image-history-info-value" id="image-history-type-2" data-default-text="No result">No result</p>
-                        </div>
+                    <div class="col-div">
+                        <span class="info-title">Type:</span>
+                        <span class="info-value" id="img-hist-type-1" data-default-text="No result">No result</span>
                     </div>
-                </li>
-                <li class="image-history-element row-div" id="image-history-element-3">
-                    <img class="image-history-image" id="image-history-image-3" src="" alt="No image to show">
-                    <div class="image-history-info">
-                        <div>
-                            <p class="image-history-info-attr">Origin:</p>
-                            <p class="image-history-info-value" id="image-history-origin-3" data-default-text="Unknown">Unknown</p>
-                        </div>
-                        <div>
-                            <p class="image-history-info-attr">Type:</p>
-                            <p class="image-history-info-value" id="image-history-type-3" data-default-text="No result">No result</p>
-                        </div>
+                </div>
+            </li>
+            <li class="img-display row-div align-mid">
+                <div class="img-view col-div align-center">
+                    <span id="no-hist-img-2">No image to show</span>
+                    <img id="hist-img-2" src="" hidden>
+                </div>
+                <div class="info-view col-div">
+                    <div class="col-div">
+                        <span class="info-title">Origin:</span>
+                        <span class="info-value" id="img-hist-origin-2" data-default-text="Unknown">Unknown</span>
                     </div>
-                </li>
-                <li class="image-history-element row-div" id="image-history-element-4">
-                    <img class="image-history-image" id="image-history-image-4" src="" alt="No image to show">
-                    <div class="image-history-info">
-                        <div>
-                            <p class="image-history-info-attr">Origin:</p>
-                            <p class="image-history-info-value" id="image-history-origin-4" data-default-text="Unknown">Unknown</p>
-                        </div>
-                        <div>
-                            <p class="image-history-info-attr">Type:</p>
-                            <p class="image-history-info-value" id="image-history-type-4" data-default-text="No result">No result</p>
-                        </div>
+                    <div class="col-div">
+                        <span class="info-title">Type:</span>
+                        <span class="info-value" id="img-hist-type-2" data-default-text="No result">No result</span>
                     </div>
-                </li>
-            </ol>
-        </div>
+                </div>
+            </li>
+            <li class="img-display row-div align-mid">
+                <div class="img-view col-div align-center">
+                    <span id="no-hist-img-3">No image to show</span>
+                    <img id="hist-img-3" src="" hidden>
+                </div>
+                <div class="info-view col-div">
+                    <div class="col-div">
+                        <span class="info-title">Origin:</span>
+                        <span class="info-value" id="img-hist-origin-3" data-default-text="Unknown">Unknown</span>
+                    </div>
+                    <div class="col-div">
+                        <span class="info-title">Type:</span>
+                        <span class="info-value" id="img-hist-type-3" data-default-text="No result">No result</span>
+                    </div>
+                </div>
+            </li>
+            <li class="img-display row-div align-mid">
+                <div class="img-view col-div align-center">
+                    <span id="no-hist-img-4">No image to show</span>
+                    <img id="hist-img-4" src="" hidden>
+                </div>
+                <div class="info-view col-div">
+                    <div class="col-div">
+                        <span class="info-title">Origin:</span>
+                        <span class="info-value" id="img-hist-origin-4" data-default-text="Unknown">Unknown</span>
+                    </div>
+                    <div class="col-div">
+                        <span class="info-title">Type:</span>
+                        <span class="info-value" id="img-hist-type-4" data-default-text="No result">No result</span>
+                    </div>
+                </div>
+            </li>
+            
+        </ol>
     </div>
 {% endblock %}
 

@@ -1,34 +1,34 @@
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h3>Menu</h3>
-        <button class="toggle-button" id="toggle-sidebar">
+    <div class="row-div align-expand header-div">
+        <h3 class="text-title text-hidden">Menu</h3>
+        <button class="menu-button" id="menu-button">
             <img src= "{{ url_for('static', filename='images/copoLogoWhite.png') }}" alt="Menu" class="button-icon">
         </button>
     </div>
-    <ul class="menu-list">
-        <li class="menu-item">
-            <a class="menu-link" href="{{ url_for('home') }}">Home</a>
+    <ul class="col-div col-menu-align menu-list">
+        <li class="text-hidden">
+            <a class="text-hidden" href="{{ url_for('home') }}">Home</a>
         </li>
-        <li class="menu-item">
-            <a class="menu-link" href="{{ url_for('image_stream') }}">Image stream</a>
+        <li class="text-hidden">
+            <a class="text-hidden" href="{{ url_for('image_stream') }}">Image stream</a>
         </li>
-        <li class="dropdown menu-item">
-            <a class="menu-link" href="">Config</a>
+        <li class="dropdown text-hidden">
+            <span class="text-hidden" href="">Config</span>
             <ul class="menu-list dropdown-content">
-                <li class="menu-item">
-                    <a class="menu-link" href="{{ url_for('config.inspection_results') }}">Inspection results</a>
+                <li class="text-hidden">
+                    <a class="text-hidden" href="{{ url_for('config.inspection_results') }}">Inspection results</a>
                 </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="{{ url_for('config.models') }}">Models</a>
+                <li class="text-hidden">
+                    <a class="text-hidden" href="{{ url_for('config.models') }}">Models</a>
                 </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="{{ url_for('config.model_classes') }}">Model classes</a>
+                <li class="text-hidden">
+                    <a class="text-hidden" href="{{ url_for('config.model_classes') }}">Model classes</a>
                 </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="{{ url_for('config.origins') }}">Origins</a>
+                <li class="text-hidden">
+                    <a class="text-hidden" href="{{ url_for('config.origins') }}">Origins</a>
                 </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="{{ url_for('config.images') }}">Images</a>
+                <li class="text-hidden">
+                    <a class="text-hidden" href="{{ url_for('config.images') }}">Images</a>
                 </li>
             </ul>
         </li>

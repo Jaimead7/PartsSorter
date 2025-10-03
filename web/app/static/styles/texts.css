@@ -1,0 +1,12 @@
+.text-hidden {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-title {
+    font-size: calc(var(--text-size) * 2);
+    font-weight: bold;
+    text-align: left;
+    max-width: fit-content;
+}
