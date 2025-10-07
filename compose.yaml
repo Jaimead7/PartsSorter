@@ -7,7 +7,7 @@ services:
     container_name: postgres
     restart: unless-stopped
     env_file:
-      - path: ./postgres/dist/.env
+      - path: ./postgres/.env.docker
         required: true
     volumes:
       - postgres-volume:/var/lib/postgresql
@@ -23,12 +23,13 @@ services:
     depends_on:
       - postgres-db
     env_file:
-      - path: ./api/.env
+      - path: ./api/.env.docker
         required: true
     volumes:
       - images-volume:/app/dist/images
       - models-volume:/app/dist/models
       - datasets-volume:/app/dist/datasets
+      - logs-volume:/app/dist/logs
     networks:
       - my-db-network
       - my-api-network
@@ -42,10 +43,12 @@ services:
     depends_on:
       - api
     env_file:
-      - path: ./web/.env
+      - path: ./web/.env.docker
         required: true
     ports:
       - "5000:5000"
+    volumes:
+      - logs-volume:/app/dist/logs
     networks:
       - my-api-network
 
@@ -77,7 +80,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${LABEL_STUDIO_VOLUME:-/mnt/shared/label-studio}
+      device: ${LABEL_STUDIO_VOLUME_PATH:-/mnt/shared/label-studio}
     external: false
     labels:
       - "description=Label studio data volume."
@@ -86,7 +89,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${IMAGES_VOLUME:-/mnt/shared/images}
+      device: ${IMAGES_VOLUME_PATH:-/mnt/shared/images}
     external: false
     labels:
       - "description=Images volume."
@@ -95,7 +98,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${MODELS_VOLUME:-/mnt/shared/models}
+      device: ${MODELS_VOLUME_PATH:-/mnt/shared/models}
     external: false
     labels:
       - "description=Models volume."
@@ -104,10 +107,19 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${DATASETS_VOLUME:-/mnt/shared/datasets}
+      device: ${DATASETS_VOLUME_PATH:-/mnt/shared/datasets}
     external: false
     labels:
       - "description=Datasets volume."
+  logs-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOGS_VOLUME_PATH:-/mnt/shared/logs}
+    external: false
+    labels:
+      - "description=Logs volume."
 
 
 networks:
