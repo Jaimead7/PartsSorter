@@ -24,7 +24,7 @@ from ..database.images import (db_create_new_image, db_delete_images,
                                db_get_image, db_get_images,
                                db_process_new_image, db_update_image)
 from ..database.manager import get_session
-from ..dependencies.serverConfig import DATABASE_GET_LIMIT
+from ..dependencies.server_config import DATABASE_GET_LIMIT
 from ..models.database import Image, ImageProcessed
 
 images_router = APIRouter()

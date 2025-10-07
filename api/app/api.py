@@ -22,7 +22,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from .database.manager import initDB
-from .dependencies.serverConfig import (SERVER_IP, SERVER_PORT, STATIC_PATH,
+from .dependencies.server_config import (SERVER_IP, SERVER_PORT, STATIC_PATH,
                                         TAGS)
 from .routes import (images, inspection_results, model_classes, models,
                      origin_results, origins, web_sockets)

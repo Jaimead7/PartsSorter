@@ -23,7 +23,7 @@ import yaml
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from typing_extensions import Self
 
-from ..dependencies.serverConfig import (EXTERNAL_IMAGES_URL,
+from ..dependencies.server_config import (EXTERNAL_IMAGES_URL,
                                          INTERNAL_IMAGES_FOLDER,
                                          INTERNAL_MODELS_FOLDER)
 from .typing import ModelMetadataDict

@@ -25,7 +25,7 @@ from ..database.origins import (db_create_new_origin, db_delete_origins,
                                 db_get_origin_images,
                                 db_get_origin_origin_result, db_get_origins,
                                 db_update_origin)
-from ..dependencies.serverConfig import DATABASE_GET_LIMIT
+from ..dependencies.server_config import DATABASE_GET_LIMIT
 from ..models.database import Image, Origin, OriginResult
 from ..models.typing import CameraProps
 

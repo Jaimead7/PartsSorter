@@ -23,7 +23,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import func, select
 
-from ..dependencies.serverConfig import my_logger
+from ..dependencies.server_config import my_logger
 from ..models.database import ModelClass
 
 

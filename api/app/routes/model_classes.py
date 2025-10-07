@@ -24,7 +24,7 @@ from ..database.model_classes import (db_create_new_model_class,
                                       db_delete_model_class,
                                       db_get_model_classes,
                                       db_update_model_class)
-from ..dependencies.serverConfig import DATABASE_GET_LIMIT
+from ..dependencies.server_config import DATABASE_GET_LIMIT
 from ..models.database import ModelClass
 
 model_classes_router = APIRouter()

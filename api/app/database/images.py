@@ -29,7 +29,7 @@ from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.exceptions import StopBlock
-from ..dependencies.serverConfig import my_logger
+from ..dependencies.server_config import my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.inspection import ModelsManager
 from ..models.database import (Image, ImageProcessed, InspectionResult, Model,

@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
-from ..dependencies.serverConfig import my_logger
+from ..dependencies.server_config import my_logger
 from ..models.database import Image, InspectionResult, ModelClass, OriginResult
 
 
