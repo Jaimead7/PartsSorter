@@ -217,9 +217,15 @@ sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
+- Intall docker-compose
+```bash
+sudo apt-get install docker-compose
+```
+
 - Verify installation
 ```bash
 sudo docker run hello-world
+docker compose version
 ```
 
 # Usage
