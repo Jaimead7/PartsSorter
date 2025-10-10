@@ -129,5 +129,5 @@ class CameraManager:
                         result= result
                     )
                     await results_queue.put(queue_result)
-                    my_logger.debug(f'Image captured with {queue_result}.')
+                    my_logger.debug(f'Image captured with Result{queue_result}.')
                 last_sensor_val = new_sensor_value
