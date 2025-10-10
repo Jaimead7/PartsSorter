@@ -1,9 +1,13 @@
 Dockerfile
 .dockerignore
 
+.git
+.gitignore
+
 __pycache__
 .venv
-.env
+
+.env*
 
 build
 *.egg-info

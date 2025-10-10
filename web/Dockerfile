@@ -15,13 +15,13 @@
 
 
 ## ---------------------------- Builder Stage --------------------------- ##
-FROM python:3.12.11-alpine AS builder
+FROM python:3.13.8-alpine AS builder
 
 # Set the working directory
 WORKDIR /app
 
 # Copy project files
-COPY . .
+COPY ./pyproject.toml ./pyproject.toml
 
 # Setup uv
 COPY --from=ghcr.io/astral-sh/uv:0.6.16 /uv /uvx /bin/
@@ -30,7 +30,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.6.16 /uv /uvx /bin/
 RUN uv sync
 
 ## ---------------------------- Production Stage --------------------------- ##
-FROM python:3.12.11-alpine AS production
+FROM python:3.13.8-alpine AS production
 
 # Set the working directory
 WORKDIR /app
@@ -45,7 +45,7 @@ COPY . .
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose the FastApi port
-EXPOSE 8000
+EXPOSE 5000
 
 # Run the app
-CMD ["python3", "./web/app/app.py"]
+CMD ["python3.13", "-m", "app.app"]

@@ -26,7 +26,7 @@ from ..database.inspection_results import (
     db_get_inspection_result_origin_results, db_get_inspection_results,
     db_update_inspection_result)
 from ..database.manager import get_session
-from ..dependencies.server_config import DATABASE_GET_LIMIT
+from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.database import Image, InspectionResult, ModelClass, OriginResult
 
 inspection_results_router = APIRouter()

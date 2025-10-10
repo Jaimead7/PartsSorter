@@ -1,18 +1,47 @@
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
 name: parts-sorter
 
-
 services:
-  postgres-db:
+  label-studio:
+    image: heartexlabs/label-studio:latest
+    container_name: label-studio
+    ports:
+      - "8080:8080"
+    volumes:
+      - label-studio-volume:/label-studio/data
+      - images-volume:/local-storage/images
+    environment:
+      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
+      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/local-storage/images/training
+
+  postgres:
     image: postgres:15-alpine
     container_name: postgres
     restart: unless-stopped
     env_file:
       - path: ./postgres/.env.docker
         required: true
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres-volume:/var/lib/postgresql
+      - postgres-volume:/var/lib/postgresql/data
     networks:
-      - my-db-network
+      - db-network
 
   api:
     build:
@@ -21,18 +50,20 @@ services:
     container_name: api
     restart: unless-stopped
     depends_on:
-      - postgres-db
+      - postgres
     env_file:
       - path: ./api/.env.docker
         required: true
+    ports:
+      - "8000:8000"
     volumes:
-      - images-volume:/app/dist/images
-      - models-volume:/app/dist/models
-      - datasets-volume:/app/dist/datasets
-      - logs-volume:/app/dist/logs
+      - images-volume:/api/dist/images
+      - models-volume:/api/dist/models
+      - datasets-volume:/api/dist/datasets
+      - logs-volume:/api/dist/logs
     networks:
-      - my-db-network
-      - my-api-network
+      - db-network
+      - api-network
 
   web:
     build:
@@ -50,19 +81,7 @@ services:
     volumes:
       - logs-volume:/app/dist/logs
     networks:
-      - my-api-network
-
-  label-studio:
-    image: heartexlabs/label-studio:latest
-    container_name: label-studio
-    ports:
-      - "8080:8080"
-    volumes:
-      - label-studio-volume:/label-studio/data
-      - images-volume:/local-storage/images
-    environment:
-      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
-      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/local-storage/images/training
+      - api-network
 
 
 volumes:
@@ -71,7 +90,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${POSTGRES_VOLUME_PATH:-/mnt/shared/postgresql}
+      device: ${POSTGRES_VOLUME_PATH:-/mnt/shared/postgres}
     external: false
     labels:
       - "description=PostgreSQL data volume."
@@ -123,7 +142,7 @@ volumes:
 
 
 networks:
-  my-db-network:
+  db-network:
     driver: bridge
-  my-api-network:
+  api-network:
     driver: bridge

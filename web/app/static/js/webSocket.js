@@ -1,11 +1,38 @@
-const noImage = document.getElementById("no-live-image");
+// Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
 let ws;
 let reconnectDelay = 10000;
 let reconnectTimeout;
 let alertDiv;
 
-function connectWebSocket() {
-    ws = new WebSocket("ws://localhost:8000/ws/image-stream"); //TODO: hide on finall deploy
+
+async function initWebSocket() {
+    try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        connectWebSocket(`ws://${config.ip}/ws/image-stream`);
+    } catch (error) {
+        console.error('Error loading config:', error);
+        connectWebSocket('ws://localhost:8000/ws/image-stream');
+    }
+}
+
+function connectWebSocket(url) {
+    ws = new WebSocket(url);
 
     ws.onopen = () => {
         try{
@@ -20,17 +47,15 @@ function connectWebSocket() {
         switch (data.type) {
             case "new-image":
                 transferImages();
-                noImage.hidden = true;
-                img = document.createElement("img");
-                img.setAttribute("id", "live-image")
-                img.setAttribute("class", "live-image")
-                document.getElementById("live-image-image").appendChild(img);
+                document.getElementById("live-img-span").hidden = true;
+                img = document.getElementById("live-img");
                 img.src = data.image_url;
+                img.hidden = false;
                 writeImageInfo(
                     data.origin,
-                    "live-image-origin",
+                    "live-img-origin",
                     data.insp_result,
-                    "live-image-type"
+                    "live-img-type"
                 )
         }
     };
@@ -50,7 +75,7 @@ function scheduleReconnect() {
     showAlert("Reconnecting to server...", "warning");
     clearTimeout(reconnectTimeout);
     reconnectTimeout = setTimeout(() => {
-        connectWebSocket();
+        initWebSocket();
     }, reconnectDelay);
 }
 
@@ -67,57 +92,45 @@ function showAlert(message, type) {
 
 function clearImages() {
     for (let i = 4; i > 1; i--) {
-        const img = document.getElementById(`image-history-image-${i}`);
-        img.src = ""
-        clearImageInfo(`image-history-origin-${i}`, `image-history-type-${i}`)
+        img = document.getElementById(`hist-img-${i}`);
+        img.src = "";
+        img.hidden = true;
+        document.getElementById(`hist-img-${i}-span`).hidden = false;
+        clearImageInfo(`img-hist-origin-${i}`, `img-hist-type-${i}`)
     }
-    const img = document.getElementById("live-image");
-    if (img) {
-        img.remove();
-        clearImageInfo("live-image-origin", "live-image-type")
-    }
-    noImage.hidden = false;
+    img = document.getElementById("live-img");
+    img.src = "";
+    img.hidden = true;
+    document.getElementById("live-img-span").hidden = false;
+    clearImageInfo("live-img-origin", "live-img-type")
 }
 
 function transferImages() {
     for (let i = 4; i > 1; i--) {
-        transferImage(`image-history-image-${i-1}`, `image-history-image-${i}`);
-        transferText(`image-history-origin-${i-1}`, `image-history-origin-${i}`);
-        transferText(`image-history-type-${i-1}`, `image-history-type-${i}`);
+        transferImage(`hist-img-${i-1}`, `hist-img-${i}`);
+        transferText(`img-hist-origin-${i-1}`, `img-hist-origin-${i}`);
+        transferText(`img-hist-type-${i-1}`, `img-hist-type-${i}`);
     }
-    transferImage("live-image", "image-history-image-1");
-    transferText("live-image-origin", "image-history-origin-1");
-    transferText("live-image-type", `image-history-type-1`);
-    try {
-        document.getElementById("live-image").remove()
-    } catch (error) {}
+    transferImage("live-img", "hist-img-1");
+    transferText("live-img-origin", "img-hist-origin-1");
+    transferText("live-img-type", "img-hist-type-1");
 }
 
 function transferImage(idOrigin, idDestiny) {
-    const origin = document.getElementById(idOrigin);
-    const destiny = document.getElementById(idDestiny);
-    if (origin && destiny) {
-        destiny.src = origin.src;
-    }
+    imgDestiny = document.getElementById(idDestiny)
+    imgOrigin = document.getElementById(idOrigin)
+    imgDestiny.src = imgOrigin.src;
+    imgDestiny.hidden = imgOrigin.hidden;
+    document.getElementById(`${idDestiny}-span`).hidden = document.getElementById(`${idOrigin}-span`).hidden;
 }
 
 function transferText(idOrigin, idDestiny) {
-    const origin = document.getElementById(idOrigin);
-    const destiny = document.getElementById(idDestiny);
-    if (origin && destiny) {
-        destiny.textContent = origin.textContent;
-    }
+    document.getElementById(idDestiny).textContent = document.getElementById(idOrigin).textContent;
 }
 
 function writeImageInfo(origin, originElementName, type, typeElementName) {
-    const originElement = document.getElementById(originElementName);
-    if (originElement) {
-        originElement.innerText = origin
-    }
-    const typeElement = document.getElementById(typeElementName);
-    if (typeElement) {
-        typeElement.innerText = type
-    }
+    document.getElementById(originElementName).innerText = origin
+    document.getElementById(typeElementName).innerText = type
 }
 
 function clearImageInfo(originElementName, typeElementName) {
@@ -131,4 +144,4 @@ function clearImageInfo(originElementName, typeElementName) {
     }
 }
 
-connectWebSocket();
+initWebSocket();

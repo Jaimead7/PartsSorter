@@ -24,7 +24,7 @@ from ..database.origin_results import (db_create_new_origin_result,
                                        db_delete_origin_result,
                                        db_get_origin_results,
                                        db_update_origin_result)
-from ..dependencies.server_config import DATABASE_GET_LIMIT
+from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.database import OriginResult
 
 origin_results_router = APIRouter()

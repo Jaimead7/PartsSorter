@@ -8,10 +8,10 @@
 {% endblock %}
 
 {% block content %}
-    <div class="live-img-div">
+    <div class="img-stream-main">
         <div class="img-display row-div align-mid">
             <div class="img-view col-div align-center">
-                <span id="no-live-img">No image to show</span>
+                <span id="live-img-span">No image to show</span>
                 <img id="live-img" src="" hidden>
             </div>
             <div class="info-view col-div">
@@ -25,12 +25,10 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="hist-div">
-        <ol class="img-hist-list row-div" id="img-hist-list">
-            <li class="img-display row-div align-mid">
+        <div class="img-hist">
+            <div class="img-display-small row-div align-mid">
                 <div class="img-view col-div align-center">
-                    <span id="no-hist-img-1">No image to show</span>
+                    <span id="hist-img-1-span">No image to show</span>
                     <img id="hist-img-1" src="" hidden>
                 </div>
                 <div class="info-view col-div">
@@ -43,10 +41,10 @@
                         <span class="info-value" id="img-hist-type-1" data-default-text="No result">No result</span>
                     </div>
                 </div>
-            </li>
-            <li class="img-display row-div align-mid">
+            </div>
+            <div class="img-display-small row-div align-mid">
                 <div class="img-view col-div align-center">
-                    <span id="no-hist-img-2">No image to show</span>
+                    <span id="hist-img-2-span">No image to show</span>
                     <img id="hist-img-2" src="" hidden>
                 </div>
                 <div class="info-view col-div">
@@ -59,10 +57,10 @@
                         <span class="info-value" id="img-hist-type-2" data-default-text="No result">No result</span>
                     </div>
                 </div>
-            </li>
-            <li class="img-display row-div align-mid">
+            </div>
+            <div class="img-display-small row-div align-mid">
                 <div class="img-view col-div align-center">
-                    <span id="no-hist-img-3">No image to show</span>
+                    <span id="hist-img-3-span">No image to show</span>
                     <img id="hist-img-3" src="" hidden>
                 </div>
                 <div class="info-view col-div">
@@ -75,10 +73,10 @@
                         <span class="info-value" id="img-hist-type-3" data-default-text="No result">No result</span>
                     </div>
                 </div>
-            </li>
-            <li class="img-display row-div align-mid">
+            </div>
+            <div class="img-display-small row-div align-mid">
                 <div class="img-view col-div align-center">
-                    <span id="no-hist-img-4">No image to show</span>
+                    <span id="hist-img-4-span">No image to show</span>
                     <img id="hist-img-4" src="" hidden>
                 </div>
                 <div class="info-view col-div">
@@ -91,9 +89,8 @@
                         <span class="info-value" id="img-hist-type-4" data-default-text="No result">No result</span>
                     </div>
                 </div>
-            </li>
-            
-        </ol>
+            </div>
+        </div>
     </div>
 {% endblock %}
 

@@ -15,37 +15,48 @@
 
 
 ## ---------------------------- Builder Stage --------------------------- ##
-FROM python:3.12.11-alpine AS builder
+FROM python:3.12.11-slim AS builder
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /api
+
 
 # Copy project files
-COPY . .
+COPY ./pyproject.toml ./pyproject.toml
 
 # Setup uv
 COPY --from=ghcr.io/astral-sh/uv:0.6.16 /uv /uvx /bin/
 
 # Install dependencies
-RUN uv sync
+RUN uv sync --extra postgres
 
 ## ---------------------------- Production Stage --------------------------- ##
-FROM python:3.12.11-alpine AS production
+FROM python:3.12.11-slim AS production
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /api
+
+# Instal opencv dependencies #TODO: use opencv-python-headless
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglx-mesa0 \
+    libglib2.0-0 \
+    libsm6 \
+    libxrender1 \
+    libxext6 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
-COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /api/.venv /api/.venv
 
 # Copy project files
 COPY . .
 
 # Set up environment variables for production
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/api/.venv/bin:$PATH"
 
 # Expose the FastApi port
 EXPOSE 8000
 
 # Run the app
-CMD ["python3", "./api/app/api.py"]
+CMD ["python3.12", "-m", "app.api"]

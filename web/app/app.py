@@ -1,7 +1,8 @@
 import uvicorn
 from quart import Quart, render_template
 
-from .blueprints.config import config_bp
+from .blueprints import api_bp, config_bp
+from .dependencies.config import SERVER_PORT, SERVER_IP
 
 app = Quart(__name__)
 
@@ -15,11 +16,11 @@ async def image_stream() -> str:
     return await render_template('image-stream.html')
 
 app.register_blueprint(config_bp)
+app.register_blueprint(api_bp)
 
 if __name__ == '__main__':
     uvicorn.run(
-        'app.app:app', #TODO: change to app
-        host = 'localhost',
-        port = 5000,
-        reload= True #DELETE
+        app,
+        host= SERVER_IP,
+        port= SERVER_PORT
     )

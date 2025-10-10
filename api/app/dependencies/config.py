@@ -18,12 +18,14 @@ import logging
 from enum import Enum
 from os import getenv
 from pathlib import Path
+import socket
 
 from pyUtils import (MyLogger, ProjectPathsDict, save_pyutils_logs,
                      set_pyutils_logging_level, set_pyutils_logs_path)
 
 
 class TAGS(Enum):
+    CONFIG = 'Configuration'
     WEB_SOCKETS = 'Web Sockets'
     IMAGES = 'Images'
     INSPECTION_RESULTS = 'Inspection results'
@@ -39,12 +41,13 @@ class EnvVars(Enum):
     SERVER_PORT = 'SERVER_PORT'
     DATABASE_URL = 'DATABASE_URL'
     DATABASE_GET_LIMIT = 'DATABASE_GET_LIMIT'
+    HOST_IP = 'HOST_IP'
 
 
 # APP
 MY_APP: ProjectPathsDict = ProjectPathsDict().set_app_path(Path(__file__).parents[2])
 MY_APP[ProjectPathsDict.DIST_PATH] = MY_APP[ProjectPathsDict.APP_PATH] / 'dist'
-MY_APP['images'] = MY_APP[ProjectPathsDict.DIST_PATH] / 'images'
+MY_APP['images'] = MY_APP[ProjectPathsDict.DIST_PATH] / 'images' / 'production'
 MY_APP['models'] = MY_APP[ProjectPathsDict.DIST_PATH] / 'models'
 
 
@@ -52,35 +55,35 @@ MY_APP['models'] = MY_APP[ProjectPathsDict.DIST_PATH] / 'models'
 LOGGING_LVL: int = MyLogger.get_logging_lvl_from_env(EnvVars.LOGGING_LVL.value)
 
 my_logger: MyLogger = MyLogger(
-    logger_name= 'WebServer',
+    logger_name= 'api',
     logging_level= LOGGING_LVL
 )
 
-def set_web_server_logs_path(new_path: Path | str) -> None:
+def set_api_logs_path(new_path: Path | str) -> None:
     my_logger.logs_file_path = new_path
     set_pyutils_logs_path(new_path)
 
-def save_web_server_logs(value: bool) -> None:
+def save_api_logs(value: bool) -> None:
     my_logger.save_logs = value
     save_pyutils_logs(value)
 
-def set_web_server_logging_level(lvl: int = logging.DEBUG) -> None:
+def set_api_logging_level(lvl: int = logging.DEBUG) -> None:
     my_logger.set_logging_level(lvl)
     set_pyutils_logging_level(lvl)
 
-set_web_server_logging_level(logging.WARNING)
-set_web_server_logs_path('webServer.log')
-set_web_server_logging_level(LOGGING_LVL)
-save_web_server_logs(True)
+set_api_logging_level(logging.WARNING)
+set_api_logs_path('api.log')
+set_api_logging_level(LOGGING_LVL)
+save_api_logs(True)
 
 # ENV VARS
 SERVER_IP: str = getenv(EnvVars.SERVER_IP.value, 'localhost')
 SERVER_PORT: int = int(getenv(EnvVars.SERVER_PORT.value, 8000))
-SERVER_URL: str = f'http://{SERVER_IP}:{SERVER_PORT}/'
+HOST_IP: str = getenv(EnvVars.HOST_IP.value, 'localhost')
 STATIC_PATH: Path = MY_APP[ProjectPathsDict.DIST_PATH]
 INTERNAL_IMAGES_FOLDER: Path = MY_APP['images']
-EXTERNAL_IMAGES_URL: str = SERVER_URL + (Path('static') / 'images').as_posix() + '/'
+EXTERNAL_IMAGES_URL: str = f'http://{HOST_IP}:{SERVER_PORT}/{(Path("static") / "images").as_posix()}/'
 INTERNAL_MODELS_FOLDER: Path = MY_APP['models']
-EXTERNAL_MODELS_URL: str = SERVER_URL + (Path('static') / 'models').as_posix() + '/'
+EXTERNAL_MODELS_URL: str = f'http://{HOST_IP}:{SERVER_PORT}/{(Path("static") / "models").as_posix()}/'
 DATABASE_URL: str = getenv(EnvVars.DATABASE_URL.value, 'sqlite+aiosqlite:///./database.db')
 DATABASE_GET_LIMIT = int(getenv(EnvVars.DATABASE_GET_LIMIT.value, 50))

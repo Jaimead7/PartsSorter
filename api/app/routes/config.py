@@ -14,32 +14,19 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional
+from fastapi import APIRouter, status
 
-from pydantic import BaseModel
-from typing_extensions import Self
+from ..dependencies.config import SERVER_PORT, HOST_IP
+from ..models.api import ApiIPResponse
 
+config_router = APIRouter()
 
-class ApiIPResponse(BaseModel):
-    ip: str
-
-
-class ImageStreamResponse(BaseModel):
-    """Model for broadcast new image"""
-    type: str = 'new-image'
-    image_url: str
-    insp_result: str =  'No result'
-    origin: str = 'Unknown'
-
-    @classmethod
-    def factory(
-        cls,
-        image_url: str,
-        insp_result: Optional[str],
-        origin: Optional[str]
-    ) -> Self:
-        return cls(
-            image_url= image_url,
-            insp_result= insp_result if insp_result is not None else 'No result',
-            origin= origin if origin is not None else 'Unknown'
-        )
+@config_router.post(
+    '/ip',
+    response_model= ApiIPResponse,
+    summary= 'Get the API IP.',
+    response_description= 'The API IP.',
+    status_code= status.HTTP_200_OK
+)
+async def get_api_ip() -> ApiIPResponse:
+    return ApiIPResponse(ip= f'{HOST_IP}:{SERVER_PORT}')

@@ -27,7 +27,7 @@ from utils.data_types import Result
 async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
     last_sensor_val: bool = False
     new_result: Result = Result(
-        date= datetime.now(timezone.utc),
+        date= datetime.now(timezone.utc).replace(tzinfo=None),
         result= False
     )
     while True:
@@ -37,7 +37,7 @@ async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
             continue
         if new_sensor_value and not last_sensor_val:
             my_logger.debug(f'New part on the actuator.')
-            now: datetime = datetime.now(timezone.utc)
+            now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
             new_result: Result = Result(
                 date= now,
                 result= False

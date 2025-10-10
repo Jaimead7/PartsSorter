@@ -27,9 +27,10 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
+from pyUtils import Styles
 
 from ..dependencies.exceptions import StopBlock
-from ..dependencies.server_config import my_logger
+from ..dependencies.config import my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.inspection import ModelsManager
 from ..models.database import (Image, ImageProcessed, InspectionResult, Model,
@@ -120,7 +121,7 @@ async def db_update_image(
         db_image.inspection_result = image.inspection_result
     except HTTPException:
         ...
-    db_image.processed_date = datetime.now(timezone.utc)
+    db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     return await _db_add_image(
         session= session,
         image= db_image
@@ -193,6 +194,10 @@ async def db_save_image(
 ) -> Image:
     async with aiofiles.open(image.internal_absolute_path, 'wb') as f:
         await f.write(await file.read())
+    my_logger.debug(
+        f'Image file "{image.internal_absolute_path}" saved.',
+        Styles.SUCCEED
+    )
     return image
 
 def db_delete_image_file(
@@ -241,7 +246,7 @@ async def db_process_new_image(
         if inpection_result is None:
             raise StopBlock
         db_image.inspection_result = inpection_result.name
-        db_image.processed_date = datetime.now(timezone.utc)
+        db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
         db_image = await _db_add_image(
             session= session,
             image= db_image

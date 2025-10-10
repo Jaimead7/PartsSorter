@@ -20,7 +20,7 @@ from fastapi import WebSocket
 from pyUtils import NoInstantiable
 
 from ..models.api import ImageStreamResponse
-from .server_config import my_logger
+from .config import my_logger
 
 
 class ImageStreamSocketManager(NoInstantiable):

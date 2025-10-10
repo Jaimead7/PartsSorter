@@ -12,12 +12,11 @@
 }
 
 :root {
-    --text-size: 2.5vh;
+    --text-size: min(2.5vh, 1vw);
     --menu-icon-size: 5.3vh;
     --sidebar-width: 35vh;
     --global-padding: 2.5vh;
     --sidebar-collaps-time: 1s;
-    --main-contente-header-height: 8%;
     /* COLORS */
     --copo-dark-blue: #152e49;
     --copo-dark-blue-opacity: #44586d;
@@ -26,6 +25,8 @@
     --text-color: white;
     --ok-color: #0f800f;
     --nok-color: #800000;
+    height: 100%;
+    width: 100%;
 }
 
 * {
@@ -37,6 +38,8 @@
 }
 
 body {
+    height: 100%;
+    width: 100%;
     font-family: ITCAvantGarde, sans-serif;
     background-color: var(--copo-dark-blue-opacity);
     color: var(--text-color);
@@ -59,6 +62,7 @@ body {
 }
 
 .main-content {
+    width: 100%;
     background-color: var(--copo-dark-blue-opacity);
     padding: var(--global-padding);
     overflow: hidden;
@@ -66,10 +70,10 @@ body {
 }
 
 .main-content-header {
-    height: var(--main-contente-header-height);
+    height: calc(var(--text-size) * 3);
 }
 
 .main-content-div {
-    height: calc(100% - var(--main-contente-header-height));
+    height: calc(100% - calc(var(--text-size) * 3));
     width: 100%;
 }

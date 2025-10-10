@@ -22,9 +22,9 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from .database.manager import initDB
-from .dependencies.server_config import (SERVER_IP, SERVER_PORT, STATIC_PATH,
+from .dependencies.config import (SERVER_IP, SERVER_PORT, STATIC_PATH,
                                         TAGS)
-from .routes import (images, inspection_results, model_classes, models,
+from .routes import (config, images, inspection_results, model_classes, models,
                      origin_results, origins, web_sockets)
 
 
@@ -38,6 +38,11 @@ app.include_router(
     web_sockets.ws_router,
     prefix= '/ws',
     tags= [TAGS.WEB_SOCKETS]
+)
+app.include_router(
+    config.config_router,
+    prefix= '/config',
+    tags= [TAGS.CONFIG]
 )
 app.include_router(
     images.images_router,
@@ -75,8 +80,7 @@ app.mount('/static', StaticFiles(directory= STATIC_PATH), name='static')
 
 if __name__ == "__main__":
     uvicorn.run(
-        'app.api:app', #TODO: change to app
+        app,
         host=SERVER_IP,
-        port=SERVER_PORT,
-        reload= True #DELETE
+        port=SERVER_PORT
     )

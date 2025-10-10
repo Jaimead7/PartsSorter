@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlmodel import SQLModel
 
-from ..dependencies.server_config import DATABASE_URL
+from ..dependencies.config import DATABASE_URL
 from ..models.database import Image, Model
 from .images import db_delete_image_file
 from .models import db_delete_model_dir

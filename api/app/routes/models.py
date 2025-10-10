@@ -25,7 +25,7 @@ from ..database.models import (db_create_new_model, db_delete_models,
                                db_get_model_model_classes,
                                db_get_model_origins, db_get_models,
                                db_update_model)
-from ..dependencies.server_config import DATABASE_GET_LIMIT
+from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.database import Model, ModelClass, Origin
 from ..models.typing import ModelMetadataDict
 

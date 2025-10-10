@@ -20,10 +20,11 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 import yaml
+from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from typing_extensions import Self
 
-from ..dependencies.server_config import (EXTERNAL_IMAGES_URL,
+from ..dependencies.config import (EXTERNAL_IMAGES_URL,
                                          INTERNAL_IMAGES_FOLDER,
                                          INTERNAL_MODELS_FOLDER)
 from .typing import ModelMetadataDict
@@ -131,10 +132,10 @@ class BaseImage(SQLModel):
         default= '.png'
     )
     processed_date: Optional[datetime] = Field(
-        default_factory= lambda: datetime.now(timezone.utc),
+        default_factory= lambda: datetime.now(timezone.utc).replace(tzinfo=None),
         sa_column= Column(
-            DateTime(),
-            server_default= "CURRENT_TIMESTAMP", #FIXME: On the sql create table this is between ''
+            DateTime(timezone= False),
+            server_default= func.now(), #FIXME: On the sql create table this is between ''
             nullable= False
         )
     )

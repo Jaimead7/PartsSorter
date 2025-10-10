@@ -119,7 +119,7 @@ class CameraManager:
                     continue
                 if new_sensor_value and not last_sensor_val:
                     my_logger.debug('Capturing new image.')
-                    date: datetime = datetime.now(timezone.utc)
+                    date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
                     result: bool = await process_image(self.capture_image(cap))
                     await results_queue.put(
                         Result(
