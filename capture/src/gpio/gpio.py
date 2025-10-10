@@ -16,7 +16,7 @@
 
 from typing import Literal, Optional
 
-from utils.config import GPIO_CHIP, EnvVars, my_logger
+from utils.config import GPIO_CHIP, my_logger
 
 
 class GPIO:
@@ -68,7 +68,7 @@ class GPIO:
     @classmethod
     def get_chip(cls) -> str:
         if GPIO_CHIP is None:
-            msg: str = f'"{EnvVars.GPIO_CHIP.value}" not found in environmental variables.'
+            msg: str = f'"{GPIO_CHIP}" not found in environmental variables.'
             my_logger.error(msg)
             raise ValueError(msg)
         return GPIO_CHIP

@@ -60,7 +60,7 @@
 .info-view {
     padding-left: 2vh;
     gap: 2vh;
-    width: fit-content;
+    overflow: hidden;
 }
 
 .info-view .info-title {

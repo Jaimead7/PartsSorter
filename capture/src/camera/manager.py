@@ -36,6 +36,7 @@ class CameraManager:
     ) -> None:
         atexit.register(self.cleanup)
         self.index = index
+        my_logger.debug(f'Camera {self.index} configured.')
 
     @property
     def index(self) -> int:
@@ -74,6 +75,7 @@ class CameraManager:
         self.set_saturation(cap, props['saturation'])
         self.set_exposure(cap, props['exposure'])
         self.set_wb(cap, props['wb'])
+        my_logger.debug(f'Loaded properties for Camera-{self.index}: {props}.')
 
     def set_width(self, cap: cv2.VideoCapture, value: int) -> None:
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, value)
@@ -112,18 +114,20 @@ class CameraManager:
         last_sensor_val: bool = False
         with self.get_video_capture() as cap:
             await self.load_camera_props(cap)
+            my_logger.info(f'Camera-{self.index} cycle started.')
             while True:
                 await asyncio.sleep(0.001)
                 new_sensor_value: Optional[bool] = GPIO.read(CAMERA_SENSOR_PIN)
                 if new_sensor_value is None:
                     continue
                 if new_sensor_value and not last_sensor_val:
-                    my_logger.debug('Capturing new image.')
+                    my_logger.debug('Capturing new image...')
                     date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
                     result: bool = await process_image(self.capture_image(cap))
-                    await results_queue.put(
-                        Result(
-                            date= date,
-                            result= result
-                        )
+                    queue_result: Result = Result(
+                        date= date,
+                        result= result
                     )
+                    await results_queue.put(queue_result)
+                    my_logger.debug(f'Image captured with {queue_result}.')
+                last_sensor_val = new_sensor_value

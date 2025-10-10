@@ -22,8 +22,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from .database.manager import initDB
-from .dependencies.config import (SERVER_IP, SERVER_PORT, STATIC_PATH,
-                                        TAGS)
+from .dependencies.config import (SERVER_IP, SERVER_PORT, STATIC_PATH, TAGS,
+                                  my_logger)
 from .routes import (config, images, inspection_results, model_classes, models,
                      origin_results, origins, web_sockets)
 
@@ -31,6 +31,7 @@ from .routes import (config, images, inspection_results, model_classes, models,
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await initDB()
+    my_logger.info('Lifespan finished.')
     yield
 
 app = FastAPI(lifespan= lifespan)

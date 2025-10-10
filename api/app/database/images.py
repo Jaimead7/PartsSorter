@@ -14,27 +14,25 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Sequence
 
 import aiofiles
 from fastapi import HTTPException, UploadFile, status
-from pyUtils import ImageFileValidator
+from pyUtils import ImageFileValidator, Styles
 from sqlalchemy import ScalarResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
-from pyUtils import Styles
 
-from ..dependencies.exceptions import StopBlock
 from ..dependencies.config import my_logger
+from ..dependencies.exceptions import StopBlock
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.inspection import ModelsManager
-from ..models.database import (Image, ImageProcessed, InspectionResult, Model,
-                               Origin, OriginResult)
+from ..models.database import (Image, ImageProcessed, InspectionResult, Origin,
+                               OriginResult)
 from .inspection_results import db_get_inspection_result
 from .models import db_get_model_inspection_result
 from .origin_results import db_get_origin_result
@@ -75,20 +73,14 @@ async def db_create_new_image(
             detail= msg
         )
     image: Image = Image(extension= file_ext, origin= origin)
-    save_task: asyncio.Task[Image] = asyncio.create_task(
-        db_save_image(
-            image= image,
-            file= file
-        )
+    await db_save_image(
+        image= image,
+        file= file
     )
-    update_task: asyncio.Task[Image] = asyncio.create_task(
-        _db_add_image(
-            session= session,
-            image= image
-        )
+    db_image: Image = await _db_add_image(
+        session= session,
+        image= image
     )
-    await save_task
-    db_image: Image = await update_task
     return db_image
 
 async def db_update_image(

@@ -26,10 +26,8 @@ from utils.data_types import Result
 
 async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
     last_sensor_val: bool = False
-    new_result: Result = Result(
-        date= datetime.now(timezone.utc).replace(tzinfo=None),
-        result= False
-    )
+    new_result: Optional[Result] = None
+    my_logger.info(f'Actuator cycle started.')
     while True:
         await asyncio.sleep(0.001)
         new_sensor_value: Optional[bool] = GPIO.read(ACTUATOR_SENSOR_PIN)
@@ -38,7 +36,7 @@ async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
         if new_sensor_value and not last_sensor_val:
             my_logger.debug(f'New part on the actuator.')
             now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
-            new_result: Result = Result(
+            new_result = Result(
                 date= now,
                 result= False
             )
@@ -47,13 +45,16 @@ async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
                     new_result = results_queue.get_nowait()
                 except asyncio.QueueEmpty:
                     pass
-                if now - new_result['date'] < timedelta(milliseconds= SENSORS_INTERVAL_MS):
-                    break
-                new_result['result'] = False
+                if new_result is not None:
+                    if now - new_result['date'] < timedelta(milliseconds= SENSORS_INTERVAL_MS):
+                        my_logger.debug(f'New part to push with {new_result}.')
+                        break
+                new_result = None
         if not new_sensor_value and last_sensor_val:
-            if new_result['result']:
-                my_logger.debug(f'Pushing part. {new_result["result"]}')
-            GPIO.write(ACTUATOR_PIN, new_result["result"])
-            await asyncio.sleep(1)
-            GPIO.write(ACTUATOR_PIN, False)
+            my_logger.debug(f'Part to be pushed with result {new_result}.')
+            if new_result is not None:
+                GPIO.write(ACTUATOR_PIN, new_result["result"])
+                await asyncio.sleep(1)
+                GPIO.write(ACTUATOR_PIN, False)
+            new_result = None
         last_sensor_val = new_sensor_value

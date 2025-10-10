@@ -14,7 +14,7 @@ async def get_camera_props() -> CameraProps:
             url= f'http://{API_IP}/origin/{ORIGIN_NAME}/camera-prop'
         )
     if response.status_code // 100 != 2:
-        msg: str = f'Could not obtain the camera properties of "{API_IP}". {response.status_code}.'
+        msg: str = f'Could not obtain the camera properties of "{API_IP}". {response}.'
         my_logger.error(msg)
         raise RuntimeError(msg)
     return CameraProps(response.json())
@@ -37,4 +37,5 @@ async def process_image(image: Optional[np.ndarray]) -> bool:
             },
             timeout= httpx.Timeout(timeout= 10.0)
         )
+        my_logger.debug(f'Response from server: {response}')
     return bool(response.json()['result'])

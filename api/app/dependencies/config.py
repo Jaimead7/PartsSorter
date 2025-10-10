@@ -15,10 +15,10 @@
 
 
 import logging
+import socket
 from enum import Enum
 from os import getenv
 from pathlib import Path
-import socket
 
 from pyUtils import (MyLogger, ProjectPathsDict, save_pyutils_logs,
                      set_pyutils_logging_level, set_pyutils_logs_path)
@@ -82,8 +82,10 @@ SERVER_PORT: int = int(getenv(EnvVars.SERVER_PORT.value, 8000))
 HOST_IP: str = getenv(EnvVars.HOST_IP.value, 'localhost')
 STATIC_PATH: Path = MY_APP[ProjectPathsDict.DIST_PATH]
 INTERNAL_IMAGES_FOLDER: Path = MY_APP['images']
-EXTERNAL_IMAGES_URL: str = f'http://{HOST_IP}:{SERVER_PORT}/{(Path("static") / "images").as_posix()}/'
+_static_images_path: str = (Path("static") / MY_APP['images'].relative_to(MY_APP[ProjectPathsDict.DIST_PATH])).as_posix()
+EXTERNAL_IMAGES_URL: str = f'http://{HOST_IP}:{SERVER_PORT}/{_static_images_path}/'
 INTERNAL_MODELS_FOLDER: Path = MY_APP['models']
-EXTERNAL_MODELS_URL: str = f'http://{HOST_IP}:{SERVER_PORT}/{(Path("static") / "models").as_posix()}/'
+_static_models_path: str = (Path("static") / MY_APP['models'].relative_to(MY_APP[ProjectPathsDict.DIST_PATH])).as_posix()
+EXTERNAL_MODELS_URL: str = f'http://{HOST_IP}:{SERVER_PORT}/{_static_models_path}/'
 DATABASE_URL: str = getenv(EnvVars.DATABASE_URL.value, 'sqlite+aiosqlite:///./database.db')
 DATABASE_GET_LIMIT = int(getenv(EnvVars.DATABASE_GET_LIMIT.value, 50))
