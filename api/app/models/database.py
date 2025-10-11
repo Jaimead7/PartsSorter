@@ -24,9 +24,8 @@ from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from typing_extensions import Self
 
-from ..dependencies.config import (EXTERNAL_IMAGES_URL,
-                                         INTERNAL_IMAGES_FOLDER,
-                                         INTERNAL_MODELS_FOLDER)
+from ..dependencies.config import (EXTERNAL_IMAGES_URL, INTERNAL_IMAGES_FOLDER,
+                                   INTERNAL_MODELS_FOLDER)
 from .typing import ModelMetadataDict
 
 
@@ -135,7 +134,7 @@ class BaseImage(SQLModel):
         default_factory= lambda: datetime.now(timezone.utc).replace(tzinfo=None),
         sa_column= Column(
             DateTime(timezone= False),
-            server_default= func.now(), #FIXME: On the sql create table this is between ''
+            server_default= func.now(),
             nullable= False
         )
     )
