@@ -58,12 +58,14 @@ async def update_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     uuid: Annotated[UUID, Path()],
     inspection_result: Annotated[Optional[str], Body()] = None,
-    origin: Annotated[Optional[str], Body()] = None
+    origin: Annotated[Optional[str], Body()] = None,
+    true_result: Annotated[Optional[str], Body()] = None
 ) -> Image:
     image = Image(
         id= uuid,
         inspection_result= inspection_result,
-        origin= origin
+        origin= origin,
+        true_result= true_result
     )
     return await db_update_image(
         session= session,

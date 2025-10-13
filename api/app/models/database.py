@@ -40,7 +40,12 @@ class InspectionResult(SQLModel, table= True):
     )
 
     images_of_result: Optional[list["Image"]] = Relationship(
-        back_populates= 'result_of_image'
+        back_populates= 'result_of_image',
+        sa_relationship_kwargs=dict(foreign_keys="[Image.inspection_result]")
+    )
+    images_of_true_result: Optional[list["Image"]] = Relationship(
+        back_populates= 'true_result_of_image',
+        sa_relationship_kwargs=dict(foreign_keys="[Image.true_result]")
     )
     model_classes_of_result: Optional[list['ModelClass']] = Relationship(
         back_populates= 'result_of_model_class'
@@ -150,6 +155,12 @@ class BaseImage(SQLModel):
         foreign_key= 'origins.name',
         ondelete= 'SET NULL'
     )
+    true_result: Optional[str] = Field(
+        default= None,
+        nullable= True,
+        foreign_key= 'inspection_results.name',
+        ondelete= 'SET NULL'
+    )
 
     @property
     def file_name(self) -> str:
@@ -177,7 +188,12 @@ class Image(BaseImage, table= True):
     __tablename__: str = 'images' # type: ignore
 
     result_of_image: Optional['InspectionResult'] = Relationship(
-        back_populates= 'images_of_result'
+        back_populates= 'images_of_result',
+        sa_relationship_kwargs=dict(foreign_keys="[Image.inspection_result]")
+    )
+    true_result_of_image: Optional['InspectionResult'] = Relationship(
+        back_populates= 'images_of_true_result',
+        sa_relationship_kwargs=dict(foreign_keys="[Image.true_result]")
     )
     origin_of_image: Optional['Origin'] = Relationship(
         back_populates= 'images_of_origin'

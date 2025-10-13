@@ -103,6 +103,17 @@ async def db_update_image(
     except HTTPException:
         ...
     try:
+        if image.true_result is not None:
+            await db_get_inspection_result(
+                session= session,
+                inspection_result= InspectionResult(
+                    name= image.true_result
+                )
+            )
+        db_image.true_result = image.true_result
+    except HTTPException:
+        ...
+    try:
         if image.origin is not None:
             await db_get_origin(
                 session= session,
@@ -110,7 +121,7 @@ async def db_update_image(
                     name= image.origin
                 )
             )
-        db_image.inspection_result = image.inspection_result
+        db_image.origin = image.origin
     except HTTPException:
         ...
     db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
