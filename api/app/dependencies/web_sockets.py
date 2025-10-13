@@ -40,12 +40,16 @@ class ImageStreamSocketManager(NoInstantiable):
         cls,
         image_url: str,
         insp_result: Optional[str],
-        origin: Optional[str]
+        origin: Optional[str],
+        true_result: Optional[str],
+        trust: Optional[float]
     ) -> None:
         response: ImageStreamResponse = ImageStreamResponse.factory(
             image_url= image_url,
             insp_result= insp_result,
-            origin= origin
+            origin= origin,
+            true_result= true_result,
+            trust= trust
         )
         for socket in cls._active_sockets:
             try:

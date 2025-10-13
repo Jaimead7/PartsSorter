@@ -27,7 +27,7 @@ from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.database import Image, ImageProcessed
 
-images_router = APIRouter()
+images_router: APIRouter = APIRouter()
 
 @images_router.post(
     '/',
@@ -59,13 +59,15 @@ async def update_image(
     uuid: Annotated[UUID, Path()],
     inspection_result: Annotated[Optional[str], Body()] = None,
     origin: Annotated[Optional[str], Body()] = None,
-    true_result: Annotated[Optional[str], Body()] = None
+    true_result: Annotated[Optional[str], Body()] = None,
+    trust: Annotated[Optional[float], Body()] = None 
 ) -> Image:
     image = Image(
         id= uuid,
         inspection_result= inspection_result,
         origin= origin,
-        true_result= true_result
+        true_result= true_result,
+        trust= trust
     )
     return await db_update_image(
         session= session,

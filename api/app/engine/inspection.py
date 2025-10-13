@@ -48,25 +48,25 @@ class ModelsManager(NoInstantiable):
         cls,
         db_image: Image,
         model_name: str
-    ) -> Optional[int]:
+    ) -> tuple[Optional[int], Optional[float]]:
         model: YOLO = cls.get_model(model_name)
-        return await cls.get_best_result_class_n(model(db_image.internal_absolute_path)[0])
+        return await cls.get_best_result(model(db_image.internal_absolute_path)[0])
 
     @staticmethod
-    async def get_best_result_class_n(
+    async def get_best_result(
         results: Results
-    ) -> Optional[int]:
+    ) -> tuple[Optional[int], Optional[float]]:
         if results.boxes is None:
-            return None
+            return (None, None)
         if isinstance(results.boxes.data, Tensor):
             results_array: np.ndarray = results.boxes.data.numpy()
         else:
             results_array = results.boxes.data
         if len(results_array) == 0:
-            return None
+            return (None, None)
         best: np.ndarray = results_array[0]
         #result = np.ndarray(x0, y0, x1, y1, conf, obj_n)
         for result in results_array:
             if result[-2] > best[-2]:
                 best = result
-        return int(best[-1])
+        return (int(best[-1]), float(best[-2]))

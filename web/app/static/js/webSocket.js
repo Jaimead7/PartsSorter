@@ -55,7 +55,9 @@ function connectWebSocket(url) {
                     data.origin,
                     "live-img-origin",
                     data.insp_result,
-                    "live-img-type"
+                    "live-img-type",
+                    (data.trust * 100).toFixed(2) + '%',
+                    "live-img-trust"
                 )
         }
     };
@@ -96,13 +98,13 @@ function clearImages() {
         img.src = "";
         img.hidden = true;
         document.getElementById(`hist-img-${i}-span`).hidden = false;
-        clearImageInfo(`img-hist-origin-${i}`, `img-hist-type-${i}`)
+        clearImageInfo(`img-hist-origin-${i}`, `img-hist-type-${i}`, `img-hist-trust-${i}`)
     }
     img = document.getElementById("live-img");
     img.src = "";
     img.hidden = true;
     document.getElementById("live-img-span").hidden = false;
-    clearImageInfo("live-img-origin", "live-img-type")
+    clearImageInfo("live-img-origin", "live-img-type", "live-img-trust")
 }
 
 function transferImages() {
@@ -110,10 +112,12 @@ function transferImages() {
         transferImage(`hist-img-${i-1}`, `hist-img-${i}`);
         transferText(`img-hist-origin-${i-1}`, `img-hist-origin-${i}`);
         transferText(`img-hist-type-${i-1}`, `img-hist-type-${i}`);
+        transferText(`img-hist-trust-${i-1}`, `img-hist-trust-${i}`);
     }
     transferImage("live-img", "hist-img-1");
     transferText("live-img-origin", "img-hist-origin-1");
     transferText("live-img-type", "img-hist-type-1");
+    transferText("live-img-trust", "img-hist-trust-1");
 }
 
 function transferImage(idOrigin, idDestiny) {
@@ -128,9 +132,10 @@ function transferText(idOrigin, idDestiny) {
     document.getElementById(idDestiny).textContent = document.getElementById(idOrigin).textContent;
 }
 
-function writeImageInfo(origin, originElementName, type, typeElementName) {
+function writeImageInfo(origin, originElementName, type, typeElementName, trust, trustElementName) {
     document.getElementById(originElementName).innerText = origin
     document.getElementById(typeElementName).innerText = type
+    document.getElementById(trustElementName).innerText = trust
 }
 
 function clearImageInfo(originElementName, typeElementName) {
@@ -141,6 +146,10 @@ function clearImageInfo(originElementName, typeElementName) {
     const typeElement = document.getElementById(typeElementName);
     if (typeElement) {
         typeElement.innerText = typeElement.getAttribute("data-default-text")
+    }
+    const trustElement = document.getElementById(trustElementName);
+    if (trustElement) {
+        trustElement.innerText = typeEtrustElementlement.getAttribute("data-default-text")
     }
 }
 

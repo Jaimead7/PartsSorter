@@ -161,6 +161,10 @@ class BaseImage(SQLModel):
         foreign_key= 'inspection_results.name',
         ondelete= 'SET NULL'
     )
+    trust: Optional[float] = Field(
+        default= None,
+        nullable= True
+    )
 
     @property
     def file_name(self) -> str:
@@ -215,6 +219,8 @@ class ImageProcessed(BaseImage):
             processed_date= image.processed_date,
             inspection_result= image.inspection_result,
             origin= image.origin,
+            true_result= image.true_result,
+            trust= image.trust,
             result= result if result is not None else False
         )
 

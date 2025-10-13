@@ -124,6 +124,7 @@ async def db_update_image(
         db_image.origin = image.origin
     except HTTPException:
         ...
+    db_image.trust = image.trust
     db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     return await _db_add_image(
         session= session,
@@ -232,7 +233,9 @@ async def db_process_new_image(
             raise StopBlock
         if db_origin.model is None:
             raise StopBlock
-        result: Optional[int] = await ModelsManager.inspect(
+        result: Optional[int]
+        trust: Optional[float]
+        result, trust = await ModelsManager.inspect(
             db_image= db_image,
             model_name= db_origin.model
         )
@@ -249,6 +252,7 @@ async def db_process_new_image(
         if inpection_result is None:
             raise StopBlock
         db_image.inspection_result = inpection_result.name
+        db_image.trust = trust
         db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
         db_image = await _db_add_image(
             session= session,
@@ -274,6 +278,8 @@ async def db_process_new_image(
     await ImageStreamSocketManager.broadcast_new_result(
         image_url= db_image.external_url,
         insp_result= db_image.inspection_result,
-        origin= db_image.origin
+        origin= db_image.origin,
+        true_result= db_image.true_result,
+        trust= db_image.trust
     )
     return image_processed

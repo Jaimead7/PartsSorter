@@ -30,16 +30,22 @@ class ImageStreamResponse(BaseModel):
     image_url: str
     insp_result: str =  'No result'
     origin: str = 'Unknown'
+    true_result: str = 'No result'
+    trust: Optional[float] = None
 
     @classmethod
     def factory(
         cls,
         image_url: str,
         insp_result: Optional[str],
-        origin: Optional[str]
+        origin: Optional[str],
+        true_result: Optional[str],
+        trust: Optional[float]
     ) -> Self:
         return cls(
             image_url= image_url,
             insp_result= insp_result if insp_result is not None else 'No result',
-            origin= origin if origin is not None else 'Unknown'
+            origin= origin if origin is not None else 'Unknown',
+            true_result= true_result if true_result is not None else 'No result',
+            trust= trust
         )
