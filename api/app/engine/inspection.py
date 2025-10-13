@@ -16,6 +16,7 @@
 
 from typing import Optional
 
+import cv2
 import numpy as np
 from pyUtils import NoInstantiable
 from torch import Tensor
@@ -50,7 +51,15 @@ class ModelsManager(NoInstantiable):
         model_name: str
     ) -> tuple[Optional[int], Optional[float]]:
         model: YOLO = cls.get_model(model_name)
-        return await cls.get_best_result(model(db_image.internal_absolute_path)[0])
+        raw_img: Optional[np.ndarray] = cv2.imread(str(db_image.internal_absolute_path))
+        if raw_img is None:
+            return (None, None)
+        scale_img: np.ndarray = cv2.resize(
+            raw_img,
+            (640, 640),
+            interpolation= cv2.INTER_LINEAR
+        )
+        return await cls.get_best_result(model(scale_img)[0])
 
     @staticmethod
     async def get_best_result(
