@@ -83,6 +83,25 @@ services:
     networks:
       - api-network
 
+  capture:
+    build:
+      context: ./capture
+      dockerfile: Dockerfile
+    container_name: capture
+    restart: unless-stopped
+    depends_on:
+      - api
+    env_file:
+      - path: ./capture/.env.docker
+        required: true
+    volumes:
+      - logs-volume:/app/dist/logs
+    networks:
+      - api-network
+    devices:
+      - "${GPIO_DEVICE:-/dev/gpiochip4}:/dev/gpiochip4"
+      - "${CAMERA_DEVICE:-/dev/video0}:/dev/video0"
+
 
 volumes:
   postgres-volume:

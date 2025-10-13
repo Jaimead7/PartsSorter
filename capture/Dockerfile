@@ -14,11 +14,35 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-DATASETS_VOLUME_PATH="/mnt/shared/datasets"
-MODELS_VOLUME_PATH="/mnt/shared/models"
-IMAGES_VOLUME_PATH="/mnt/shared/images"
-LOGS_VOLUME_PATH="/mnt/shared/logs"
-LABEL_STUDIO_VOLUME_PATH="/mnt/shared/label-studio"
-POSTGRES_VOLUME_PATH="/mnt/shared/postgres"
-GPIO_DEVICE="/dev/gpiochip4"
-CAMERA_DEVICE="/dev/video0"
+## ---------------------------- Builder Stage --------------------------- ##
+FROM python:3.13.8-slim AS builder
+
+# Set the working directory
+WORKDIR /app
+
+# Copy project files
+COPY ./pyproject.toml ./pyproject.toml
+
+# Setup uv
+COPY --from=ghcr.io/astral-sh/uv:0.6.16 /uv /uvx /bin/
+
+# Install dependencies
+RUN uv sync
+
+## ---------------------------- Production Stage --------------------------- ##
+FROM python:3.13.8-slim AS production
+
+# Set the working directory
+WORKDIR /app
+
+# Copy dependencies
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy project files
+COPY . .
+
+# Set up environment variables for production
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Run the app
+CMD ["python3.13", "./src/main.py"]

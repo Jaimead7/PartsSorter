@@ -20,30 +20,30 @@ from os import getenv
 from pathlib import Path
 from typing import Optional
 
-from dotenv import load_dotenv
-from pyUtils import (ConfigFileManager, MyLogger, ProjectPathsDict,
-                     save_pyutils_logs, set_pyutils_logging_level,
-                     set_pyutils_logs_path)
+from pyUtils import (MyLogger, ProjectPathsDict, save_pyutils_logs,
+                     set_pyutils_logging_level, set_pyutils_logs_path)
 
 
 class EnvVars(Enum):
     ORIGIN_NAME = 'ORIGIN_NAME'
     API_IP = 'API_IP'
     LOGGING_LVL = 'LOGGING_LVL'
+    ACTUATOR_PIN = 'ACTUATOR_PIN'
+    CAMERA_SENSOR_PIN = 'CAMERA_SENSOR_PIN'
+    ACTUATOR_SENSOR_PIN = 'ACTUATOR_SENSOR_PIN'
+    SENSORS_DISTANCE = 'SENSORS_DISTANCE'
+    TAPE_SPEED = 'TAPE_SPEED'
 
 
 # APP
 MY_APP: ProjectPathsDict = ProjectPathsDict().set_app_path(Path(__file__).parents[2])
 MY_APP[ProjectPathsDict.DIST_PATH] = MY_APP[ProjectPathsDict.APP_PATH] / 'dist'
-MY_APP[ProjectPathsDict.CONFIG_PATH] = MY_APP[ProjectPathsDict.DIST_PATH] / 'config'
-MY_APP[ProjectPathsDict.CONFIG_FILE_PATH] = MY_APP[ProjectPathsDict.CONFIG_PATH] / 'config.toml'
-MY_CFG: ConfigFileManager = ConfigFileManager(MY_APP[ProjectPathsDict.CONFIG_FILE_PATH])
 
 # LOGGING
 LOGGING_LVL: int = MyLogger.get_logging_lvl_from_env(EnvVars.LOGGING_LVL.value)
 
 my_logger = MyLogger(
-    logger_name= f'CaptureApp',
+    logger_name= f'Capture',
     logging_level= LOGGING_LVL
 )
 
@@ -60,16 +60,12 @@ def set_capture_app_logging_level(lvl: int = logging.DEBUG) -> None:
     set_pyutils_logging_level(lvl)
 
 set_capture_app_logging_level(logging.WARNING)
-set_capture_app_logs_path('captureApp.log')
+set_capture_app_logs_path('capture.log')
 set_capture_app_logging_level(LOGGING_LVL)
 save_capture_app_logs(True)
 
 
 # ENV VARS
-load_dotenv(
-    dotenv_path= MY_APP[ProjectPathsDict.DIST_PATH] / '.env',
-    override= False
-)
 _env_aux: Optional[str] = getenv(EnvVars.ORIGIN_NAME.value, None)
 if _env_aux is None:
     msg: str = f'Could not import "{EnvVars.ORIGIN_NAME.value}" from env vars.'
@@ -85,11 +81,38 @@ API_IP: Optional[str] = getenv(EnvVars.API_IP.value, None)
 del(_env_aux)
 
 # CONFIG
-CAMERA_INDEX: int = int(MY_CFG.camera.index)
-GPIO_CHIP: str = str(MY_CFG.gpio.chip)
-ACTUATOR_PIN: int = int(MY_CFG.gpio.actuator_pin)
-CAMERA_SENSOR_PIN: int = int(MY_CFG.gpio.camera_sensor_pin)
-ACTUATOR_SENSOR_PIN: int = int(MY_CFG.gpio.actuator_sensor_pin)
-_SENSORS_DISTANCE: float = float(MY_CFG.calibration.sensors_distance)
-_TAPE_SPEED: float = float(MY_CFG.calibration.tape_speed)
+CAMERA_INDEX: int = 0
+GPIO_CHIP: str = '/dev/gpiochip4'
+_env_aux: Optional[str] = getenv(EnvVars.ACTUATOR_PIN.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.ACTUATOR_PIN.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+ACTUATOR_PIN: int = int(_env_aux)
+_env_aux: Optional[str] = getenv(EnvVars.CAMERA_SENSOR_PIN.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.CAMERA_SENSOR_PIN.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+CAMERA_SENSOR_PIN: int = int(_env_aux)
+_env_aux: Optional[str] = getenv(EnvVars.ACTUATOR_SENSOR_PIN.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.ACTUATOR_SENSOR_PIN.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+ACTUATOR_SENSOR_PIN: int = int(_env_aux)
+#TODO: change to variables readed from api
+_env_aux: Optional[str] = getenv(EnvVars.SENSORS_DISTANCE.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.SENSORS_DISTANCE.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+_SENSORS_DISTANCE: float = float(_env_aux)
+_env_aux: Optional[str] = getenv(EnvVars.TAPE_SPEED.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.TAPE_SPEED.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+_TAPE_SPEED: float = float(_env_aux)
+
 SENSORS_INTERVAL_MS: float = (_SENSORS_DISTANCE / _TAPE_SPEED)*1000

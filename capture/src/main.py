@@ -14,17 +14,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-#---------- LOAD ENV VARIABLES FIRST ----------#
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-load_dotenv(
-    Path(__file__).parents[1] / '.env',
-    override= False
-)
-#---------------------------------------------#
-
 import asyncio
 
 from actuator import actuator_cycle
