@@ -274,6 +274,10 @@ class OriginResult(SQLModel, table= True):
         default= False,
         nullable= False
     )
+    threshold: float = Field(
+        default= 0.5,
+        nullable= False
+    )
 
     origin_of_origin_result: Optional['Origin'] = Relationship(
         back_populates= 'origin_results_of_origin'

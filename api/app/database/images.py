@@ -261,6 +261,7 @@ async def db_process_new_image(
     except StopBlock:
         pass
     image_processed: ImageProcessed = ImageProcessed.factory(image= db_image)
+    image_processed.result = False
     if db_image.origin is not None and db_image.inspection_result is not None:
         try:
             db_origin_result: OriginResult = await db_get_origin_result(
@@ -271,10 +272,10 @@ async def db_process_new_image(
                 )
             )
             image_processed.result = db_origin_result.result
+            if db_image.trust is not None and db_origin_result.threshold >= db_image.trust:
+                image_processed.result = True
         except HTTPException:
-            image_processed.result = False
-    else:
-        image_processed.result = False
+            pass
     await ImageStreamSocketManager.broadcast_new_result(
         image_url= db_image.external_url,
         insp_result= db_image.inspection_result,

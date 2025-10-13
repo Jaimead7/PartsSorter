@@ -60,6 +60,7 @@ async def db_update_origin_result(
         origin_result= origin_result
     )
     db_origin_result.inspection_result = origin_result.inspection_result
+    db_origin_result.threshold = origin_result.threshold
     session.add(db_origin_result)
     await session.commit()
     await session.refresh(db_origin_result)

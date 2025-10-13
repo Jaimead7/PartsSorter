@@ -57,14 +57,16 @@ async def update_origin_result(
     session: Annotated[AsyncSession, Depends(get_session)],
     origin: Annotated[str, Path()],
     inspection_result: Annotated[str, Path()],
-    result: Annotated[bool, Body()]
+    result: Annotated[bool, Body()],
+    threshold: Annotated[float, Body()]
 ) -> OriginResult:
     return await db_update_origin_result(
         session= session,
         origin_result= OriginResult(
             origin= origin,
             inspection_result= inspection_result,
-            result= result
+            result= result,
+            threshold= threshold
         )
     )
 
