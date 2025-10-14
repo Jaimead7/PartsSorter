@@ -101,18 +101,3 @@ if _env_aux is None:
     my_logger.critical(f'ImportError: {msg}')
     raise ImportError(msg)
 ACTUATOR_SENSOR_PIN: int = int(_env_aux)
-#TODO: change to variables readed from api
-_env_aux: Optional[str] = getenv(EnvVars.SENSORS_DISTANCE.value, None)
-if _env_aux is None:
-    msg: str = f'Could not import "{EnvVars.SENSORS_DISTANCE.value}" from env vars.'
-    my_logger.critical(f'ImportError: {msg}')
-    raise ImportError(msg)
-_SENSORS_DISTANCE: float = float(_env_aux)
-_env_aux: Optional[str] = getenv(EnvVars.TAPE_SPEED.value, None)
-if _env_aux is None:
-    msg: str = f'Could not import "{EnvVars.TAPE_SPEED.value}" from env vars.'
-    my_logger.critical(f'ImportError: {msg}')
-    raise ImportError(msg)
-_TAPE_SPEED: float = float(_env_aux)
-
-SENSORS_INTERVAL_MS: float = (_SENSORS_DISTANCE / _TAPE_SPEED)*1000

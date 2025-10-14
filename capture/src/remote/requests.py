@@ -19,7 +19,7 @@ async def get_camera_params() -> CameraParams:
         raise RuntimeError(msg)
     return CameraParams(response.json())
 
-async def get_origin_actuator_params() -> ActuatorParams:
+async def get_actuator_params() -> ActuatorParams:
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.get(
             url= f'http://{API_IP}/origin/{ORIGIN_NAME}/params'

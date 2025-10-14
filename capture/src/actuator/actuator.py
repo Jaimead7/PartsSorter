@@ -19,14 +19,20 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from gpio.gpio import GPIO
-from utils.config import (ACTUATOR_PIN, ACTUATOR_SENSOR_PIN,
-                          SENSORS_INTERVAL_MS, my_logger)
+from remote.models import ActuatorParams
+from remote.requests import get_actuator_params
+from utils.config import ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, my_logger
 from utils.data_types import Result
 
+
+async def get_sensors_interval_ms() -> float:
+    params: ActuatorParams = await get_actuator_params()
+    return (params['sensors_distance'] / params['tape_speed'])*1000
 
 async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
     last_sensor_val: bool = False
     new_result: Optional[Result] = None
+    SENSORS_INTERVAL_MS: float = await get_sensors_interval_ms()
     my_logger.info(f'Actuator cycle started.')
     while True:
         await asyncio.sleep(0.001)
