@@ -14,6 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+from enum import Enum
 from typing import Optional
 
 import cv2
@@ -24,6 +25,13 @@ from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
 from ..models.database import Image, Model
+
+
+class ModelTasks(Enum):
+    DETECT = 'detect'
+    SEGMENT = 'segment'
+    CLASSIFY = 'classify'
+    POSE = 'pose'
 
 
 class ModelsManager(NoInstantiable):
@@ -39,7 +47,7 @@ class ModelsManager(NoInstantiable):
         except KeyError:
             model = YOLO(
                 Model(name= model_name).internal_absolute_ncnn_path,
-                task= 'detect'
+                task= ModelTasks.DETECT.value
             )
             cls.models[model_name] = model
         return model

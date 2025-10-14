@@ -15,16 +15,8 @@
 
 
 from datetime import datetime
-from enum import Enum
 
 from typing_extensions import TypedDict
-
-
-class ModelTasks(Enum):
-    DETECT = 'detect'
-    SEGMENT = 'segment'
-    CLASSIFY = 'classify'
-    POSE = 'pose'
 
 
 class DatasetDataDict(TypedDict):

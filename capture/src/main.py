@@ -28,7 +28,8 @@ async def main() -> None:
     my_logger.info('Capture starting...')
     await asyncio.gather(
         my_camera.cycle(results_queue),
-        actuator_cycle(results_queue)
+        actuator_cycle(results_queue),
+        return_exceptions= False
     )
     my_logger.info('Capture stopping...')
 

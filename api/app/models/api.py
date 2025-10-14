@@ -46,7 +46,6 @@ class CameraParams(BaseModel):
 
 
 class ImageStreamResponse(BaseModel):
-    """Model for broadcast new image"""
     type: str = 'new-image'
     image_url: str
     insp_result: str =  'No result'

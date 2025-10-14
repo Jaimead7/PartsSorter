@@ -23,8 +23,8 @@ from typing import Any, Generator, NoReturn, Optional
 import cv2
 import numpy as np
 from gpio import GPIO
-from remote.models import CameraProps
-from remote.requests import get_camera_props, process_image
+from remote.models import CameraParams
+from remote.requests import get_camera_params, process_image
 from utils.config import CAMERA_SENSOR_PIN, my_logger
 from utils.data_types import Result
 
@@ -67,14 +67,16 @@ class CameraManager:
             my_logger.debug(f'Camera {self.index} cleared.')
 
     async def load_camera_props(self, cap: cv2.VideoCapture) -> None:
-        props: CameraProps = await get_camera_props()
+        props: CameraParams = await get_camera_params()
         self.set_width(cap, props['camera_width'])
         self.set_height(cap, props['camera_height'])
         self.set_brightness(cap, props['brightness'])
         self.set_contrast(cap, props['contrast'])
         self.set_saturation(cap, props['saturation'])
         self.set_exposure(cap, props['exposure'])
+        self.set_auto_exposure(cap, props['auto_exposure'])
         self.set_wb(cap, props['wb'])
+        self.set_auto_wb(cap, props['auto_wb'])
         my_logger.debug(f'Loaded properties for Camera-{self.index}: {props}.')
 
     def set_width(self, cap: cv2.VideoCapture, value: int) -> None:
@@ -95,8 +97,14 @@ class CameraManager:
     def set_exposure(self, cap: cv2.VideoCapture, value: int) -> None:
         cap.set(cv2.CAP_PROP_EXPOSURE, value)
 
+    def set_auto_exposure(self, cap: cv2.VideoCapture, value: int) -> None:
+        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, value)
+
     def set_wb(self, cap: cv2.VideoCapture, value: int) -> None:
         cap.set(cv2.CAP_PROP_WB_TEMPERATURE, value)
+
+    def set_auto_wb(self, cap: cv2.VideoCapture, value: int) -> None:
+        cap.set(cv2.CAP_PROP_AUTO_WB, value)
 
     def capture_image(self, cap: cv2.VideoCapture) -> Optional[np.ndarray]:
         ret: bool
