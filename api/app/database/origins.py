@@ -88,7 +88,6 @@ async def db_delete_origins(
     session: AsyncSession,
     origins: list[Origin]
 ) -> None:
-    #FIXME: origin_results fk blocks
     db_origins: Sequence[Origin] = await db_get_origins(
         session= session,
         origins= origins,

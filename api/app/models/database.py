@@ -53,7 +53,10 @@ class InspectionResult(SQLModel, table= True):
         back_populates= 'result_of_model_class'
     )
     origin_results_of_result: Optional[list['OriginResult']] = Relationship(
-        back_populates= 'result_of_origin_result'
+        back_populates= 'result_of_origin_result',
+        sa_relationship_kwargs= {
+            "cascade": "all, delete",
+        }
     )
 
 
@@ -80,7 +83,10 @@ class Origin(SQLModel, table= True):
         back_populates= 'origin_of_image'
     )
     origin_results_of_origin: Optional[list['OriginResult']] = Relationship(
-        back_populates= 'origin_of_origin_result'
+        back_populates= 'origin_of_origin_result',
+        sa_relationship_kwargs= {
+            "cascade": "all, delete",
+        }
     )
     model_of_origin: Optional['Model'] = Relationship(
         back_populates= 'origins_of_model',
