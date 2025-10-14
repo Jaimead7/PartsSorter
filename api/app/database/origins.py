@@ -14,19 +14,20 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 
 from fastapi import HTTPException, status
 from pyUtils import Styles
 from sqlalchemy import ScalarResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.attributes import flag_modified
 from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import my_logger
+from ..models.api import CameraParams
 from ..models.database import Image, Model, Origin, OriginResult
-from ..models.typing import CameraProps
 from .models import db_get_model
 
 
@@ -46,10 +47,14 @@ async def db_create_new_origin(
     except HTTPException:
         ...
     if origin.model is not None:
-        await db_get_model(
+        db_model: Model = await db_get_model(
             session= session,
             model= Model(name= origin.model)
         )
+        params: CameraParams = CameraParams.from_dict(dict(db_model.model_metadata))
+        if origin.params is None:
+            origin.params = dict(params)
+        origin.params.update(params)
     session.add(origin)
     await session.commit()
     await session.refresh(origin)
@@ -73,6 +78,7 @@ async def db_update_origin(
             model= Model(name= origin.model)
         )
     db_origin.model = origin.model
+    db_origin.params = origin.params
     session.add(db_origin)
     await session.commit()
     await session.refresh(db_origin)
@@ -82,6 +88,7 @@ async def db_delete_origins(
     session: AsyncSession,
     origins: list[Origin]
 ) -> None:
+    #FIXME: origin_results fk blocks
     db_origins: Sequence[Origin] = await db_get_origins(
         session= session,
         origins= origins,
@@ -184,24 +191,69 @@ async def db_get_origin_origin_result(
         return None
     return db_origin.origin_results_of_origin[offset:offset+limit]
 
-async def db_get_origin_camera_props(
+async def db_get_origin_camera_params(
     session: AsyncSession,
     origin_name: str,
-) -> CameraProps:
+) -> CameraParams:
     db_origin: Origin = await db_get_origin(
         session= session,
         origin= Origin(name= origin_name)
     )
-    await session.refresh(
-        db_origin,
-        attribute_names= ['model_of_origin']
-    )
-    db_model: Optional[Model] = db_origin.model_of_origin
-    if db_model is None:
-        msg: str = f'Origin("{db_origin.name}") don\'t have model.'
+    if db_origin.params is None:
+        msg: str = f'Origin("{origin_name}") params not found.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_404_NOT_FOUND,
             detail= msg
         )
-    return db_model.model_metadata
+    return CameraParams.from_dict(db_origin.params)
+
+async def db_get_origin_params(
+    session: AsyncSession,
+    origin_name: str,
+) -> dict[str, Any]:
+    db_origin: Origin = await db_get_origin(
+        session= session,
+        origin= Origin(name= origin_name)
+    )
+    if db_origin.params is None:
+        msg: str = f'Origin("{origin_name}") params not found.'
+        my_logger.error(msg)
+        raise HTTPException(
+            status_code= status.HTTP_404_NOT_FOUND,
+            detail= msg
+        )
+    return db_origin.params
+
+async def db_update_origin_params(
+    session: AsyncSession,
+    origin_name: str,
+    params: Optional[dict[str, Any]]
+) -> Origin:
+    db_origin: Origin = await db_get_origin(
+        session= session,
+        origin= Origin(name= origin_name)
+    )
+    if db_origin.params is None:
+        db_origin.params = params
+    elif params is not None:
+        db_origin.params.update(params)
+        flag_modified(db_origin, 'params')
+    session.add(db_origin)
+    await session.commit()
+    await session.refresh(db_origin)
+    return db_origin
+
+async def db_delete_origin_params(
+    session: AsyncSession,
+    origin_name: str,
+) -> Origin:
+    db_origin: Origin = await db_get_origin(
+        session= session,
+        origin= Origin(name= origin_name)
+    )
+    db_origin.params = None
+    session.add(db_origin)
+    await session.commit()
+    await session.refresh(db_origin)
+    return db_origin

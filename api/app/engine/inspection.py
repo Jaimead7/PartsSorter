@@ -54,6 +54,7 @@ class ModelsManager(NoInstantiable):
         raw_img: Optional[np.ndarray] = cv2.imread(str(db_image.internal_absolute_path))
         if raw_img is None:
             return (None, None)
+        #TODO: use model metadata filters
         scale_img: np.ndarray = cv2.resize(
             raw_img,
             (640, 640),

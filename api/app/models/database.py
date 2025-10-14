@@ -16,10 +16,12 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID, uuid4
 
 import yaml
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from typing_extensions import Self
@@ -68,6 +70,10 @@ class Origin(SQLModel, table= True):
         nullable= True,
         foreign_key= 'models.name',
         ondelete= 'SET NULL'
+    )
+    params: Optional[dict[str, Any]] = Field(
+        default= None,
+        sa_type= JSONB  #TODO: Change to work with sqlite
     )
 
     images_of_origin: Optional[list['Image']] = Relationship(

@@ -11,10 +11,10 @@ from .models import CameraProps
 async def get_camera_props() -> CameraProps:
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.get(
-            url= f'http://{API_IP}/origin/{ORIGIN_NAME}/camera-prop'
+            url= f'http://{API_IP}/origin/{ORIGIN_NAME}/camera-params'
         )
     if response.status_code // 100 != 2:
-        msg: str = f'Could not obtain the camera properties of "{API_IP}". {response}.'
+        msg: str = f'Could not obtain the camera parameters of "{API_IP}". {response}.'
         my_logger.error(msg)
         raise RuntimeError(msg)
     return CameraProps(response.json())

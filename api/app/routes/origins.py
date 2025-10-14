@@ -14,22 +14,24 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Annotated, Optional, Sequence
+from typing import Annotated, Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.manager import get_session
-from ..database.origins import (db_create_new_origin, db_delete_origins,
-                                db_get_origin, db_get_origin_camera_props,
+from ..database.origins import (db_create_new_origin, db_delete_origin_params,
+                                db_delete_origins, db_get_origin,
+                                db_get_origin_camera_params,
                                 db_get_origin_images,
-                                db_get_origin_origin_result, db_get_origins,
-                                db_update_origin)
+                                db_get_origin_origin_result,
+                                db_get_origin_params, db_get_origins,
+                                db_update_origin, db_update_origin_params)
 from ..dependencies.config import DATABASE_GET_LIMIT
+from ..models.api import CameraParams
 from ..models.database import Image, Origin, OriginResult
-from ..models.typing import CameraProps
 
-origins_router = APIRouter()
+origins_router: APIRouter = APIRouter()
 
 @origins_router.post(
     '/',
@@ -56,13 +58,15 @@ async def create_new_origin(
 async def update_origin(
     session: Annotated[AsyncSession, Depends(get_session)],
     name: Annotated[str, Path()],
-    model: Annotated[Optional[str], Body()] = None
+    model: Annotated[Optional[str], Body()] = None,
+    params: Annotated[Optional[dict[str, Any]], Body()] = None
 ) -> Origin:
     return await db_update_origin(
         session= session,
         origin= Origin(
             name= name,
-            model= model
+            model= model,
+            params= params
         )
     )
 
@@ -172,17 +176,67 @@ async def get_origin_origin_result(
     )
 
 @origins_router.get(
-    '/{name}/camera-prop',
-    response_model= CameraProps,
-    summary= 'Get the proprerties of the camera from a origin.',
-    response_description= 'The camera properties.',
+    '/{name}/camera-params',
+    response_model= CameraParams,
+    summary= 'Get the parameters of the camera from a origin.',
+    response_description= 'The camera parameters.',
     status_code= status.HTTP_200_OK
 )
-async def get_origin_camera_props(
+async def get_origin_camera_params(
     session: Annotated[AsyncSession, Depends(get_session)],
     name: Annotated[str, Path()]
-) -> CameraProps:
-    return await db_get_origin_camera_props(
+) -> CameraParams:
+    return await db_get_origin_camera_params(
+        session= session,
+        origin_name = name
+    )
+
+@origins_router.get(
+    '/{name}/params',
+    response_model= dict[str, Any],
+    summary= 'Delete the params of the origin.',
+    response_description= 'The origin params.',
+    status_code= status.HTTP_200_OK
+)
+async def get_origin_params(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> dict[str, Any]:
+    return await db_get_origin_params(
+        session= session,
+        origin_name = name
+    )
+
+@origins_router.put(
+    '/{name}/params',
+    response_model= Origin,
+    summary= 'Delete the params of the origin.',
+    response_description= 'The origin params.',
+    status_code= status.HTTP_200_OK
+)
+async def put_origin_params(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()],
+    params: Annotated[Optional[dict[str, Any]], Body(embed= True)] = None
+) -> Origin:
+    return await db_update_origin_params(
+        session= session,
+        origin_name = name,
+        params= params
+    )
+
+@origins_router.delete(
+    '/{name}/params',
+    response_model= Origin,
+    summary= 'Delete the params of the origin.',
+    response_description= 'The origin params.',
+    status_code= status.HTTP_200_OK
+)
+async def delete_origin_params(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> Origin:
+    return await db_delete_origin_params(
         session= session,
         origin_name = name
     )

@@ -14,7 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 from typing_extensions import Self
@@ -22,6 +22,27 @@ from typing_extensions import Self
 
 class ApiIPResponse(BaseModel):
     ip: str
+
+
+class CameraParams(BaseModel):
+    camera_width: int = 640
+    camera_height: int = 480
+    brightness: float = 128.0
+    contrast: float = 32.0
+    saturation: float = 32.0
+    exposure: float = 40.0
+    auto_exposure: int = 3
+    wb: float = 0.0
+    auto_wb: int = 1
+
+    @classmethod
+    def from_dict(
+        cls,
+        params: Optional[dict[str, Any]]
+    ) -> Self:
+        if params is None:
+            params = {}
+        return cls(**params)
 
 
 class ImageStreamResponse(BaseModel):
