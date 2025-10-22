@@ -2,7 +2,7 @@ import uvicorn
 from quart import Quart, render_template
 
 from .blueprints import api_bp, config_bp
-from .dependencies.config import SERVER_PORT, SERVER_IP
+from .dependencies.config import SERVER_IP, SERVER_PORT
 
 app = Quart(__name__)
 
