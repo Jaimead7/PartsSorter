@@ -1,7 +1,7 @@
 from quart import Blueprint, Response, jsonify
 
 wn_bp = Blueprint(
-    '.well-known',
+    'well-known',
     __name__,
     url_prefix='/.well-known'
 )

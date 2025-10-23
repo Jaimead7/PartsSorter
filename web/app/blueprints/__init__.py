@@ -1,2 +1,2 @@
 from .api import api_bp
-from .config import config_bp
+from .well_known import wn_bp

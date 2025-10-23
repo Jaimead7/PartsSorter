@@ -1,0 +1,100 @@
+@font-face {
+    font-family: 'ITCAvantGarde';
+    src: url('/static/fonts/ITCAvantGardeGothicBook.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'ITCAvantGarde';
+    src: url('/static/fonts/ITCAvantGardeGothicBold.otf');
+    font-weight: bold;
+    font-style: normal;
+}
+
+:root[data-bs-theme="custom-dark"] {
+    --bs-body-font-family: ITCAvantGarde, sans-serif;
+
+    /********** COLOR PALETT /**********/
+    /** Base colors */
+    --clr-dark-a0: #000000;
+    --clr-dark-a0-rgb: 0, 0, 0;
+    --clr-light-a0: #ffffff;
+    --clr-light-a0-rgb: 255, 255, 255;
+
+    /** Theme primary colors */
+    --clr-primary-a0: #ed7a18;
+    --clr-primary-a0-rgb: 237, 122, 24;
+    --clr-primary-a10: #f28937;
+    --clr-primary-a10-rgb: 242, 137, 55;
+    --clr-primary-a20: #f79851;
+    --clr-primary-a20-rgb: 247, 152, 81;
+    --clr-primary-a30: #fba76a;
+    --clr-primary-a30-rgb: 251, 167, 106;
+    --clr-primary-a40: #feb582;
+    --clr-primary-a40-rgb: 254, 181, 130;
+    --clr-primary-a50: #ffc49a;
+    --clr-primary-a50-rgb: 255, 196, 154;
+
+    /** Theme surface colors */
+    --clr-surface-a0: #152e49;
+    --clr-surface-a0-rgb: 21, 46, 73;
+    --clr-surface-a10: #2f425b;
+    --clr-surface-a10-rgb: 47, 66, 91;
+    --clr-surface-a20: #47576e;
+    --clr-surface-a20-rgb: 71, 87, 110;
+    --clr-surface-a30: #5f6d82;
+    --clr-surface-a30-rgb: 95, 109, 130;
+    --clr-surface-a40: #788395;
+    --clr-surface-a40-rgb: 120, 131, 149;
+    --clr-surface-a50: #929baa;
+    --clr-surface-a50-rgb: 146, 155, 170;
+
+    /** Theme tonal surface colors */
+    --clr-surface-tonal-a0: #323547;
+    --clr-surface-tonal-a0-rgb: 50, 53, 71;
+    --clr-surface-tonal-a10: #464859;
+    --clr-surface-tonal-a10-rgb: 70, 72, 89;
+    --clr-surface-tonal-a20: #5b5d6c;
+    --clr-surface-tonal-a20-rgb: 91, 93, 108;
+    --clr-surface-tonal-a30: #707280;
+    --clr-surface-tonal-a30-rgb: 112, 114, 128;
+    --clr-surface-tonal-a40: #878894;
+    --clr-surface-tonal-a40-rgb: 135, 136, 148;
+    --clr-surface-tonal-a50: #9e9fa8;
+    --clr-surface-tonal-a50-rgb: 158, 159, 168;
+
+    /** Success colors */
+    --clr-success-a0: #22946e;
+    --clr-success-a0-rgb: 34, 148, 110;
+    --clr-success-a10: #47d5a6;
+    --clr-success-a10-rgb: 71, 213, 166;
+    --clr-success-a20: #9ae8ce;
+    --clr-success-a20-rgb: 154, 232, 206;
+
+    /** Warning colors */
+    --clr-warning-a0: #a87a2a;
+    --clr-warning-a0-rgb: 168, 122, 42;
+    --clr-warning-a10: #d7ac61;
+    --clr-warning-a10-rgb: 215, 172, 97;
+    --clr-warning-a20: #ecd7b2;
+    --clr-warning-a20-rgb: 236, 215, 178;
+
+    /** Danger colors */
+    --clr-danger-a0: #9c2121;
+    --clr-danger-a0-rgb: 156, 33, 33;
+    --clr-danger-a10: #d94a4a;
+    --clr-danger-a10-rgb: 217, 74, 74;
+    --clr-danger-a20: #eb9e9e;
+    --clr-danger-a20-rgb: 235, 158, 158;
+
+    /** Info colors */
+    --clr-info-a0: #21498a;
+    --clr-info-a0-rgb: 33, 73, 138;
+    --clr-info-a10: #4077d1;
+    --clr-info-a10-rgb: 64, 119, 209;
+    --clr-info-a20: #92b2e5;
+    --clr-info-a20-rgb: 146, 178, 229;
+
+    /********** BOOTSTRAP COLORS /**********/
+    /*TODO*/
+}

@@ -47,17 +47,17 @@ function connectWebSocket(url) {
         switch (data.type) {
             case "new-image":
                 transferImages();
-                document.getElementById("live-img-span").hidden = true;
-                img = document.getElementById("live-img");
+                document.getElementById("img-0-span").hidden = true;
+                img = document.getElementById("img-0-omg");
                 img.src = data.image_url;
                 img.hidden = false;
                 writeImageInfo(
                     data.origin,
-                    "live-img-origin",
+                    "img-0-origin",
                     data.insp_result,
-                    "live-img-type",
+                    "img-0-type",
                     (data.trust * 100).toFixed(2) + '%',
-                    "live-img-trust"
+                    "img-0-trust"
                 )
         }
     };
@@ -86,70 +86,70 @@ function showAlert(message, type) {
         alertDiv.remove();
     } catch (error) {}
     alertDiv = document.createElement("div");
-    alertDiv.id = "alert-msg";
-    alertDiv.className = `alert alert-${type}`;
+    alertDiv.className = `d-inline-block position-absolute top-2 end-0 alert alert-${type}`;
     alertDiv.textContent = message;
     document.getElementById("main-content").appendChild(alertDiv);
 }
 
 function clearImages() {
-    for (let i = 4; i > 1; i--) {
-        img = document.getElementById(`hist-img-${i}`);
+    for (let i = 4; i > 0; i--) {
+        img = document.getElementById(`img-${i}-img`);
         img.src = "";
         img.hidden = true;
-        document.getElementById(`hist-img-${i}-span`).hidden = false;
-        clearImageInfo(`img-hist-origin-${i}`, `img-hist-type-${i}`, `img-hist-trust-${i}`)
+        document.getElementById(`img-${i}-span`).hidden = false;
+        clearImageInfo(i)
     }
-    img = document.getElementById("live-img");
-    img.src = "";
-    img.hidden = true;
-    document.getElementById("live-img-span").hidden = false;
-    clearImageInfo("live-img-origin", "live-img-type", "live-img-trust")
 }
 
 function transferImages() {
-    for (let i = 4; i > 1; i--) {
-        transferImage(`hist-img-${i-1}`, `hist-img-${i}`);
-        transferText(`img-hist-origin-${i-1}`, `img-hist-origin-${i}`);
-        transferText(`img-hist-type-${i-1}`, `img-hist-type-${i}`);
-        transferText(`img-hist-trust-${i-1}`, `img-hist-trust-${i}`);
+    for (let i = 4; i > 0; i--) {
+        transferImage(i-1, i);
+        transferText(`img-${i-1}-origin`, `img-${i}-origin`);
+        transferText(`img-${i-1}-type`, `img-${i}-type`);
+        transferText(`img-${i-1}-trust`, `img-${i}-trust`);
     }
-    transferImage("live-img", "hist-img-1");
-    transferText("live-img-origin", "img-hist-origin-1");
-    transferText("live-img-type", "img-hist-type-1");
-    transferText("live-img-trust", "img-hist-trust-1");
 }
 
 function transferImage(idOrigin, idDestiny) {
-    imgDestiny = document.getElementById(idDestiny)
-    imgOrigin = document.getElementById(idOrigin)
+    imgDestiny = document.getElementById(`img-${idDestiny}-img`)
+    spanDestiny = document.getElementById(`img-${idDestiny}-span`)
+    imgOrigin = document.getElementById(`img-${idOrigin}-img`)
+    spanOrigin = document.getElementById(`img-${idOrigin}-span`)
     imgDestiny.src = imgOrigin.src;
-    imgDestiny.hidden = imgOrigin.hidden;
-    document.getElementById(`${idDestiny}-span`).hidden = document.getElementById(`${idOrigin}-span`).hidden;
+    let cond = (imgDestiny.src == "");
+    imgDestiny.hidden = !cond;
+    spanDestiny = cond;
 }
 
 function transferText(idOrigin, idDestiny) {
     document.getElementById(idDestiny).textContent = document.getElementById(idOrigin).textContent;
 }
 
-function writeImageInfo(origin, originElementName, type, typeElementName, trust, trustElementName) {
+function writeImageInfo(
+    origin,
+    originElementName,
+    type,
+    typeElementName,
+    trust,
+    trustElementName
+) {
     document.getElementById(originElementName).innerText = origin
     document.getElementById(typeElementName).innerText = type
     document.getElementById(trustElementName).innerText = trust
 }
 
-function clearImageInfo(originElementName, typeElementName) {
-    const originElement = document.getElementById(originElementName);
+function clearImageInfo(id) {
+    const originElement = document.getElementById(`img-${id}-origin`);
     if (originElement) {
         originElement.innerText = originElement.getAttribute("data-default-text")
     }
-    const typeElement = document.getElementById(typeElementName);
+    const typeElement = document.getElementById(`img-${id}-type`);
     if (typeElement) {
         typeElement.innerText = typeElement.getAttribute("data-default-text")
     }
-    const trustElement = document.getElementById(trustElementName);
+    const trustElement = document.getElementById(`img-${id}-trust`);
     if (trustElement) {
-        trustElement.innerText = typeEtrustElementlement.getAttribute("data-default-text")
+        trustElement.innerText = trustElement.getAttribute("data-default-text")
     }
 }
 

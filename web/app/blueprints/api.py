@@ -1,8 +1,7 @@
-from quart import Blueprint
 import httpx
+from quart import Blueprint, Response, jsonify
 
-from ..dependencies.config import API_URL
-
+from ..dependencies.config import API_URL, my_logger
 
 api_bp = Blueprint(
     'api',
@@ -11,12 +10,25 @@ api_bp = Blueprint(
 )
 
 @api_bp.route('/config')
-async def api_config() -> dict:
-    async with httpx.AsyncClient() as client:
-        response: httpx.Response = await client.post(
-            url= f'http://{API_URL}/config/ip',
-            headers= {
-                'accept': 'application/json'
-            }
+async def api_config():
+    try:
+        async with httpx.AsyncClient() as client:
+            response: httpx.Response = await client.post(
+                url= f'http://{API_URL}/config/ip',
+                headers= {
+                    'accept': 'application/json'
+                }
+            )
+        return Response(response.json(), 200)
+    except httpx.ConnectError:
+        msg: str = 'Could not connect to the API.'
+        my_logger.error(f'ConnectionError: {msg}')
+        return Response(
+            {
+                'error': {
+                    'code': 'internal_error',
+                    'message': msg
+                }
+            },
+            500
         )
-    return response.json()

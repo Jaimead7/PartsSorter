@@ -1,7 +1,7 @@
 import uvicorn
-from quart import Quart, render_template, render_template_string
+from quart import Quart, render_template
 
-from .blueprints import api_bp, config_bp
+from .blueprints import api_bp, wn_bp
 from .dependencies.config import SERVER_IP, SERVER_PORT
 
 app = Quart(__name__)
@@ -11,18 +11,18 @@ app = Quart(__name__)
 async def home() -> str:
     return await render_template(
         'index.html',
-        page_title= 'PART INSPECTION'
+        page_title= 'Part inspection'
     )
 
 @app.route('/image-stream')
 async def image_stream() -> str:
     return await render_template(
         'image-stream.html',
-        page_title= 'Airbag cut inspection - Image stream'
+        page_title= 'Image stream'
     )
 
-app.register_blueprint(config_bp)
 app.register_blueprint(api_bp)
+app.register_blueprint(wn_bp)
 
 if __name__ == '__main__':
     uvicorn.run(
