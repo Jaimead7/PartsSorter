@@ -9,9 +9,9 @@
             <div class="row m-0 align-items-center border border-2 rounded">
                 <div class="col-sm-8 p-2">
                     <div class="ratio ratio-4x3 border border-2 rounded">
-                        <div class="d-flex flex-column align-items-center justify-content-center text-center h-100">
+                        <div class="d-flex flex-column align-items-center justify-content-center text-center h-100 p-1">
                             <span class="h1 mb-0 fs-2" id="img-0-span">No image to show</span>
-                            <img id="img-0-img" src="" alt="No image" class="img-fluid" hidden>
+                            <img id="img-0-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
                         </div>
                     </div>
                 </div>
@@ -31,19 +31,19 @@
                     <div class="row m-0 p-0 align-items-center border border-2 rounded">
                         <div class="col-sm-8 p-2">
                             <div class="ratio ratio-4x3 border border-2 rounded">
-                                <div class="d-flex flex-column align-items-center justify-content-center text-center h-100">
-                                    <span class="h1 mb-0 fs-5" id="img-{{ i }}-span">No image to show</span>
-                                    <img id="img-1-img" src="" alt="No image" class="img-fluid" hidden>
+                                <div class="d-flex flex-column align-items-center justify-content-center text-center h-100 p-1">
+                                    <span class="h1 mb-0 fs-5" id="img-{{ i+1 }}-span">No image to show</span>
+                                    <img id="img-{{ i+1 }}-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-4 p-0">
                             <span class="row m-0 fs-10 fst-italic">Origin:</span>
-                            <span class="row m-0 fs-8 fw-bold mb-1" id="img-{{ i }}-origin" data-default-text="Unknown">Unknown</span>
+                            <span class="row m-0 fs-8 fw-bold mb-1" id="img-{{ i+1 }}-origin" data-default-text="Unknown">Unknown</span>
                             <span class="row m-0 fs-10 fst-italic">Type:</span>
-                            <span class="row m-0 fs-8 fw-bold mb-1" id="img-{{ i }}-type" data-default-text="No result">No result</span>
+                            <span class="row m-0 fs-8 fw-bold mb-1" id="img-{{ i+1 }}-type" data-default-text="No result">No result</span>
                             <span class="row m-0 fs-10 fst-italic">Trust:</span>
-                            <span class="row m-0 fs-8 fw-bold" id="img-{{ i }}-trust" data-default-text="NULL">NULL</span>
+                            <span class="row m-0 fs-8 fw-bold" id="img-{{ i+1 }}-trust" data-default-text="NULL">NULL</span>
                         </div>
                     </div>
                 </div>

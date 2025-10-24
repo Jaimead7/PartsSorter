@@ -48,7 +48,7 @@ function connectWebSocket(url) {
             case "new-image":
                 transferImages();
                 document.getElementById("img-0-span").hidden = true;
-                img = document.getElementById("img-0-omg");
+                img = document.getElementById("img-0-img");
                 img.src = data.image_url;
                 img.hidden = false;
                 writeImageInfo(
@@ -103,10 +103,12 @@ function clearImages() {
 
 function transferImages() {
     for (let i = 4; i > 0; i--) {
-        transferImage(i-1, i);
-        transferText(`img-${i-1}-origin`, `img-${i}-origin`);
-        transferText(`img-${i-1}-type`, `img-${i}-type`);
-        transferText(`img-${i-1}-trust`, `img-${i}-trust`);
+        try {
+            transferImage(i-1, i);
+            transferText(`img-${i-1}-origin`, `img-${i}-origin`);
+            transferText(`img-${i-1}-type`, `img-${i}-type`);
+            transferText(`img-${i-1}-trust`, `img-${i}-trust`);
+        } catch (error) {}
     }
 }
 
@@ -115,10 +117,9 @@ function transferImage(idOrigin, idDestiny) {
     spanDestiny = document.getElementById(`img-${idDestiny}-span`)
     imgOrigin = document.getElementById(`img-${idOrigin}-img`)
     spanOrigin = document.getElementById(`img-${idOrigin}-span`)
-    imgDestiny.src = imgOrigin.src;
-    let cond = (imgDestiny.src == "");
-    imgDestiny.hidden = !cond;
-    spanDestiny = cond;
+    imgDestiny.src = imgOrigin.getAttribute('src') === '' ? "" : imgOrigin.getAttribute('src');
+    imgDestiny.hidden = imgDestiny.getAttribute('src') === '';
+    spanDestiny.hidden = imgDestiny.getAttribute('src') !== '';
 }
 
 function transferText(idOrigin, idDestiny) {
