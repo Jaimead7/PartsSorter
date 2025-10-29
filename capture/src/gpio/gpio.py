@@ -48,7 +48,7 @@ class GPIO:
     def read(cls, pin: int) -> Optional[bool]:
         try:
             import gpiod
-            from gpiod.line import Direction
+            from gpiod.line import Bias, Direction
         except ImportError:
             my_logger.error('"gpiod" not installed. Can\'t read on GPIO pins.')
             return None
@@ -57,7 +57,8 @@ class GPIO:
             consumer= 'Me',
             config= {
                 pin: gpiod.LineSettings(
-                    direction= Direction.INPUT
+                    direction= Direction.INPUT,
+                    bias= Bias.PULL_DOWN
                 )
             }
         ) as chip:
