@@ -8,7 +8,10 @@
         <aside class="col-2 p-1">
             <article class="border border-1 rounded p-1">
                 <h3><strong>Filters:</strong></h3>
-                {% include 'filters/origin.html' %}
+                <section class="d-flex flex-column gap-1">
+                    {% include 'filters/origin.html' %}
+                    {% include 'filters/date.html' %}
+                </section>
             </article>
         </aside>
         <section class="col-7 p-1 d-flex flex-column align-items-center">
@@ -38,10 +41,13 @@
                     </ul>
                 </section>
             </article>
-            <footer class="col-12 d-flex justify-content-center">
+            <footer class="col-12 d-flex justify-content-center align-items-center">
                 <button class="btn btn-md p-0 align-self-start" type="button">
                     <span class="bi bi-caret-left-square fs-3"></span>
                 </button>
+                <p class="m-0 ms-1">0</p>
+                <p class="m-0">/</p>
+                <p class="m-0 me-1">10</p>
                 <button class="btn btn-md p-0 align-self-start" type="button">
                     <span class="bi bi-caret-right-square fs-3"></span>
                 </button>
