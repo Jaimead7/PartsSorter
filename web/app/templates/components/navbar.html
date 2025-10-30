@@ -1,0 +1,56 @@
+<nav class="navbar bg-body-secondary">
+    <!-- Menu -->
+    <section class="dropdown ms-2">
+        <button class="navbar-toggler"
+                title="Menu"
+                type="button"
+                data-bs-auto-close="auto"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <menu class="dropdown-menu" id="navbar">
+            <li>
+                <h6 class="dropdown-header">Menu</h6>
+            </li>
+            <li>
+                <a class="dropdown-item" href="/">Home</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="/inspection/image-stream">Image stream</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="/inspection/image-inspection">Image inspection</a>
+            </li>
+        </menu>
+    </section>
+    <!-- Title -->
+    <section>
+        <a class="navbar-brand position-absolute top-50 start-50 translate-middle text-truncate me-0" href="/">
+            <article class="d-flex align-items-center gap-2">
+                <img src="/static/images/faviconWhite.png" alt="Logo" width="30" height="30">
+                <h3 class="mb-0 text-uppercase"><strong>{{ page_title }}</strong></h3>
+            </article>
+        </a>
+    </section>
+    <!-- Logging -->
+    <section class="d-flex gap-2 me-2">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                {% if True %}
+                <a class="nav-link" id="logout" href="/logout">
+                    Logout
+                </a>
+                {% else %}
+                <a class="nav-link active" id="login" href="/login">
+                    Login
+                </a>
+                {% endif %}
+            </li>
+        </ul>
+        <button id="theme-toggle" type="button" class="btn btn-secondary rounded-circle">
+            <span id="theme-icon">🌙</span>
+        </button>
+    </section>
+</nav>

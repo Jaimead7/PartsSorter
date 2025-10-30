@@ -17,7 +17,7 @@
 let ws;
 let reconnectDelay = 10000;
 let reconnectTimeout;
-let alertDiv;
+let alertBlock;
 
 
 async function initWebSocket() {
@@ -36,7 +36,7 @@ function connectWebSocket(url) {
 
     ws.onopen = () => {
         try{
-            alertDiv.remove();
+            alertBlock.remove();
         } catch {}
         console.log("Websocket connected");
     };
@@ -47,7 +47,7 @@ function connectWebSocket(url) {
         switch (data.type) {
             case "new-image":
                 transferImages();
-                document.getElementById("img-0-span").hidden = true;
+                document.getElementById("img-0-alt").hidden = true;
                 img = document.getElementById("img-0-img");
                 img.src = data.image_url;
                 img.hidden = false;
@@ -83,20 +83,20 @@ function scheduleReconnect() {
 
 function showAlert(message, type) {
     try {
-        alertDiv.remove();
+        alertBlock.remove();
     } catch (error) {}
-    alertDiv = document.createElement("div");
-    alertDiv.className = `d-inline-block position-absolute top-2 end-0 alert alert-${type}`;
-    alertDiv.textContent = message;
-    document.getElementById("main-content").appendChild(alertDiv);
+    alertBlock = document.createElement("dialog");
+    alertBlock.className = `d-inline-block position-absolute top-2 end-0 alert alert-${type} m-0`;
+    alertBlock.textContent = message;
+    document.getElementById("main-content").appendChild(alertBlock);
 }
 
 function clearImages() {
-    for (let i = 4; i > 0; i--) {
+    for (let i = 2; i >= 0; i--) {
         img = document.getElementById(`img-${i}-img`);
         img.src = "";
         img.hidden = true;
-        document.getElementById(`img-${i}-span`).hidden = false;
+        document.getElementById(`img-${i}-alt`).hidden = false;
         clearImageInfo(i)
     }
 }
@@ -114,9 +114,9 @@ function transferImages() {
 
 function transferImage(idOrigin, idDestiny) {
     imgDestiny = document.getElementById(`img-${idDestiny}-img`)
-    spanDestiny = document.getElementById(`img-${idDestiny}-span`)
+    spanDestiny = document.getElementById(`img-${idDestiny}-alt`)
     imgOrigin = document.getElementById(`img-${idOrigin}-img`)
-    spanOrigin = document.getElementById(`img-${idOrigin}-span`)
+    spanOrigin = document.getElementById(`img-${idOrigin}-alt`)
     imgDestiny.src = imgOrigin.getAttribute('src') === '' ? "" : imgOrigin.getAttribute('src');
     imgDestiny.hidden = imgDestiny.getAttribute('src') === '';
     spanDestiny.hidden = imgDestiny.getAttribute('src') !== '';

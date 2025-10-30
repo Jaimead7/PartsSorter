@@ -1,0 +1,38 @@
+import json
+
+import httpx
+
+from ..dependencies.config import API_URL
+
+
+async def api_get_ip() -> str:
+    async with httpx.AsyncClient() as client:
+        response: httpx.Response = await client.post(
+            url= f'http://{API_URL}/config/ip',
+            headers= {
+                'accept': 'application/json'
+            }
+        )
+    return json.dumps(response.json())
+
+async def api_get_origins() -> list[str]:
+    async with httpx.AsyncClient() as client:
+        response: httpx.Response = await client.get(
+            url= f'http://{API_URL}/origin/?limit=100&offset=0',
+            headers= {
+                'accept': 'application/json'
+            }
+        )
+    origins: list[str] = [origin['name'] for origin in response.json()]
+    return origins
+
+async def api_get_inspection_results() -> list[str]:
+    async with httpx.AsyncClient() as client:
+        response: httpx.Response = await client.get(
+            url= f'http://{API_URL}/inspection-result/?limit=100&offset=0',
+            headers= {
+                'accept': 'application/json'
+            }
+        )
+    results: list[str] = [result['name'] for result in response.json()]
+    return results
