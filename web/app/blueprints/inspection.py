@@ -1,5 +1,5 @@
 import httpx
-from quart import Blueprint, redirect, render_template
+from quart import Blueprint, current_app, redirect, render_template
 from werkzeug import Response
 
 from ..dependencies.api import api_get_inspection_results, api_get_origins
