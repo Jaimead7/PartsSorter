@@ -1,5 +1,5 @@
 import httpx
-from quart import Blueprint, current_app, redirect, render_template
+from quart import Blueprint, redirect, render_template, request
 from werkzeug import Response
 
 from ..dependencies.api import api_get_inspection_results, api_get_origins
@@ -16,10 +16,12 @@ async def image_stream() -> str:
         origins: list[str] = await api_get_origins()
     except httpx.ConnectError:
         origins = []
+    preselected_origins: list[str] = request.args.getlist('origin')
     return await render_template(
         'image-stream.html',
         page_title= 'Image stream',
-        origins= origins
+        origins= origins,
+        preselected_origins= preselected_origins
     )
 
 @inspection_bp.route('/image-inspection')
