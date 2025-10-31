@@ -69,3 +69,28 @@ class ImageStreamResponse(BaseModel):
             true_result= true_result if true_result is not None else 'No result',
             trust= trust
         )
+
+class ImageHistResponse(ImageStreamResponse):
+    index: int = 0
+    total: int = 0
+
+    @classmethod
+    def factory(
+        cls,
+        image_url: str,
+        insp_result: Optional[str],
+        origin: Optional[str],
+        true_result: Optional[str],
+        trust: Optional[float],
+        index: Optional[int] = None,
+        total: Optional[int] = None
+    ) -> Self:
+        return cls(
+            image_url= image_url,
+            insp_result= insp_result if insp_result is not None else 'No result',
+            origin= origin if origin is not None else 'Unknown',
+            true_result= true_result if true_result is not None else 'No result',
+            trust= trust,
+            index= index if index is not None else 0,
+            total= total if total is not None else 0
+        )

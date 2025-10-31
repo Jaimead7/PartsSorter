@@ -17,7 +17,7 @@
 let ws;
 let reconnectDelay = 10000;
 let reconnectTimeout;
-let alertDiv;
+let alertBlock;
 
 
 async function initWebSocket() {
@@ -36,7 +36,7 @@ function connectWebSocket(url) {
 
     ws.onopen = () => {
         try{
-            alertDiv.remove();
+            alertBlock.remove();
         } catch {}
         console.log("Websocket connected");
     };
@@ -44,21 +44,28 @@ function connectWebSocket(url) {
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log("New message received:", data);
+        const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
+        const noneChecked = Array.from(originOptions).every(checkbox => !checkbox.checked);
+        const selectedOrigins = Array.from(originOptions)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
         switch (data.type) {
             case "new-image":
-                transferImages();
-                document.getElementById("live-img-span").hidden = true;
-                img = document.getElementById("live-img");
-                img.src = data.image_url;
-                img.hidden = false;
-                writeImageInfo(
-                    data.origin,
-                    "live-img-origin",
-                    data.insp_result,
-                    "live-img-type",
-                    (data.trust * 100).toFixed(2) + '%',
-                    "live-img-trust"
-                )
+                if (selectedOrigins.includes(data.origin) || noneChecked) {
+                    transferImages();
+                    document.getElementById("img-0-alt").hidden = true;
+                    img = document.getElementById("img-0-img");
+                    img.src = data.image_url;
+                    img.hidden = false;
+                    writeImageInfo(
+                        data.origin,
+                        "img-0-origin",
+                        data.insp_result,
+                        "img-0-type",
+                        (data.trust * 100).toFixed(2) + '%',
+                        "img-0-trust"
+                    )
+                }
         }
     };
 
@@ -83,73 +90,74 @@ function scheduleReconnect() {
 
 function showAlert(message, type) {
     try {
-        alertDiv.remove();
+        alertBlock.remove();
     } catch (error) {}
-    alertDiv = document.createElement("div");
-    alertDiv.id = "alert-msg";
-    alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
-    document.getElementById("main-content").appendChild(alertDiv);
+    alertBlock = document.createElement("dialog");
+    alertBlock.className = `d-inline-block position-absolute top-2 end-0 alert alert-${type} m-0`;
+    alertBlock.textContent = message;
+    document.getElementById("main-content").appendChild(alertBlock);
 }
 
 function clearImages() {
-    for (let i = 4; i > 1; i--) {
-        img = document.getElementById(`hist-img-${i}`);
+    for (let i = 4; i >= 0; i--) {
+        img = document.getElementById(`img-${i}-img`);
         img.src = "";
         img.hidden = true;
-        document.getElementById(`hist-img-${i}-span`).hidden = false;
-        clearImageInfo(`img-hist-origin-${i}`, `img-hist-type-${i}`, `img-hist-trust-${i}`)
+        document.getElementById(`img-${i}-alt`).hidden = false;
+        clearImageInfo(i)
     }
-    img = document.getElementById("live-img");
-    img.src = "";
-    img.hidden = true;
-    document.getElementById("live-img-span").hidden = false;
-    clearImageInfo("live-img-origin", "live-img-type", "live-img-trust")
 }
 
 function transferImages() {
-    for (let i = 4; i > 1; i--) {
-        transferImage(`hist-img-${i-1}`, `hist-img-${i}`);
-        transferText(`img-hist-origin-${i-1}`, `img-hist-origin-${i}`);
-        transferText(`img-hist-type-${i-1}`, `img-hist-type-${i}`);
-        transferText(`img-hist-trust-${i-1}`, `img-hist-trust-${i}`);
+    for (let i = 4; i > 0; i--) {
+        try {
+            transferImage(i-1, i);
+            transferText(`img-${i-1}-origin`, `img-${i}-origin`);
+            transferText(`img-${i-1}-type`, `img-${i}-type`);
+            transferText(`img-${i-1}-trust`, `img-${i}-trust`);
+        } catch (error) {}
     }
-    transferImage("live-img", "hist-img-1");
-    transferText("live-img-origin", "img-hist-origin-1");
-    transferText("live-img-type", "img-hist-type-1");
-    transferText("live-img-trust", "img-hist-trust-1");
 }
 
 function transferImage(idOrigin, idDestiny) {
-    imgDestiny = document.getElementById(idDestiny)
-    imgOrigin = document.getElementById(idOrigin)
-    imgDestiny.src = imgOrigin.src;
-    imgDestiny.hidden = imgOrigin.hidden;
-    document.getElementById(`${idDestiny}-span`).hidden = document.getElementById(`${idOrigin}-span`).hidden;
+    imgDestiny = document.getElementById(`img-${idDestiny}-img`)
+    spanDestiny = document.getElementById(`img-${idDestiny}-alt`)
+    imgOrigin = document.getElementById(`img-${idOrigin}-img`)
+    spanOrigin = document.getElementById(`img-${idOrigin}-alt`)
+    imgDestiny.src = imgOrigin.getAttribute('src') === '' ? "" : imgOrigin.getAttribute('src');
+    imgDestiny.hidden = imgDestiny.getAttribute('src') === '';
+    spanDestiny.hidden = imgDestiny.getAttribute('src') !== '';
 }
 
 function transferText(idOrigin, idDestiny) {
     document.getElementById(idDestiny).textContent = document.getElementById(idOrigin).textContent;
 }
 
-function writeImageInfo(origin, originElementName, type, typeElementName, trust, trustElementName) {
+function writeImageInfo(
+    origin,
+    originElementName,
+    type,
+    typeElementName,
+    trust,
+    trustElementName
+) {
     document.getElementById(originElementName).innerText = origin
     document.getElementById(typeElementName).innerText = type
     document.getElementById(trustElementName).innerText = trust
 }
 
-function clearImageInfo(originElementName, typeElementName) {
-    const originElement = document.getElementById(originElementName);
+function clearImageInfo(id) {
+    const originElement = document.getElementById(`img-${id}-origin`);
     if (originElement) {
         originElement.innerText = originElement.getAttribute("data-default-text")
     }
-    const typeElement = document.getElementById(typeElementName);
+    const typeElement = document.getElementById(`img-${id}-type`);
     if (typeElement) {
         typeElement.innerText = typeElement.getAttribute("data-default-text")
     }
-    const trustElement = document.getElementById(trustElementName);
+    const trustElement = document.getElementById(`img-${id}-trust`);
     if (trustElement) {
-        trustElement.innerText = typeEtrustElementlement.getAttribute("data-default-text")
+        trustElement.innerText = trustElement.getAttribute("data-default-text")
     }
 }
 

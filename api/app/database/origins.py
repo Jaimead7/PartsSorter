@@ -121,26 +121,17 @@ async def db_get_origins(
     limit: int,
     offset: int
 ) -> Sequence[Origin]:
+    statement: SelectOfScalar[Origin] = select(Origin)
     if len(origins) > 0:
-        statement: SelectOfScalar[Origin] = (
-            select(Origin)
-            .where(
-                col(Origin.name).in_(
-                    [
-                        origin.name
-                        for origin in origins
-                    ]
-                )
+        statement = statement.where(
+            col(Origin.name).in_(
+                [
+                    origin.name
+                    for origin in origins
+                ]
             )
-            .offset(offset)
-            .limit(limit)
         )
-    else:
-        statement: SelectOfScalar[Origin] = (
-            select(Origin)
-            .offset(offset)
-            .limit(limit)
-        )
+    statement = statement.offset(offset).limit(limit)
     db_origins: ScalarResult[Origin] = await session.scalars(statement)
     db_origins_list: Sequence[Origin] = db_origins.all()
     if len(db_origins_list) == 0:

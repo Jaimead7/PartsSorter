@@ -1,116 +1,73 @@
-{% extends "base.html" %}
-
-{% block title %}
-    Airbag cut inspection - Live view
-{% endblock %}
+{% extends "index.html" %}
 
 {% block styles %}
 {% endblock %}
 
 {% block content %}
-    <div class="img-stream-main">
-        <div class="img-display row-div align-mid">
-            <div class="img-view col-div align-center">
-                <span id="live-img-span">No image to show</span>
-                <img id="live-img" src="" hidden>
+    <div class="d-flex h-100">
+        <section class="col-md-8 p-1">
+            <div class="d-flex flex-column gap-1">
+                <article class="col-12 d-flex align-items-center border border-2 rounded p-1">
+                    <section class="col-8">
+                        <div class="ratio ratio-4x3 border border-2 rounded">
+                            <div class="d-flex align-items-center justify-content-center p-1 text-center">
+                                <h1 class="mb-0" id="img-0-alt"><strong>No image to show</strong></h1>
+                                <img id="img-0-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="col-4 ps-2 text-truncate">
+                        <ul class="list-group">
+                            <li class="list-item">
+                                <h5 class="fst-italic fw-normal m-0">Origin:</h5>
+                                <p class="h3 m-0 mb-3"><strong id="img-0-origin" data-default-text="Unknown">Unknown</strong></p>
+                            </li>
+                            <li class="list-item">
+                                <h5 class="fst-italic fw-normal m-0">Type:</h5>
+                                <p class="h3 m-0 mb-3"><strong id="img-0-type" data-default-text="No result">No result</strong></p>
+                            </li>
+                            <li class="list-item">
+                                <h5 class="fst-italic fw-normal m-0">Trust:</h5>
+                                <p class="h3 m-0"><strong id="img-0-trust" data-default-text="NULL">NULL</strong></p>
+                            </li>
+                        </ul>
+                    </section>
+                </article>
+                <article class="col-3">
+                    {% include 'filters/origin.html' %}
+                </article>
             </div>
-            <div class="info-view col-div">
-                <div class="col-div">
-                    <span class="info-title text-hidden">Origin:</span>
-                    <span class="info-value text-hidden" id="live-img-origin" data-default-text="Unknown">Unknown</span>
-                </div>
-                <div class="col-div">
-                    <span class="info-title text-hidden">Type:</span>
-                    <span class="info-value text-hidden" id="live-img-type" data-default-text="No result">No result</span>
-                </div>
-                <div class="col-div">
-                    <span class="info-title text-hidden">Trust:</span>
-                    <span class="info-value text-hidden" id="live-img-trust" data-default-text="NULL">NULL</span>
-                </div>
-            </div>
-        </div>
-        <div class="img-hist">
-            <div class="img-display-small row-div align-mid">
-                <div class="img-view col-div align-center">
-                    <span id="hist-img-1-span">No image to show</span>
-                    <img id="hist-img-1" src="" hidden>
-                </div>
-                <div class="info-view col-div">
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Origin:</span>
-                        <span class="info-value text-hidden" id="img-hist-origin-1" data-default-text="Unknown">Unknown</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Type:</span>
-                        <span class="info-value text-hidden" id="img-hist-type-1" data-default-text="No result">No result</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Trust:</span>
-                        <span class="info-value text-hidden" id="img-hist-trust-1" data-default-text="NULL">NULL</span>
-                    </div>
-                </div>
-            </div>
-            <div class="img-display-small row-div align-mid">
-                <div class="img-view col-div align-center">
-                    <span id="hist-img-2-span">No image to show</span>
-                    <img id="hist-img-2" src="" hidden>
-                </div>
-                <div class="info-view col-div">
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Origin:</span>
-                        <span class="info-value text-hidden" id="img-hist-origin-2" data-default-text="Unknown">Unknown</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Type:</span>
-                        <span class="info-value text-hidden" id="img-hist-type-2" data-default-text="No result">No result</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Trust:</span>
-                        <span class="info-value text-hidden" id="img-hist-trust-2" data-default-text="NULL">NULL</span>
-                    </div>
-                </div>
-            </div>
-            <div class="img-display-small row-div align-mid">
-                <div class="img-view col-div align-center">
-                    <span id="hist-img-3-span">No image to show</span>
-                    <img id="hist-img-3" src="" hidden>
-                </div>
-                <div class="info-view col-div">
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Origin:</span>
-                        <span class="info-value text-hidden" id="img-hist-origin-3" data-default-text="Unknown">Unknown</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Type:</span>
-                        <span class="info-value text-hidden" id="img-hist-type-3" data-default-text="No result">No result</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Trust:</span>
-                        <span class="info-value text-hidden" id="img-hist-trust-3" data-default-text="NULL">NULL</span>
-                    </div>
-                </div>
-            </div>
-            <div class="img-display-small row-div align-mid">
-                <div class="img-view col-div align-center">
-                    <span id="hist-img-4-span">No image to show</span>
-                    <img id="hist-img-4" src="" hidden>
-                </div>
-                <div class="info-view col-div">
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Origin:</span>
-                        <span class="info-value text-hidden" id="img-hist-origin-4" data-default-text="Unknown">Unknown</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Type:</span>
-                        <span class="info-value text-hidden" id="img-hist-type-4" data-default-text="No result">No result</span>
-                    </div>
-                    <div class="col-div">
-                        <span class="info-title text-hidden">Trust:</span>
-                        <span class="info-value text-hidden" id="img-hist-trust-4" data-default-text="NULL">NULL</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </section>
+        <section class="col-4 h-100 overflow-auto p-1">
+            {% for i in range(4) %}
+                <article class="col-12 d-flex align-items-center border border-2 rounded p-1 mb-2">
+                    <section class="col-8">
+                        <div class="ratio ratio-4x3 border border-2 rounded">
+                            <div class="d-flex align-items-center justify-content-center p-1 text-center">
+                                <h5 class="mb-0" id="img-{{ i+1 }}-alt"><strong>No image to show</strong></h5>
+                                <img id="img-{{ i+1 }}-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="col-4 ps-1 text-truncate">
+                        <ul class="list-group">
+                            <li class="list-item">
+                                <p class="fs-10 fst-italic m-0">Origin:</p>
+                                <p class="fs-8 m-0 mb-1"><strong id="img-{{ i+1 }}-origin" data-default-text="Unknown">Unknown</strong></p>
+                            </li>
+                            <li class="list-item">
+                                <p class="fs-10 fst-italic m-0">Type:</p>
+                                <p class="fs-8 m-0 mb-1"><strong id="img-{{ i+1 }}-type" data-default-text="Unknown">No result</strong></p>
+                            </li>
+                            <li class="list-item">
+                                <p class="fs-10 fst-italic m-0">Trust:</p>
+                                <p class="fs-8 m-0"><strong id="img-{{ i+1 }}-trust" data-default-text="Unknown">NULL</strong></p>
+                            </li>
+                        </ul>
+                    </section>
+                </article>
+            {% endfor %}
+        </section>
     </div>
 {% endblock %}
 

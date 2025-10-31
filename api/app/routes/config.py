@@ -16,12 +16,12 @@
 
 from fastapi import APIRouter, status
 
-from ..dependencies.config import SERVER_PORT, HOST_IP
+from ..dependencies.config import HOST_IP, SERVER_PORT
 from ..models.api import ApiIPResponse
 
 config_router = APIRouter()
 
-@config_router.post(
+@config_router.get(
     '/ip',
     response_model= ApiIPResponse,
     summary= 'Get the API IP.',

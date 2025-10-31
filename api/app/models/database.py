@@ -20,8 +20,8 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 import yaml
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Column
+#from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from typing_extensions import Self
@@ -76,7 +76,7 @@ class Origin(SQLModel, table= True):
     )
     params: Optional[dict[str, Any]] = Field(
         default= None,
-        sa_type= JSONB  #TODO: Change to work with sqlite
+        sa_type= JSON #JSONB  #TODO: Change to work with sqlite
     )
 
     images_of_origin: Optional[list['Image']] = Relationship(

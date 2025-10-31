@@ -1,0 +1,30 @@
+<article class="card user-select-none">
+    <button class="btn card-header p-0 ps-1 pe-1 d-flex justify-content-between align-items-center collapsed"
+            type="button" 
+            data-bs-toggle="collapse"
+            data-bs-target="#dateFilterCollapseCard" 
+            aria-expanded="false"
+            aria-controls="dateFilterCollapseCard"
+    >
+        <span class="fs-8 fst-italic p-0">Date:</span>
+        <span class="bi bi-caret-down-square fs-5"></span>
+    </button>
+    <section class="card-body collapse p-1"  id="dateFilterCollapseCard">
+        <ul class="list-group">
+            <li class="list-group-item p-1 text-truncate">
+                <label class="d-flex justify-content-between align-items-center">
+                    Start:
+                    <input type="date" id="dateStartFilter">
+                </label>
+            </li>
+            <li class="list-group-item p-1 text-truncate">
+                <label class="d-flex justify-content-between align-items-center">
+                    End:
+                    <input type="date" id="dateEndFilter">
+                </label>
+            </li>
+        </ul>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/filters/date.js') }}"></script>
+</article>

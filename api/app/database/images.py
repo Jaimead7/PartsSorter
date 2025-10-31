@@ -16,21 +16,22 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 
 import aiofiles
 from fastapi import HTTPException, UploadFile, status
 from pyUtils import ImageFileValidator, Styles
-from sqlalchemy import ScalarResult
+from sqlalchemy import Result, ScalarResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import col, select
+from sqlmodel import col, func, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import my_logger
 from ..dependencies.exceptions import StopBlock
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.inspection import ModelsManager
+from ..models.api import ImageHistResponse
 from ..models.database import (Image, ImageProcessed, InspectionResult, Origin,
                                OriginResult)
 from .inspection_results import db_get_inspection_result
@@ -168,19 +169,12 @@ async def db_get_images(
     limit: int,
     offset: int
 ) -> Sequence[Image]:
+    statement: SelectOfScalar[Image] = select(Image)
     if len(images) > 0:
-        statement: SelectOfScalar[Image] = (
-            select(Image)
-            .where(col(Image.id).in_([img.id for img in images]))
-            .offset(offset)
-            .limit(limit)
+        statement = statement.where(
+            col(Image.id).in_([img.id for img in images])
         )
-    else:
-        statement: SelectOfScalar[Image] = (
-            select(Image)
-            .offset(offset)
-            .limit(limit)
-        )
+    statement = statement.offset(offset).limit(limit)
     db_images: ScalarResult[Image] = await session.scalars(statement)
     db_images_list: Sequence[Image] = db_images.all()
     if len(db_images_list) == 0:
@@ -284,3 +278,141 @@ async def db_process_new_image(
         trust= db_image.trust
     )
     return image_processed
+
+async def db_get_next_hist_image(
+    session: AsyncSession,
+    extensions: list[str],
+    start_date: datetime,
+    end_date: datetime,
+    inspection_results: list[str],
+    origins: list[str],
+    true_results: list[str],
+    min_trust: float,
+    max_trust: float,
+    index: int
+) -> ImageHistResponse:
+    total_images: int = await db_get_total_images_with_filters(
+        session= session,
+        extensions= extensions,
+        start_date= start_date,
+        end_date= end_date,
+        inspection_results= inspection_results,
+        origins= origins,
+        true_results= true_results,
+        min_trust= min_trust,
+        max_trust= max_trust
+    )
+    db_images: Sequence[Image] = await db_get_images_with_filters(
+        session= session,
+        extensions= extensions,
+        start_date= start_date,
+        end_date= end_date,
+        inspection_results= inspection_results,
+        origins= origins,
+        true_results= true_results,
+        min_trust= min_trust,
+        max_trust= max_trust,
+        offset= index,
+        limit= 1
+    )
+    if len(db_images) == 0:
+        msg: str = f'Image not found.'
+        my_logger.error(msg)
+        raise HTTPException(
+            status_code= status.HTTP_404_NOT_FOUND,
+            detail= msg
+        )
+    return ImageHistResponse.factory(
+        image_url= db_images[0].external_url,
+        insp_result= db_images[0].inspection_result,
+        origin= db_images[0].origin,
+        true_result= db_images[0].true_result,
+        trust= db_images[0].trust,
+        index= index,
+        total= total_images
+    )
+
+async def db_get_total_images_with_filters(
+    session: AsyncSession,
+    extensions: list[str],
+    start_date: datetime,
+    end_date: datetime,
+    inspection_results: list[str],
+    origins: list[str],
+    true_results: list[str],
+    min_trust: float,
+    max_trust: float
+) -> int:
+    statement: SelectOfScalar[int] = (
+        select(func.count(col(Image.id)))
+        .where(
+            col(Image.processed_date).is_not(None),
+            col(Image.processed_date) >= start_date,
+            col(Image.processed_date) <= end_date,
+            col(Image.trust).is_not(None),
+            col(Image.trust) >= min_trust,
+            col(Image.trust) <= max_trust
+        )
+    )
+    if len(extensions) > 0:
+        statement = statement.where(
+            col(Image.extension).in_(extensions)
+        )
+    if len(inspection_results) > 0:
+        statement = statement.where(
+            col(Image.inspection_result).in_(inspection_results)
+        )
+    if len(origins) > 0:
+        statement = statement.where(
+            col(Image.origin).in_(origins)
+        )
+    if len(true_results) > 0:
+        statement = statement.where(
+            col(Image.true_result).in_(true_results)
+        )
+    result: Result[Tuple[int]] = await session.execute(statement)
+    return result.scalar_one()
+
+async def db_get_images_with_filters(
+    session: AsyncSession,
+    extensions: list[str],
+    start_date: datetime,
+    end_date: datetime,
+    inspection_results: list[str],
+    origins: list[str],
+    true_results: list[str],
+    min_trust: float,
+    max_trust: float,
+    offset: int,
+    limit: int
+) -> Sequence[Image]:
+    statement: SelectOfScalar[Image] = (
+        select(Image)
+        .where(
+            col(Image.processed_date).is_not(None),
+            col(Image.processed_date) >= start_date,
+            col(Image.processed_date) <= end_date,
+            col(Image.trust).is_not(None),
+            col(Image.trust) >= min_trust,
+            col(Image.trust) <= max_trust
+        )
+    )
+    if len(extensions) > 0:
+        statement = statement.where(
+            col(Image.extension).in_(extensions)
+        )
+    if len(inspection_results) > 0:
+        statement = statement.where(
+            col(Image.inspection_result).in_(inspection_results)
+        )
+    if len(origins) > 0:
+        statement = statement.where(
+            col(Image.origin).in_(origins)
+        )
+    if len(true_results) > 0:
+        statement = statement.where(
+            col(Image.true_result).in_(true_results)
+        )
+    statement = statement.offset(offset).limit(limit)
+    db_images: ScalarResult[Image] = await session.scalars(statement)
+    return db_images.all()
