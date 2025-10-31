@@ -4,13 +4,13 @@
 {% endblock %}
 
 {% block content %}
-    <section class="clearfix" id="main-content">
-        <section class="col-md-8 p-2 float-md-start">
+    <div class="d-flex h-100">
+        <section class="col-md-8 p-1">
             <div class="d-flex flex-column gap-1">
                 <article class="col-12 d-flex align-items-center border border-2 rounded p-1">
                     <section class="col-8">
                         <div class="ratio ratio-4x3 border border-2 rounded">
-                            <div class="d-flex align-items-center justify-content-center p-1">
+                            <div class="d-flex align-items-center justify-content-center p-1 text-center">
                                 <h1 class="mb-0" id="img-0-alt"><strong>No image to show</strong></h1>
                                 <img id="img-0-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
                             </div>
@@ -33,17 +33,17 @@
                         </ul>
                     </section>
                 </article>
-                <div class="col-3">
+                <article class="col-3">
                     {% include 'filters/origin.html' %}
-                </div>
+                </article>
             </div>
         </section>
-        {% for i in range(2) %}
-            <article class="col-4 float-md-start m-0 p-2 pb-0">
-                <div class="col-12 d-flex align-items-center border border-2 rounded p-1">
+        <section class="col-4 h-100 overflow-auto p-1">
+            {% for i in range(4) %}
+                <article class="col-12 d-flex align-items-center border border-2 rounded p-1 mb-2">
                     <section class="col-8">
                         <div class="ratio ratio-4x3 border border-2 rounded">
-                            <div class="d-flex align-items-center justify-content-center p-1">
+                            <div class="d-flex align-items-center justify-content-center p-1 text-center">
                                 <h5 class="mb-0" id="img-{{ i+1 }}-alt"><strong>No image to show</strong></h5>
                                 <img id="img-{{ i+1 }}-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
                             </div>
@@ -65,10 +65,10 @@
                             </li>
                         </ul>
                     </section>
-                </div>
-            </article>
-        {% endfor %}
-    </section>
+                </article>
+            {% endfor %}
+        </section>
+    </div>
 {% endblock %}
 
 {% block scripts %}

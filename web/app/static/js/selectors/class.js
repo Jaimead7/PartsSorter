@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonIcon.classList.add('bi-caret-down-square');
     });
 
-    // SELECT ALL
+    // SELECT ONLY ONE
     const optionCheckboxes = document.querySelectorAll('input[name="class-selector-option"]');
 
     optionCheckboxes.forEach(checkbox => {

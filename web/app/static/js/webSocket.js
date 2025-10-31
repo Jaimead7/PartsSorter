@@ -92,7 +92,7 @@ function showAlert(message, type) {
 }
 
 function clearImages() {
-    for (let i = 2; i >= 0; i--) {
+    for (let i = 4; i >= 0; i--) {
         img = document.getElementById(`img-${i}-img`);
         img.src = "";
         img.hidden = true;

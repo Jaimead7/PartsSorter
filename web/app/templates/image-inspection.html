@@ -4,13 +4,14 @@
 {% endblock %}
 
 {% block content %}
-    <section class="d-flex">
-        <aside class="col-2 p-1">
+    <section class="d-flex h-100">
+        <aside class="col-2 p-1 h-100 overflow-auto">
             <article class="border border-1 rounded p-1">
                 <h3><strong>Filters:</strong></h3>
                 <section class="d-flex flex-column gap-1">
-                    {% include 'filters/origin.html' %}
                     {% include 'filters/date.html' %}
+                    {% include 'filters/origin.html' %}
+                    {% include 'filters/class.html' %}
                 </section>
             </article>
         </aside>
@@ -18,7 +19,7 @@
             <article class="col-12 d-flex align-items-center border border-2 rounded p-1">
                 <section class="col-8">
                     <div class="ratio ratio-4x3 border border-2 rounded">
-                        <div class="d-flex align-items-center justify-content-center p-1">
+                        <div class="d-flex align-items-center justify-content-center p-1 text-center">
                             <h1 class="mb-0" id="img-0-alt"><strong>No image to show</strong></h1>
                             <img id="img-0-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
                         </div>
@@ -45,15 +46,15 @@
                 <button class="btn btn-md p-0 align-self-start" type="button">
                     <span class="bi bi-caret-left-square fs-3"></span>
                 </button>
-                <p class="m-0 ms-1">0</p>
+                <p class="m-0 ms-1" data-default-text="-">-</p>
                 <p class="m-0">/</p>
-                <p class="m-0 me-1">10</p>
+                <p class="m-0 me-1" data-default-text="-">-</p>
                 <button class="btn btn-md p-0 align-self-start" type="button">
                     <span class="bi bi-caret-right-square fs-3"></span>
                 </button>
             </footer>
         </section>
-        <form class="col-3 p-1">
+        <form class="col-3 p-1 h-100 overflow-auto">
             {% include 'selectors/class.html' %}
             <div class="d-flex justify-content-center">
                 <button type="submit" class="btn btn-secondary">Save</button>
