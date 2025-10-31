@@ -21,19 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedOrigins = Array.from(originOptions)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
-        const expirationDate = new Date();
-
-        expirationDate.setDate(expirationDate.getDate() + 30);
-        document.cookie = `originFilterOptions=${JSON.stringify(selectedOrigins)}; expires=${expirationDate.toUTCString()}; path=/`;
+        localStorage.setItem('originFilterOptions', JSON.stringify(selectedOrigins));
     };
 
     function loadOriginsOptions() {
-        const cookieValue = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('originFilterOptions='));
+        const savedOrigins = localStorage.getItem('originFilterOptions');
 
-        if (cookieValue) {
-            const selectedOrigins = JSON.parse(cookieValue.split('=')[1]);
+        if (savedOrigins) {
+            const selectedOrigins = JSON.parse(savedOrigins);
             originOptions.forEach(checkbox => {
                 checkbox.checked = selectedOrigins.includes(checkbox.value);
             });
