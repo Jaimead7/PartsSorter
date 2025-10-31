@@ -30,10 +30,7 @@ app.register_blueprint(wn_bp)
 
 if __name__ == '__main__':
     uvicorn.run(
-        'app.app:app',
+        app,
         host= SERVER_IP,
-        port= SERVER_PORT,
-        reload= True,
-        reload_dirs=['.', './templates', './static'],
-        reload_includes=['*.py', '*.html', '*.css', '*.js']
+        port= SERVER_PORT
     )
