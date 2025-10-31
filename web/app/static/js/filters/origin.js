@@ -15,11 +15,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // SELECT ALL
     const selectAllCheckbox = document.getElementById('originFilterSelectAll');
-    const optionCheckboxes = document.querySelectorAll('input[name="origin-filter-option"]');
+    const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
     
     function updateSelectAllState() {
-        const allChecked = Array.from(optionCheckboxes).every(checkbox => checkbox.checked);
-        const someChecked = Array.from(optionCheckboxes).some(checkbox => checkbox.checked);
+        const allChecked = Array.from(originOptions).every(checkbox => checkbox.checked);
+        const someChecked = Array.from(originOptions).some(checkbox => checkbox.checked);
         
         selectAllCheckbox.checked = allChecked;
         selectAllCheckbox.indeterminate = someChecked && !allChecked;
@@ -27,13 +27,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     selectAllCheckbox.addEventListener('change', function() {
         const isChecked = this.checked;
-        optionCheckboxes.forEach(checkbox => {
+        originOptions.forEach(checkbox => {
             checkbox.checked = isChecked;
         });
         selectAllCheckbox.indeterminate = false;
     });
 
-    optionCheckboxes.forEach(checkbox => {
+    originOptions.forEach(checkbox => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 

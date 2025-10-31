@@ -44,21 +44,28 @@ function connectWebSocket(url) {
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log("New message received:", data);
+        const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
+        const noneChecked = Array.from(originOptions).every(checkbox => !checkbox.checked);
+        const selectedOrigins = Array.from(originOptions)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
         switch (data.type) {
             case "new-image":
-                transferImages();
-                document.getElementById("img-0-alt").hidden = true;
-                img = document.getElementById("img-0-img");
-                img.src = data.image_url;
-                img.hidden = false;
-                writeImageInfo(
-                    data.origin,
-                    "img-0-origin",
-                    data.insp_result,
-                    "img-0-type",
-                    (data.trust * 100).toFixed(2) + '%',
-                    "img-0-trust"
-                )
+                if (selectedOrigins.includes(data.origin) || noneChecked) {
+                    transferImages();
+                    document.getElementById("img-0-alt").hidden = true;
+                    img = document.getElementById("img-0-img");
+                    img.src = data.image_url;
+                    img.hidden = false;
+                    writeImageInfo(
+                        data.origin,
+                        "img-0-origin",
+                        data.insp_result,
+                        "img-0-type",
+                        (data.trust * 100).toFixed(2) + '%',
+                        "img-0-trust"
+                    )
+                }
         }
     };
 
