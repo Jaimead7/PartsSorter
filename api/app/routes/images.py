@@ -14,6 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any, Optional, Sequence
 from uuid import UUID
 
@@ -22,9 +23,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.images import (db_create_new_image, db_delete_images,
                                db_get_image, db_get_images,
-                               db_process_new_image, db_update_image)
+                               db_get_next_hist_image, db_process_new_image,
+                               db_update_image)
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
+from ..models.api import ImageHistResponse
 from ..models.database import Image, ImageProcessed
 
 images_router: APIRouter = APIRouter()
@@ -45,6 +48,91 @@ async def create_new_image(
         session= session,
         file= file,
         origin= origin
+    )
+
+@images_router.get(
+    '/',
+    response_model= list[Image],
+    summary= 'Get Image\'s of the database.',
+    response_description= 'The Image\'s list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_images(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    uuids: Annotated[list[UUID], Query()] = [],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
+) -> Sequence[Image]:
+    return await db_get_images(
+        session= session,
+        images= [Image(id= uuid) for uuid in uuids],
+        limit= limit,
+        offset= offset
+    )
+
+@images_router.delete(
+    '/',
+    summary= 'Delete Image\'s from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_images(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    uuids: Annotated[list[UUID], Body()]
+) -> None:
+    images: list[Any] = [Image(id= uuid) for uuid in uuids]
+    await db_delete_images(
+        session= session,
+        images= images
+    )
+
+@images_router.post(
+    '/process',
+    response_model= ImageProcessed,
+    summary= 'Process new Image and save it to the database.',
+    response_description= 'The new Image created.',
+    status_code= status.HTTP_201_CREATED
+)
+async def process_new_image(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    file: UploadFile,
+    origin: Annotated[Optional[str], Body()] = None
+) -> ImageProcessed:
+    return await db_process_new_image(
+        session= session,
+        file= file,
+        origin_name= origin
+    )
+
+@images_router.get(
+    '/hist/next',
+    response_model= ImageHistResponse,
+    summary= 'Get the next image of the database.',
+    response_description= 'The Image data.',
+    status_code= status.HTTP_200_OK
+)
+async def get_next_hist_image(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    extension: Annotated[list[str], Query()] = [],
+    start_date: Annotated[datetime, Query()] = datetime.now(timezone.utc) - timedelta(days=30),
+    end_date: Annotated[datetime, Query()] = datetime.now(timezone.utc),
+    inspection_result: Annotated[list[str], Query()] = [],
+    origin: Annotated[list[str], Query()] = [],
+    true_result: Annotated[list[str], Query()] = [],
+    min_trust: Annotated[float, Query()] = 0.,
+    max_trust: Annotated[float, Query()] = 1.,
+    index: Annotated[int, Query()] = 0
+)-> ImageHistResponse:
+    return await db_get_next_hist_image(
+        session= session,
+        extensions= extension,
+        start_date= start_date,
+        end_date= end_date,
+        inspection_results= inspection_result,
+        origins= origin,
+        true_results= true_result,
+        min_trust= min_trust,
+        max_trust= max_trust,
+        index= index
     )
 
 @images_router.put(
@@ -88,21 +176,6 @@ async def delete_image(
         images= [Image(id= uuid)]
     )
 
-@images_router.delete(
-    '/',
-    summary= 'Delete Image\'s from the database.',
-    status_code= status.HTTP_204_NO_CONTENT
-)
-async def delete_images(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    uuids: Annotated[list[UUID], Body()]
-) -> None:
-    images: list[Any] = [Image(id= uuid) for uuid in uuids]
-    await db_delete_images(
-        session= session,
-        images= images
-    )
-
 @images_router.get(
     '/{uuid}',
     response_model= list[Image],
@@ -117,42 +190,4 @@ async def get_image(
     return await db_get_image(
         session= session,
         image= Image(id= uuid)
-    )
-
-@images_router.get(
-    '/',
-    response_model= list[Image],
-    summary= 'Get Image\'s of the database.',
-    response_description= 'The Image\'s list.',
-    status_code= status.HTTP_200_OK
-)
-async def get_images(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    uuids: Annotated[list[UUID], Query()] = [],
-    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
-    offset: Annotated[int, Query()] = 0
-) -> Sequence[Image]:
-    return await db_get_images(
-        session= session,
-        images= [Image(id= uuid) for uuid in uuids],
-        limit= limit,
-        offset= offset
-    )
-
-@images_router.post(
-    '/process',
-    response_model= ImageProcessed,
-    summary= 'Process new Image and save it to the database.',
-    response_description= 'The new Image created.',
-    status_code= status.HTTP_201_CREATED
-)
-async def process_new_image(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    file: UploadFile,
-    origin: Annotated[Optional[str], Body()] = None
-) -> ImageProcessed:
-    return await db_process_new_image(
-        session= session,
-        file= file,
-        origin_name= origin
     )

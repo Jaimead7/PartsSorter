@@ -101,26 +101,17 @@ async def db_get_inspection_results(
     limit: int,
     offset: int
 ) -> Sequence[InspectionResult]:
+    statement: SelectOfScalar[InspectionResult] = select(InspectionResult)
     if len(inspection_results) > 0:
-        statement: SelectOfScalar[InspectionResult] = (
-            select(InspectionResult)
-            .where(
-                col(InspectionResult.name).in_(
-                    [
-                        inspection_result.name
-                        for inspection_result in inspection_results
-                    ]
-                )
+        statement = statement.where(
+            col(InspectionResult.name).in_(
+                [
+                    inspection_result.name
+                    for inspection_result in inspection_results
+                ]
             )
-            .offset(offset)
-            .limit(limit)
         )
-    else:
-        statement: SelectOfScalar[InspectionResult] = (
-            select(InspectionResult)
-            .offset(offset)
-            .limit(limit)
-        )
+    statement = statement.offset(offset).limit(limit)
     db_inspection_results: ScalarResult[InspectionResult] = await session.scalars(statement)
     db_inspection_results_list: Sequence[InspectionResult] = db_inspection_results.all()
     if len(db_inspection_results_list) == 0:

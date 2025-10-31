@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     htmlElement.setAttribute('data-bs-theme', savedTheme);
     updateToggleButton(savedTheme);
-    
+
     themeToggle.addEventListener('click', function() {
         const currentTheme = htmlElement.getAttribute('data-bs-theme');
         const newTheme = currentTheme === 'dark' ? 'custom-dark' : 'dark';
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('theme', newTheme);
         updateToggleButton(newTheme);
     });
-    
+
     function updateToggleButton(theme) {
         if (theme === 'dark') {
             themeToggle.classList.remove('btn-secondary');

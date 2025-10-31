@@ -160,19 +160,12 @@ async def db_get_models(
     limit: int,
     offset: int
 ) -> Sequence[Model]:
+    statement: SelectOfScalar[Model] = select(Model)
     if len(models) > 0:
-        statement: SelectOfScalar[Model] = (
-            select(Model)
-            .where(col(Model.name).in_([model.name for model in models]))
-            .offset(offset)
-            .limit(limit)
+        statement = statement.where(
+            col(Model.name).in_([model.name for model in models])
         )
-    else:
-        statement: SelectOfScalar[Model] = (
-            select(Model)
-            .offset(offset)
-            .limit(limit)
-        )
+    statement = statement.offset(offset).limit(limit)
     db_models: ScalarResult[Model] = await session.scalars(statement)
     db_models_list: Sequence[Model] = db_models.all()
     if len(db_models_list) == 0:
