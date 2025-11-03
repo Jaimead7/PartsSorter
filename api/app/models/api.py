@@ -50,6 +50,7 @@ class ImageStreamResponse(BaseModel):
     image_url: str
     insp_result: str =  'No result'
     origin: str = 'Unknown'
+    model: str = 'Unknown'
     true_result: str = 'No result'
     trust: Optional[float] = None
 
@@ -59,6 +60,7 @@ class ImageStreamResponse(BaseModel):
         image_url: str,
         insp_result: Optional[str],
         origin: Optional[str],
+        model: Optional[str],
         true_result: Optional[str],
         trust: Optional[float]
     ) -> Self:
@@ -66,6 +68,7 @@ class ImageStreamResponse(BaseModel):
             image_url= image_url,
             insp_result= insp_result if insp_result is not None else 'No result',
             origin= origin if origin is not None else 'Unknown',
+            model= model if model is not None else 'Unknown',
             true_result= true_result if true_result is not None else 'No result',
             trust= trust
         )
@@ -80,6 +83,7 @@ class ImageHistResponse(ImageStreamResponse):
         image_url: str,
         insp_result: Optional[str],
         origin: Optional[str],
+        model: Optional[str],
         true_result: Optional[str],
         trust: Optional[float],
         index: Optional[int] = None,
@@ -89,6 +93,7 @@ class ImageHistResponse(ImageStreamResponse):
             image_url= image_url,
             insp_result= insp_result if insp_result is not None else 'No result',
             origin= origin if origin is not None else 'Unknown',
+            model= model if model is not None else 'Unknown',
             true_result= true_result if true_result is not None else 'No result',
             trust= trust,
             index= index if index is not None else 0,

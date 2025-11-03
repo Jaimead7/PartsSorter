@@ -76,7 +76,7 @@ class Origin(SQLModel, table= True):
     )
     params: Optional[dict[str, Any]] = Field(
         default= None,
-        sa_type= JSON #JSONB  #TODO: Change to work with sqlite
+        sa_type= JSON #JSONB  #CHECK: Works ok with postgres?
     )
 
     images_of_origin: Optional[list['Image']] = Relationship(
@@ -109,6 +109,9 @@ class Model(SQLModel, table= True):
     )
     origins_of_model: Optional[list['Origin']] = Relationship(
         back_populates= 'model_of_origin',
+    )
+    images_of_model: Optional[list['Image']] = Relationship(
+        back_populates= 'model_of_image',
     )
 
     @property
@@ -167,6 +170,12 @@ class BaseImage(SQLModel):
         foreign_key= 'origins.name',
         ondelete= 'SET NULL'
     )
+    model: Optional[str] = Field(
+        default= None,
+        nullable= True,
+        foreign_key= 'models.name',
+        ondelete= 'SET NULL'
+    )
     true_result: Optional[str] = Field(
         default= None,
         nullable= True,
@@ -213,6 +222,9 @@ class Image(BaseImage, table= True):
     )
     origin_of_image: Optional['Origin'] = Relationship(
         back_populates= 'images_of_origin'
+    )
+    models_of_image: Optional['Model'] = Relationship(
+        back_populates= 'images_of_model'
     )
 
 

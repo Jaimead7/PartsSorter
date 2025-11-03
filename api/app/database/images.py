@@ -48,11 +48,11 @@ async def _db_add_image(
     await session.commit()
     await session.refresh(image)
     return image
-    
+
 async def db_create_new_image(
     session: AsyncSession,
     file: UploadFile,
-    origin: Optional[str]
+    origin: Optional[str] = None
 ) -> Image:
     if file.filename is None:
         msg: str = f'File does not have a name.'
@@ -73,6 +73,17 @@ async def db_create_new_image(
             status_code= status.HTTP_400_BAD_REQUEST,
             detail= msg
         )
+    try:
+        if origin is not None:
+            await db_get_origin(
+                session= session,
+                origin= Origin(
+                    name= origin
+                )
+            )
+    except HTTPException:
+        my_logger.warning(f'"{origin}" is not a valid Origin. Origin set to NULL.')
+        origin = None
     image: Image = Image(extension= file_ext, origin= origin)
     await db_save_image(
         image= image,
@@ -88,7 +99,7 @@ async def db_update_image(
     session: AsyncSession,
     image: Image,
 ) -> Image:
-    db_image: Image = await db_get_image(
+    db_image: Image = await db_get_image_by_id(
         session= session,
         image= image
     )
@@ -102,18 +113,7 @@ async def db_update_image(
             )
         db_image.inspection_result = image.inspection_result
     except HTTPException:
-        ...
-    try:
-        if image.true_result is not None:
-            await db_get_inspection_result(
-                session= session,
-                inspection_result= InspectionResult(
-                    name= image.true_result
-                )
-            )
-        db_image.true_result = image.true_result
-    except HTTPException:
-        ...
+        my_logger.warning(f'"{image.inspection_result}" not updated.')
     try:
         if image.origin is not None:
             await db_get_origin(
@@ -124,7 +124,18 @@ async def db_update_image(
             )
         db_image.origin = image.origin
     except HTTPException:
-        ...
+        my_logger.warning(f'"{image.origin}" not updated.')
+    try:
+        if image.true_result is not None:
+            await db_get_inspection_result(
+                session= session,
+                inspection_result= InspectionResult(
+                    name= image.true_result
+                )
+            )
+        db_image.true_result = image.true_result
+    except HTTPException:
+        my_logger.warning(f'"{image.true_result}" not updated.')
     db_image.trust = image.trust
     db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     return await _db_add_image(
@@ -136,7 +147,7 @@ async def db_delete_images(
     session: AsyncSession,
     images: list[Image]
 ) -> None:
-    db_images: Sequence[Image] = await db_get_images(
+    db_images: Sequence[Image] = await db_get_images_by_ids(
         session= session,
         images= images,
         limit= len(images),
@@ -146,7 +157,7 @@ async def db_delete_images(
         await session.delete(db_image)
     await session.commit()
 
-async def db_get_image(
+async def db_get_image_by_id(
     session: AsyncSession,
     image: Image
 ) -> Image:
@@ -163,7 +174,7 @@ async def db_get_image(
             detail= msg
         )
 
-async def db_get_images(
+async def db_get_images_by_ids(
     session: AsyncSession,
     images: list[Image],
     limit: int,
@@ -247,6 +258,7 @@ async def db_process_new_image(
             raise StopBlock
         db_image.inspection_result = inpection_result.name
         db_image.trust = trust
+        db_image.model = db_origin.model
         db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
         db_image = await _db_add_image(
             session= session,
@@ -274,6 +286,7 @@ async def db_process_new_image(
         image_url= db_image.external_url,
         insp_result= db_image.inspection_result,
         origin= db_image.origin,
+        model= db_image.model,
         true_result= db_image.true_result,
         trust= db_image.trust
     )
@@ -286,6 +299,7 @@ async def db_get_next_hist_image(
     end_date: datetime,
     inspection_results: list[str],
     origins: list[str],
+    models: list[str],
     true_results: list[str],
     min_trust: float,
     max_trust: float,
@@ -298,6 +312,7 @@ async def db_get_next_hist_image(
         end_date= end_date,
         inspection_results= inspection_results,
         origins= origins,
+        models= models,
         true_results= true_results,
         min_trust= min_trust,
         max_trust= max_trust
@@ -309,6 +324,7 @@ async def db_get_next_hist_image(
         end_date= end_date,
         inspection_results= inspection_results,
         origins= origins,
+        models= models,
         true_results= true_results,
         min_trust= min_trust,
         max_trust= max_trust,
@@ -326,6 +342,7 @@ async def db_get_next_hist_image(
         image_url= db_images[0].external_url,
         insp_result= db_images[0].inspection_result,
         origin= db_images[0].origin,
+        model= db_images[0].model,
         true_result= db_images[0].true_result,
         trust= db_images[0].trust,
         index= index,
@@ -339,6 +356,7 @@ async def db_get_total_images_with_filters(
     end_date: datetime,
     inspection_results: list[str],
     origins: list[str],
+    models: list[str],
     true_results: list[str],
     min_trust: float,
     max_trust: float
@@ -366,6 +384,10 @@ async def db_get_total_images_with_filters(
         statement = statement.where(
             col(Image.origin).in_(origins)
         )
+    if len(models) > 0:
+        statement = statement.where(
+            col(Image.model).in_(models)
+        )
     if len(true_results) > 0:
         statement = statement.where(
             col(Image.true_result).in_(true_results)
@@ -380,6 +402,7 @@ async def db_get_images_with_filters(
     end_date: datetime,
     inspection_results: list[str],
     origins: list[str],
+    models: list[str],
     true_results: list[str],
     min_trust: float,
     max_trust: float,
@@ -408,6 +431,10 @@ async def db_get_images_with_filters(
     if len(origins) > 0:
         statement = statement.where(
             col(Image.origin).in_(origins)
+        )
+    if len(models) > 0:
+        statement = statement.where(
+            col(Image.model).in_(models)
         )
     if len(true_results) > 0:
         statement = statement.where(

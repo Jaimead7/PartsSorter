@@ -41,6 +41,7 @@ class ImageStreamSocketManager(NoInstantiable):
         image_url: str,
         insp_result: Optional[str],
         origin: Optional[str],
+        model: Optional[str],
         true_result: Optional[str],
         trust: Optional[float]
     ) -> None:
@@ -48,6 +49,7 @@ class ImageStreamSocketManager(NoInstantiable):
             image_url= image_url,
             insp_result= insp_result,
             origin= origin,
+            model= model,
             true_result= true_result,
             trust= trust
         )

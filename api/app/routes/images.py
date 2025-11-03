@@ -22,7 +22,7 @@ from fastapi import APIRouter, Body, Depends, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.images import (db_create_new_image, db_delete_images,
-                               db_get_image, db_get_images,
+                               db_get_image_by_id, db_get_images_by_ids,
                                db_get_next_hist_image, db_process_new_image,
                                db_update_image)
 from ..database.manager import get_session
@@ -63,7 +63,7 @@ async def get_images(
     limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
     offset: Annotated[int, Query()] = 0
 ) -> Sequence[Image]:
-    return await db_get_images(
+    return await db_get_images_by_ids(
         session= session,
         images= [Image(id= uuid) for uuid in uuids],
         limit= limit,
@@ -117,6 +117,7 @@ async def get_next_hist_image(
     end_date: Annotated[datetime, Query()] = datetime.now(timezone.utc),
     inspection_result: Annotated[list[str], Query()] = [],
     origin: Annotated[list[str], Query()] = [],
+    model: Annotated[list[str], Query()] = [],
     true_result: Annotated[list[str], Query()] = [],
     min_trust: Annotated[float, Query()] = 0.,
     max_trust: Annotated[float, Query()] = 1.,
@@ -129,6 +130,7 @@ async def get_next_hist_image(
         end_date= end_date,
         inspection_results= inspection_result,
         origins= origin,
+        models= model,
         true_results= true_result,
         min_trust= min_trust,
         max_trust= max_trust,
@@ -187,7 +189,7 @@ async def get_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     uuid: Annotated[UUID, Path()]
 ) -> Image:
-    return await db_get_image(
+    return await db_get_image_by_id(
         session= session,
         image= Image(id= uuid)
     )
