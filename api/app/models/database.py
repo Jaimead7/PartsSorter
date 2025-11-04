@@ -223,7 +223,7 @@ class Image(BaseImage, table= True):
     origin_of_image: Optional['Origin'] = Relationship(
         back_populates= 'images_of_origin'
     )
-    models_of_image: Optional['Model'] = Relationship(
+    model_of_image: Optional['Model'] = Relationship(
         back_populates= 'images_of_model'
     )
 
