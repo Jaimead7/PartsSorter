@@ -21,7 +21,7 @@
 
 import asyncio
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import NoReturn, Optional
 
 from gpio.gpio import GPIO
 from remote.models import ActuatorParams
@@ -34,38 +34,42 @@ async def get_sensors_interval_ms() -> float:
     params: ActuatorParams = await get_actuator_params()
     return (params['sensors_distance'] / params['tape_speed'])*1000
 
-async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> None:
-    last_sensor_val: bool = False
-    new_result: Optional[Result] = None
-    SENSORS_INTERVAL_MS: float = await get_sensors_interval_ms()
-    my_logger.info(f'Actuator cycle started.')
-    while True:
-        await asyncio.sleep(0.001)
-        new_sensor_value: Optional[bool] = GPIO.read(ACTUATOR_SENSOR_PIN)
-        if new_sensor_value is None:
-            continue
-        if new_sensor_value and not last_sensor_val:
-            my_logger.debug(f'New part on the actuator.')
-            now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
-            new_result = Result(
-                date= now,
-                result= False
-            )
-            while not results_queue.empty():
-                try:
-                    new_result = results_queue.get_nowait()
-                except asyncio.QueueEmpty:
-                    pass
+async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> NoReturn:
+    try:
+        last_sensor_val: bool = False
+        new_result: Optional[Result] = None
+        SENSORS_INTERVAL_MS: float = await get_sensors_interval_ms()
+        my_logger.info(f'Actuator cycle started.')
+        while True:
+            await asyncio.sleep(0.001)
+            new_sensor_value: Optional[bool] = GPIO.read(ACTUATOR_SENSOR_PIN)
+            if new_sensor_value is None:
+                continue
+            if new_sensor_value and not last_sensor_val:
+                my_logger.debug(f'New part on the actuator.')
+                now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
+                new_result = Result(
+                    date= now,
+                    result= False
+                )
+                while not results_queue.empty():
+                    try:
+                        new_result = results_queue.get_nowait()
+                    except asyncio.QueueEmpty:
+                        pass
+                    if new_result is not None:
+                        if now - new_result['date'] < timedelta(milliseconds= SENSORS_INTERVAL_MS):
+                            my_logger.debug(f'New part to push with Result{new_result}.')
+                            break
+                    new_result = None
+            if not new_sensor_value and last_sensor_val:
+                my_logger.debug(f'Part to be pushed with Result{new_result}.')
                 if new_result is not None:
-                    if now - new_result['date'] < timedelta(milliseconds= SENSORS_INTERVAL_MS):
-                        my_logger.debug(f'New part to push with Result{new_result}.')
-                        break
+                    GPIO.write(ACTUATOR_PIN, new_result["result"])
+                    await asyncio.sleep(1)
+                    GPIO.write(ACTUATOR_PIN, False)
                 new_result = None
-        if not new_sensor_value and last_sensor_val:
-            my_logger.debug(f'Part to be pushed with Result{new_result}.')
-            if new_result is not None:
-                GPIO.write(ACTUATOR_PIN, new_result["result"])
-                await asyncio.sleep(1)
-                GPIO.write(ACTUATOR_PIN, False)
-            new_result = None
-        last_sensor_val = new_sensor_value
+            last_sensor_val = new_sensor_value
+    except asyncio.CancelledError:
+        my_logger.info('Actuator cycle cancelled.')
+        raise

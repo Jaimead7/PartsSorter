@@ -20,6 +20,9 @@
 
 
 import asyncio
+import signal
+import sys
+from typing import NoReturn
 
 from actuator import actuator_cycle
 from camera import CameraManager
@@ -31,13 +34,40 @@ results_queue: asyncio.Queue[Result] = asyncio.Queue()
 async def main() -> None:
     my_camera = CameraManager(CAMERA_INDEX)
     my_logger.info('Capture starting...')
-    await asyncio.gather(
-        my_camera.cycle(results_queue),
-        actuator_cycle(results_queue),
-        return_exceptions= False
+    camera_task: asyncio.Task[NoReturn] = asyncio.create_task(
+        my_camera.cycle(results_queue)
     )
-    my_logger.info('Capture stopping...')
+    actuator_task: asyncio.Task[NoReturn] = asyncio.create_task(
+        actuator_cycle(results_queue)
+    )
 
+    def signal_handler() -> None:
+        my_logger.info('Received shutdown signal.')
+        camera_task.cancel()
+        actuator_task.cancel()
+
+    loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
+    for sig in [signal.SIGTERM, signal.SIGINT]:
+        loop.add_signal_handler(sig, signal_handler)
+    try:
+        await asyncio.gather(
+            camera_task,
+            actuator_task,
+            return_exceptions=False
+        )
+    except asyncio.CancelledError:
+        my_logger.info('Tasks cancelled.')
+    except Exception as e:
+        my_logger.error(f'Error in main: {e}.')
+        raise
+    finally:
+        my_logger.info('Capture stopping...')
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+        my_logger.info('Application shutdown completed successfully.')
+        sys.exit(0)
+    except Exception as e:
+        my_logger.error(f'Application error: {e}.')
+        sys.exit(1)

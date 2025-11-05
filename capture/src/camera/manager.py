@@ -124,23 +124,27 @@ class CameraManager:
         return image
 
     async def cycle(self, results_queue: asyncio.Queue[Result]) -> NoReturn:
-        last_sensor_val: bool = False
-        with self.get_video_capture() as cap:
-            await self.load_camera_props(cap)
-            my_logger.info(f'Camera-{self.index} cycle started.')
-            while True:
-                await asyncio.sleep(0.001)
-                new_sensor_value: Optional[bool] = GPIO.read(CAMERA_SENSOR_PIN)
-                if new_sensor_value is None:
-                    continue
-                if new_sensor_value and not last_sensor_val:
-                    my_logger.debug('Capturing new image...')
-                    date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
-                    result: bool = await process_image(self.capture_image(cap))
-                    queue_result: Result = Result(
-                        date= date,
-                        result= result
-                    )
-                    await results_queue.put(queue_result)
-                    my_logger.debug(f'Image captured with Result{queue_result}.')
-                last_sensor_val = new_sensor_value
+        try:
+            last_sensor_val: bool = False
+            with self.get_video_capture() as cap:
+                await self.load_camera_props(cap)
+                my_logger.info(f'Camera-{self.index} cycle started.')
+                while True:
+                    await asyncio.sleep(0.001)
+                    new_sensor_value: Optional[bool] = GPIO.read(CAMERA_SENSOR_PIN)
+                    if new_sensor_value is None:
+                        continue
+                    if new_sensor_value and not last_sensor_val:
+                        my_logger.debug('Capturing new image...')
+                        date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
+                        result: bool = await process_image(self.capture_image(cap))
+                        queue_result: Result = Result(
+                            date= date,
+                            result= result
+                        )
+                        await results_queue.put(queue_result)
+                        my_logger.debug(f'Image captured with Result{queue_result}.')
+                    last_sensor_val = new_sensor_value
+        except asyncio.CancelledError:
+            my_logger.info('Camera cycle cancelled.')
+            raise
