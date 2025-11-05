@@ -29,19 +29,27 @@ The system consists on three parts:
 
 ## Installation  
 
+
 ## License
 
-This project is composed of multiple components under different licenses:
+This repository contains multiple independently licensed components:
 
-### Project Structure and Licensing
+### Component Licenses
 
-- **Supporting files & scripts**: [MIT License](./LICENSE)
-- **Capture App**: [MIT License](./capture/LICENSE)
-- **API**: [GNU Affero General Public License v3.0](./api/LICENSE)
-- **Web App**: [MIT License](./web/LICENSE)
+| Component | License | Description |
+|-----------|---------|-------------|
+| Project Infrastructure | [MIT](./LICENSE) | Common scripts, configs, and documentation |
+| Capture App | [MIT](./capture/LICENSE) | Data capture utility |
+| API Server | [AGPL-3.0](./api/LICENSE) | **⚠️ Copyleft license** - see important notes below |
+| Web Application | [MIT](./web/LICENSE) | User interface component |
 
-### Important Notes
+### Important Licensing Notes
 
-⚠️ **License Compatibility Notice**: The API component is licensed under AGPL-3.0, which has specific requirements for distribution and modification. Please review the license terms carefully before using this component.
+⚠️ **AGPL-3.0 Compliance**: The API component is licensed under GNU Affero GPL v3.0. This license requires that:
+- Modified versions must be released under the same license
+- Source code must be made available to network users
+- All derivative works inherit the AGPL-3.0 terms
 
-Each subproject contains its own `LICENSE` file and `ATTRIBUTIONS.md` with third-party license information.
+**Third-Party Attributions**: Each subproject includes an `ATTRIBUTIONS.md` file detailing third-party licenses and copyrights.
+
+For specific licensing questions, please consult the individual `LICENSE` files in each directory.

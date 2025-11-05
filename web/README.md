@@ -39,4 +39,26 @@ docker run -d \
 ```
 
 ## License  
-[MIT](./LICENSE)  
+This component is licensed under the **[MIT License](./LICENSE)**.  
+### Permissions  
+- ✅ Commercial use  
+- ✅ Modification  
+- ✅ Distribution  
+- ✅ Private use  
+- ✅ Sublicensing  
+
+### Requirements  
+- ℹ️ Include copyright notice  
+- ℹ️ Include license copy  
+
+### Limitations  
+- ❌ No liability  
+- ❌ No warranty  
+
+### Third-Party Attributions  
+This software includes third-party components under various licenses.  
+See **[ATTRIBUTIONS.md](./ATTRIBUTIONS.md)** for complete details.  
+
+### Project Context  
+This component is part of a larger project with multiple licenses.  
+Other components may have different license terms.  
