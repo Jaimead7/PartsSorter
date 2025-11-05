@@ -29,7 +29,19 @@ The system consists on three parts:
 
 ## Installation  
 
-## License  
-- **Capture App** &rarr; [MIT](./capture/LICENSE)  
-- **API** &rarr; [AGPL-3.0](./api/LICENSE)  
-- **Web App** &rarr; [MIT](./web/LICENSE)  
+## License
+
+This project is composed of multiple components under different licenses:
+
+### Project Structure and Licensing
+
+- **Supporting files & scripts**: [MIT License](./LICENSE)
+- **Capture App**: [MIT License](./capture/LICENSE)
+- **API**: [GNU Affero General Public License v3.0](./api/LICENSE)
+- **Web App**: [MIT License](./web/LICENSE)
+
+### Important Notes
+
+⚠️ **License Compatibility Notice**: The API component is licensed under AGPL-3.0, which has specific requirements for distribution and modification. Please review the license terms carefully before using this component.
+
+Each subproject contains its own `LICENSE` file and `ATTRIBUTIONS.md` with third-party license information.
