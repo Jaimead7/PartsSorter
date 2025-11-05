@@ -20,6 +20,12 @@ This software includes components from third-party libraries under the following
 **Source:** https://github.com/pallets/quart  
 **Full License:** [MIT License](./licenses/MIT-quart.txt)  
 
+## Bootstrap (CDN)  
+**License:** MIT License  
+**Copyright:** Copyright (c) 2011-2025 The Bootstrap Authors  
+**Source:** https://github.com/twbs/bootstrap  
+**Delivery:** Via jsDelivr CDN  
+**Full License:** [MIT](./licenses/MIT-Bootstrap.txt)  
 
 # Complete license texts
 Complete license texts are included in the [`./licenses/`](./licenses) directory.  
