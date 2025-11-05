@@ -25,6 +25,8 @@ services:
   label-studio:
     image: heartexlabs/label-studio:latest
     container_name: label-studio
+    init: true
+    restart: unless-stopped
     ports:
       - "8080:8080"
     volumes:
@@ -37,6 +39,7 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: postgres
+    init: true
     restart: unless-stopped
     env_file:
       - path: ./postgres/.env.docker
@@ -53,6 +56,7 @@ services:
       context: ./api
       dockerfile: Dockerfile
     container_name: api
+    init: true
     restart: unless-stopped
     depends_on:
       - postgres
@@ -75,6 +79,7 @@ services:
       context: ./web
       dockerfile: Dockerfile
     container_name: web
+    init: true
     restart: unless-stopped
     depends_on:
       - api
@@ -93,6 +98,7 @@ services:
       context: ./capture
       dockerfile: Dockerfile
     container_name: capture
+    init: true
     restart: unless-stopped
     depends_on:
       - api
