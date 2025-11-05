@@ -14,7 +14,7 @@ Program for capturing images and manage actuator signals.
 ### Create a .env.docker.  
 Use the [.env.example](./.env.example) as example.  
 - ORIGIN_NAME &rarr; Name for the device. This name should be on the database for manage the origin of the images uploaded.  
-- API_IP &rarr; Base IP of the API.  
+- API_URL &rarr; Base IP of the API.  
 - LOGGING_LVL &rarr; Logging level.  
 - LOGS_PATH &rarr; Path where the logs will be saved.  
 - ACTUATOR_PIN &rarr; Output pin connected to the relay of the actuator.  

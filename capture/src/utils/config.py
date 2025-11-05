@@ -31,7 +31,7 @@ from pyUtils import (MyLogger, ProjectPathsDict, save_pyutils_logs,
 
 class EnvVars(Enum):
     ORIGIN_NAME = 'ORIGIN_NAME'
-    API_IP = 'API_IP'
+    API_URL = 'API_URL'
     LOGGING_LVL = 'LOGGING_LVL'
     ACTUATOR_PIN = 'ACTUATOR_PIN'
     CAMERA_SENSOR_PIN = 'CAMERA_SENSOR_PIN'
@@ -77,12 +77,12 @@ if _env_aux is None:
     my_logger.critical(f'ImportError: {msg}')
     raise ImportError(msg)
 ORIGIN_NAME: str = _env_aux
-_env_aux: Optional[str] = getenv(EnvVars.API_IP.value, None)
+_env_aux: Optional[str] = getenv(EnvVars.API_URL.value, None)
 if _env_aux is None:
-    msg: str = f'Could not import "{EnvVars.API_IP.value}" from env vars.'
+    msg: str = f'Could not import "{EnvVars.API_URL.value}" from env vars.'
     my_logger.critical(f'ImportError: {msg}')
     raise ImportError(msg)
-API_IP: Optional[str] = getenv(EnvVars.API_IP.value, None)
+API_URL: Optional[str] = getenv(EnvVars.API_URL.value, None)
 del(_env_aux)
 
 # CONFIG

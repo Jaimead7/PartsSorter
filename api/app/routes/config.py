@@ -28,5 +28,5 @@ config_router = APIRouter()
     response_description= 'The API IP.',
     status_code= status.HTTP_200_OK
 )
-async def get_api_ip() -> ApiIPResponse:
+async def get_API_URL() -> ApiIPResponse:
     return ApiIPResponse(ip= f'{HOST_IP}:{SERVER_PORT}')
