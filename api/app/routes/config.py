@@ -15,11 +15,26 @@
 
 
 from fastapi import APIRouter, status
+from fastapi.responses import JSONResponse
 
 from ..dependencies.config import HOST_IP, SERVER_PORT
-from ..models.api import ApiIPResponse
+from ..models.api import ApiIPResponse, HealthResponse
 
 config_router = APIRouter()
+
+
+@config_router.get(
+    '/health',
+    response_model= HealthResponse,
+    summary= 'Health check.',
+    response_description= 'Health check for the api.',
+    status_code= status.HTTP_200_OK
+)
+async def health_check() -> HealthResponse:
+    return HealthResponse(
+        status= 'healthy',
+        service= 'api'
+    )
 
 @config_router.get(
     '/ip',

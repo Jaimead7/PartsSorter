@@ -24,6 +24,10 @@ async def home() -> str:
         page_title= 'Part inspection'
     )
 
+@app.get('/health')
+async def health_check() -> dict:
+    return {"status": "healthy", "service": "web"}
+
 app.register_blueprint(inspection_bp)
 app.register_blueprint(api_bp)
 app.register_blueprint(wn_bp)

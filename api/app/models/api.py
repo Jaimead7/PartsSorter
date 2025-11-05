@@ -20,6 +20,11 @@ from pydantic import BaseModel
 from typing_extensions import Self
 
 
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
 class ApiIPResponse(BaseModel):
     ip: str
 

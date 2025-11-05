@@ -43,6 +43,9 @@ LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/t
 # Set the working directory
 WORKDIR /app
 
+# Instal curl for healthcheck
+RUN apk update && apk add --no-cache curl
+
 # Copy dependencies
 COPY --from=builder /app/.venv /app/.venv
 

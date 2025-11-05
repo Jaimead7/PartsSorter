@@ -35,6 +35,12 @@ services:
     environment:
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/local-storage/images/training
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   postgres:
     image: postgres:15-alpine
@@ -50,6 +56,12 @@ services:
       - postgres-volume:/var/lib/postgresql/data
     networks:
       - db-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   api:
     build:
@@ -58,7 +70,8 @@ services:
     container_name: api
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     env_file:
       - path: ./api/.env.docker
         required: true
@@ -72,6 +85,12 @@ services:
     networks:
       - db-network
       - api-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/config/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   web:
     build:
@@ -80,7 +99,8 @@ services:
     container_name: web
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     env_file:
       - path: ./web/.env.docker
         required: true
@@ -90,6 +110,12 @@ services:
       - logs-volume:/app/dist/logs
     networks:
       - api-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   capture:
     build:
@@ -99,7 +125,8 @@ services:
     init: true
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     env_file:
       - path: ./capture/.env.docker
         required: true
