@@ -27,5 +27,12 @@ This software includes components from third-party libraries under the following
 **Delivery:** Via jsDelivr CDN  
 **Full License:** [MIT](./licenses/MIT-Bootstrap.txt)  
 
+## Bootstrap Icons (CDN)  
+**License:** MIT License  
+**Copyright:** Copyright (c) 2019-2025 The Bootstrap Authors  
+**Source:** https://github.com/twbs/icons  
+**Delivery:** Via jsDelivr CDN  
+**Full License:** [MIT](./licenses/MIT-Bootstrap-Icons.md)  
+
 # Complete license texts
 Complete license texts are included in the [`./licenses/`](./licenses) directory.  
