@@ -10,7 +10,7 @@ This software includes components from third-party libraries under the following
 
 ## opencv-python-headless  
 **License:** Apache License 2.0  
-**Copyright:** (C) 2020-2023, OpenCV team  
+**Copyright:** (c) 2020-2023, OpenCV team  
 **Source:** https://github.com/opencv/opencv-python  
 **Full License:** [Apache-2.0](./licenses/Apache-2.0.txt)  
 
