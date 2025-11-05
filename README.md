@@ -30,6 +30,6 @@ The system consists on three parts:
 ## Installation  
 
 ## License  
-- **Capture App** &rarr; [AGPL-3.0](./capture/LICENSE)  
+- **Capture App** &rarr; [MIT](./capture/LICENSE)  
 - **API** &rarr; [AGPL-3.0](./api/LICENSE)  
 - **Web App** &rarr; [MIT](./web/LICENSE)  
