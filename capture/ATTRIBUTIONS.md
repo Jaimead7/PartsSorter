@@ -2,6 +2,12 @@
 
 This software includes components from third-party libraries under the following licenses:  
 
+## jaimead7-pyutils  
+**License:** MIT License  
+**Copyright:** (c) 2025 Jaime Álvarez Díaz  
+**Source:** https://github.com/Jaimead7/PyUtils  
+**Full License:** [MIT License](./licenses/MIT-jaimead7-pyutils.txt)  
+
 ## httpx  
 **License:** BSD 3-Clause "New" or "Revised" License  
 **Copyright:** (c) 2019-2023, Encode OSS Ltd.  

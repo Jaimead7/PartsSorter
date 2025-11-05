@@ -2,9 +2,15 @@
 
 This software includes components from third-party libraries under the following licenses:  
 
+## jaimead7-pyutils  
+**License:** MIT License  
+**Copyright:** (c) 2025 Jaime Álvarez Díaz  
+**Source:** https://github.com/Jaimead7/PyUtils  
+**Full License:** [MIT License](./licenses/MIT-jaimead7-pyutils.txt)  
+
 ## aiofiles  
 **License:** Apache License 2.0  
-**Copyright:** (c) Copyright 2016 Tin Tvrtkovic  
+**Copyright:** (c) 2016 Tin Tvrtkovic  
 **Source:** https://github.com/Tinche/aiofiles  
 **Full License:** [Apache-2.0](./licenses/Apache-2.0.txt)  
 
