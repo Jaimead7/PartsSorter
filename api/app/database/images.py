@@ -305,7 +305,7 @@ async def db_get_next_hist_image(
     max_trust: float,
     index: int
 ) -> ImageHistResponse:
-    total_images: int = await db_get_total_images_with_filters(
+    total_images: int = await db_get_count_images_with_filters(
         session= session,
         extensions= extensions,
         start_date= start_date,
@@ -349,7 +349,7 @@ async def db_get_next_hist_image(
         total= total_images
     )
 
-async def db_get_total_images_with_filters(
+async def db_get_count_images_with_filters(
     session: AsyncSession,
     extensions: list[str],
     start_date: datetime,

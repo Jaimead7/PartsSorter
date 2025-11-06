@@ -74,6 +74,7 @@ class ModelsManager(NoInstantiable):
     async def get_best_result(
         results: Results
     ) -> tuple[Optional[int], Optional[float]]:
+        #TODO: if there are many results the result should be the left one.
         if results.boxes is None:
             return (None, None)
         if isinstance(results.boxes.data, Tensor):
