@@ -30,8 +30,8 @@ from utils.config import ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, my_logger
 from utils.data_types import Result
 
 
-async def push_in_t_ms(t: float) -> None:
-    await asyncio.sleep(t)
+async def push_in_t_ms(ms: float) -> None:
+    await asyncio.sleep(ms / 1000.)
     my_logger.debug(f'Pushing new part.')
     GPIO.write(ACTUATOR_PIN, True)
     await asyncio.sleep(0.2)
@@ -63,11 +63,11 @@ async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> NoReturn:
                         pass
                     if new_result is not None:
                         if now - new_result.date < timedelta(milliseconds= SENSORS_INTERVAL_MS):
-                            my_logger.debug(f'New part to push with Result{new_result}.')
+                            my_logger.debug(f'New part to push with Result({new_result}).')
                             break
                     new_result = None
             if not new_sensor_value and last_sensor_val:
-                my_logger.debug(f'Part to be pushed with Result{new_result}.')
+                my_logger.debug(f'Part to be pushed with Result({new_result}).')
                 if new_result is not None and new_result.result:
                     asyncio.create_task(push_in_t_ms(params.actuator_delay))
                 new_result = None

@@ -33,7 +33,7 @@ from .models import ActuatorParams, CameraParams
 async def get_origin_params() -> httpx.Response:
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.get(
-            url= f'http://{API_URL}/origin/{ORIGIN_NAME}/camera-params'
+            url= f'http://{API_URL}/origin/{ORIGIN_NAME}/params'
         )
     if response.status_code // 100 != 2:
         msg: str = f'Could not obtain the origin parameters from "{API_URL}". {response}.'

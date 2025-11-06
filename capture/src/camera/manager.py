@@ -143,7 +143,7 @@ class CameraManager:
                             result= result
                         )
                         await results_queue.put(queue_result)
-                        my_logger.debug(f'Image captured with Result{queue_result}.')
+                        my_logger.debug(f'Image captured with Result({queue_result}).')
                     last_sensor_val = new_sensor_value
         except asyncio.CancelledError:
             my_logger.info('Camera cycle cancelled.')

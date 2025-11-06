@@ -35,6 +35,6 @@ class CameraParams(BaseModel):
 
 
 class ActuatorParams(BaseModel):
-    tape_speed: float = 500 # mm/s
-    sensors_distance: float = 125  # mm
+    tape_speed: float = 125 # mm/s
+    sensors_distance: float = 500  # mm
     actuator_delay: float = 100 # ms
