@@ -134,7 +134,7 @@ class Model(SQLModel, table= True):
     def model_metadata(self) -> ModelMetadataDict:
         metadata_path: Path = self.internal_absolute_path / 'metadata.yaml'
         with open(metadata_path, 'r') as f:
-            data: ModelMetadataDict = yaml.safe_load(f)
+            data: ModelMetadataDict = ModelMetadataDict(**yaml.safe_load(f))
         return data
 
 

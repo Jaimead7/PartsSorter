@@ -16,10 +16,10 @@
 
 from datetime import datetime
 
-from typing_extensions import TypedDict
+from pydantic import BaseModel
 
 
-class DatasetDataDict(TypedDict):
+class DatasetDataDict(BaseModel):
     path: str
     task: str
     train: str
@@ -29,7 +29,7 @@ class DatasetDataDict(TypedDict):
     name: dict[int, str]
 
 
-class DatasetMetadataDict(TypedDict):
+class DatasetMetadataDict(BaseModel):
     date: datetime
     camera_width: int
     camera_height: int

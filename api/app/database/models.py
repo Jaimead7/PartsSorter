@@ -81,8 +81,8 @@ async def db_create_new_model(
         )
         metadata_file: Path = model.internal_absolute_path / 'metadata.yaml'
         with open(metadata_file, 'r') as f:
-            data: ModelMetadataDict = yaml.safe_load(f)
-        for number, name in data['name'].items():
+            data: ModelMetadataDict = ModelMetadataDict(**yaml.safe_load(f))
+        for number, name in data.name.items():
             inspection_result: InspectionResult = await db_create_new_inspection_result(
                 session= session,
                 name= name
