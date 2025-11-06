@@ -26,6 +26,12 @@ This software includes components from third-party libraries under the following
 **Source:** https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git  
 **Full License:** [LGPL-2.1](./licenses/LGPL-2.1.txt)  
 
+## pydantic  
+**License:** MIT License  
+**Copyright:** (c) 2017 to present Pydantic Services Inc. and individual contributors.  
+**Source:** https://github.com/pydantic/pydantic  
+**Full License:** [MIT License](./licenses/MIT-pydantic.txt)  
+
 
 # Complete license texts
 Complete license texts are included in the [`./licenses/`](./licenses) directory.  

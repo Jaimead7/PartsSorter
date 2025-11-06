@@ -24,32 +24,40 @@ from typing import Optional
 import cv2
 import httpx
 import numpy as np
+from pydantic import ValidationError
 from utils.config import API_URL, ORIGIN_NAME, my_logger
 
 from .models import ActuatorParams, CameraParams
 
 
-async def get_camera_params() -> CameraParams:
+async def get_origin_params() -> httpx.Response:
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.get(
             url= f'http://{API_URL}/origin/{ORIGIN_NAME}/camera-params'
         )
     if response.status_code // 100 != 2:
-        msg: str = f'Could not obtain the camera parameters from "{API_URL}". {response}.'
+        msg: str = f'Could not obtain the origin parameters from "{API_URL}". {response}.'
         my_logger.error(msg)
         raise RuntimeError(msg)
-    return CameraParams(response.json())
+    return response
+
+async def get_camera_params() -> CameraParams:
+    response: httpx.Response = await get_origin_params()
+    try:
+        return CameraParams(**response.json())
+    except ValidationError:
+        msg: str = f'Error during validation of camera parameters from "{API_URL}". {response.json()}.'
+        my_logger.error(msg)
+        raise RuntimeError(msg)
 
 async def get_actuator_params() -> ActuatorParams:
-    async with httpx.AsyncClient() as client:
-        response: httpx.Response = await client.get(
-            url= f'http://{API_URL}/origin/{ORIGIN_NAME}/params'
-        )
-    if response.status_code // 100 != 2:
-        msg: str = f'Could not obtain the parameters from "{API_URL}". {response}.'
+    response: httpx.Response = await get_origin_params()
+    try:
+        return ActuatorParams(**response.json())
+    except ValidationError:
+        msg: str = f'Error during validation of actuator parameters from "{API_URL}". {response.json()}.'
         my_logger.error(msg)
         raise RuntimeError(msg)
-    return ActuatorParams(response.json())
 
 async def process_image(image: Optional[np.ndarray]) -> bool:
     if image is None:

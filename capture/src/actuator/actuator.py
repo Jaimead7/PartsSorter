@@ -30,15 +30,19 @@ from utils.config import ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, my_logger
 from utils.data_types import Result
 
 
-async def get_sensors_interval_ms() -> float:
-    params: ActuatorParams = await get_actuator_params()
-    return (params['sensors_distance'] / params['tape_speed'])*1000
+async def push_in_t_ms(t: float) -> None:
+    await asyncio.sleep(t)
+    my_logger.debug(f'Pushing new part.')
+    GPIO.write(ACTUATOR_PIN, True)
+    await asyncio.sleep(0.2)
+    GPIO.write(ACTUATOR_PIN, False)
 
 async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> NoReturn:
     try:
         last_sensor_val: bool = False
         new_result: Optional[Result] = None
-        SENSORS_INTERVAL_MS: float = await get_sensors_interval_ms()
+        params: ActuatorParams = await get_actuator_params()
+        SENSORS_INTERVAL_MS: float = (params.sensors_distance / params.tape_speed) * 1000
         my_logger.info(f'Actuator cycle started.')
         while True:
             await asyncio.sleep(0.001)
@@ -58,16 +62,14 @@ async def actuator_cycle(results_queue: asyncio.Queue[Result]) -> NoReturn:
                     except asyncio.QueueEmpty:
                         pass
                     if new_result is not None:
-                        if now - new_result['date'] < timedelta(milliseconds= SENSORS_INTERVAL_MS):
+                        if now - new_result.date < timedelta(milliseconds= SENSORS_INTERVAL_MS):
                             my_logger.debug(f'New part to push with Result{new_result}.')
                             break
                     new_result = None
             if not new_sensor_value and last_sensor_val:
                 my_logger.debug(f'Part to be pushed with Result{new_result}.')
-                if new_result is not None:
-                    GPIO.write(ACTUATOR_PIN, new_result["result"])
-                    await asyncio.sleep(1)
-                    GPIO.write(ACTUATOR_PIN, False)
+                if new_result is not None and new_result.result:
+                    asyncio.create_task(push_in_t_ms(params.actuator_delay))
                 new_result = None
             last_sensor_val = new_sensor_value
     except asyncio.CancelledError:

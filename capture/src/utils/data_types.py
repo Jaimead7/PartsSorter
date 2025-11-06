@@ -19,10 +19,11 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from datetime import datetime
-from typing import TypedDict
+from datetime import datetime, timezone
+
+from pydantic import BaseModel
 
 
-class Result(TypedDict):
-    date: datetime
-    result: bool
+class Result(BaseModel):
+    date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
+    result: bool = False

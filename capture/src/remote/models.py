@@ -19,20 +19,22 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from typing import TypedDict
+from pydantic import BaseModel
 
 
-class CameraParams(TypedDict):
-    camera_width: int
-    camera_height: int
-    brightness: int
-    contrast: int
-    saturation: int
-    auto_exposure: int
-    exposure: int
-    auto_wb: int
-    wb: int
+class CameraParams(BaseModel):
+    camera_width: int = 640
+    camera_height: int = 480
+    brightness: int = 128
+    contrast: int = 32
+    saturation: int = 32
+    auto_exposure: int = 3
+    exposure: int = 40
+    auto_wb: int = 1
+    wb: int = 0
 
-class ActuatorParams(TypedDict):
-    tape_speed: float
-    sensors_distance: float
+
+class ActuatorParams(BaseModel):
+    tape_speed: float = 500 # mm/s
+    sensors_distance: float = 125  # mm
+    actuator_delay: float = 100 # ms

@@ -73,15 +73,15 @@ class CameraManager:
 
     async def load_camera_props(self, cap: cv2.VideoCapture) -> None:
         props: CameraParams = await get_camera_params()
-        self.set_width(cap, props['camera_width'])
-        self.set_height(cap, props['camera_height'])
-        self.set_brightness(cap, props['brightness'])
-        self.set_contrast(cap, props['contrast'])
-        self.set_saturation(cap, props['saturation'])
-        self.set_exposure(cap, props['exposure'])
-        self.set_auto_exposure(cap, props['auto_exposure'])
-        self.set_wb(cap, props['wb'])
-        self.set_auto_wb(cap, props['auto_wb'])
+        self.set_width(cap, props.camera_width)
+        self.set_height(cap, props.camera_height)
+        self.set_brightness(cap, props.brightness)
+        self.set_contrast(cap, props.contrast)
+        self.set_saturation(cap, props.saturation)
+        self.set_exposure(cap, props.exposure)
+        self.set_auto_exposure(cap, props.auto_exposure)
+        self.set_wb(cap, props.wb)
+        self.set_auto_wb(cap, props.auto_wb)
         my_logger.debug(f'Loaded properties for Camera-{self.index}: {props}.')
 
     def set_width(self, cap: cv2.VideoCapture, value: int) -> None:
