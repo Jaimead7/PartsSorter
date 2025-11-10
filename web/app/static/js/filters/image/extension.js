@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedImageExtensions = Array.from(imageExtensionOptions)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
-        localStorage.setItem('imageExtensionFilterOptions', JSON.stringify(imageExtensionOptions));
+        localStorage.setItem('imageExtensionFilterOptions', JSON.stringify(selectedImageExtensions));
     };
 
     function loadImageExtensionsOptions() {
