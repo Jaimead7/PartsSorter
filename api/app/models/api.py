@@ -14,10 +14,21 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
+import aiofiles
+from fastapi import HTTPException, UploadFile, status
 from pydantic import BaseModel
+from pyUtils import ImageFileValidator, Styles
+from sqlalchemy import Delete, Result, ScalarResult
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import col, delete, func, select
+from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from typing_extensions import Self
+
+from .database import Image
 
 
 class HealthResponse(BaseModel):
@@ -27,6 +38,58 @@ class HealthResponse(BaseModel):
 
 class ApiIPResponse(BaseModel):
     ip: str
+
+
+class ProcessImageResult(BaseModel):
+    model_name: Optional[str]
+    inpection_result_name: Optional[str]
+    trust: Optional[float]
+
+
+class ImageFilters(BaseModel):
+    extensions: list[str] = []
+    start_date: datetime = datetime.now(timezone.utc) - timedelta(days=30)
+    end_date: datetime = datetime.now(timezone.utc)
+    inspection_results: list[str] = []
+    origins: list[str] = []
+    true_results: list[str] = []
+    min_trust: float = 0.
+    max_trust: float = 1.
+    models: list[str] = []
+
+    def add_filters_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        statement = statement.where(
+            col(Image.processed_date).is_not(None),
+            col(Image.processed_date) >= self.start_date,
+            col(Image.processed_date) <= self.end_date,
+            col(Image.trust).is_not(None),
+            col(Image.trust) >= self.min_trust,
+            col(Image.trust) <= self.max_trust
+        )
+        if len(self.extensions) > 0:
+            statement = statement.where(
+                col(Image.extension).in_(self.extensions)
+            )
+        if len(self.inspection_results) > 0:
+            statement = statement.where(
+                col(Image.inspection_result).in_(self.inspection_results)
+            )
+        if len(self.origins) > 0:
+            statement = statement.where(
+                col(Image.origin).in_(self.origins)
+            )
+        if len(self.models) > 0:
+            statement = statement.where(
+                col(Image.model).in_(self.models)
+            )
+        if len(self.true_results) > 0:
+            statement = statement.where(
+                col(Image.true_result).in_(self.true_results)
+            )
+        return statement
 
 
 class CameraParams(BaseModel):

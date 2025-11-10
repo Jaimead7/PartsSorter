@@ -28,6 +28,23 @@ from ..dependencies.config import my_logger
 from ..models.database import Image, InspectionResult, ModelClass, OriginResult
 
 
+async def db_inspection_result_name_exists(
+    session: AsyncSession,
+    inspection_result_name: Optional[str]
+) -> Optional[str]:
+    try:
+        if inspection_result_name is not None:
+            await db_get_inspection_result(
+                session= session,
+                inspection_result= InspectionResult(
+                    name= inspection_result_name
+                )
+            )
+    except HTTPException:
+        my_logger.warning(f'"{inspection_result_name}" is not a valid InspectionResult. Returns NULL.')
+        inspection_result_name = None
+    return inspection_result_name
+
 async def db_create_new_inspection_result(
     session: AsyncSession,
     name: str

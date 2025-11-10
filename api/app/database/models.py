@@ -180,19 +180,26 @@ async def db_get_models(
 async def db_get_model_inspection_result(
     session: AsyncSession,
     model_name: str,
-    result: int
-) -> Optional[InspectionResult]:
+    result_id: int
+) -> InspectionResult:
     db_model_class: ModelClass = await db_get_model_class(
         session= session,
         model_class= ModelClass(
             model= model_name,
-            number= result
+            number= result_id
         )
     )
     await session.refresh(
         db_model_class,
         attribute_names= ['result_of_model_class']
     )
+    if db_model_class.result_of_model_class is None:
+        msg: str = f'InspectionResult not found for Model({model_name}) and Id({result_id}).'
+        my_logger.error(msg)
+        raise HTTPException(
+            status_code= status.HTTP_404_NOT_FOUND,
+            detail= msg
+        )
     return db_model_class.result_of_model_class
     
 async def db_save_model_zip_file(

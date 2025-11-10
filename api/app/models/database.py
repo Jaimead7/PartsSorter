@@ -245,6 +245,7 @@ class ImageProcessed(BaseImage):
             origin= image.origin,
             true_result= image.true_result,
             trust= image.trust,
+            model= image.model,
             result= result if result is not None else False
         )
 

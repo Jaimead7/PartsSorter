@@ -14,6 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+import asyncio
 from typing import AsyncGenerator
 
 from sqlalchemy import event
@@ -54,7 +55,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 @event.listens_for(Image, 'after_delete')
 def event_delete_image(mapper, connection, image: Image) -> None:
-    db_delete_image_file(image)
+    asyncio.run(db_delete_image_file(image))
 
 @event.listens_for(Model, 'after_delete')
 def event_delete_model(mapper, connection, model: Model) -> None:

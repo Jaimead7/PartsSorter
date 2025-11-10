@@ -20,6 +20,7 @@ from fastapi import WebSocket
 from pyUtils import NoInstantiable
 
 from ..models.api import ImageStreamResponse
+from ..models.database import Image
 from .config import my_logger
 
 
@@ -38,20 +39,15 @@ class ImageStreamSocketManager(NoInstantiable):
     @classmethod
     async def broadcast_new_result(
         cls,
-        image_url: str,
-        insp_result: Optional[str],
-        origin: Optional[str],
-        model: Optional[str],
-        true_result: Optional[str],
-        trust: Optional[float]
+        image: Image
     ) -> None:
         response: ImageStreamResponse = ImageStreamResponse.factory(
-            image_url= image_url,
-            insp_result= insp_result,
-            origin= origin,
-            model= model,
-            true_result= true_result,
-            trust= trust
+            image_url= image.external_url,
+            insp_result= image.inspection_result,
+            origin= image.origin,
+            model= image.model,
+            true_result= image.true_result,
+            trust= image.trust
         )
         for socket in cls._active_sockets:
             try:

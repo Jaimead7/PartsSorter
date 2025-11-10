@@ -21,13 +21,13 @@ from uuid import UUID
 from fastapi import APIRouter, Body, Depends, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database.images import (db_create_new_image, db_delete_images,
+from ..database.images import (db_create_and_process_new_image,
+                               db_create_new_image, db_delete_images_by_id,
                                db_get_image_by_id, db_get_images_by_ids,
-                               db_get_next_hist_image, db_process_new_image,
-                               db_update_image)
+                               db_get_next_hist_image, db_update_image)
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
-from ..models.api import ImageHistResponse
+from ..models.api import ImageFilters, ImageHistResponse
 from ..models.database import Image, ImageProcessed
 
 images_router: APIRouter = APIRouter()
@@ -47,7 +47,7 @@ async def create_new_image(
     return await db_create_new_image(
         session= session,
         file= file,
-        origin= origin
+        origin_name= origin
     )
 
 @images_router.get(
@@ -65,7 +65,7 @@ async def get_images(
 ) -> Sequence[Image]:
     return await db_get_images_by_ids(
         session= session,
-        images= [Image(id= uuid) for uuid in uuids],
+        images_uuids= uuids,
         limit= limit,
         offset= offset
     )
@@ -80,9 +80,9 @@ async def delete_images(
     uuids: Annotated[list[UUID], Body()]
 ) -> None:
     images: list[Any] = [Image(id= uuid) for uuid in uuids]
-    await db_delete_images(
+    await db_delete_images_by_id(
         session= session,
-        images= images
+        images_uuids= images
     )
 
 @images_router.post(
@@ -97,7 +97,7 @@ async def process_new_image(
     file: UploadFile,
     origin: Annotated[Optional[str], Body()] = None
 ) -> ImageProcessed:
-    return await db_process_new_image(
+    return await db_create_and_process_new_image(
         session= session,
         file= file,
         origin_name= origin
@@ -123,8 +123,7 @@ async def get_next_hist_image(
     max_trust: Annotated[float, Query()] = 1.,
     index: Annotated[int, Query()] = 0
 )-> ImageHistResponse:
-    return await db_get_next_hist_image(
-        session= session,
+    filters: ImageFilters = ImageFilters(
         extensions= extension,
         start_date= start_date,
         end_date= end_date,
@@ -134,6 +133,10 @@ async def get_next_hist_image(
         true_results= true_result,
         min_trust= min_trust,
         max_trust= max_trust,
+    )
+    return await db_get_next_hist_image(
+        session= session,
+        filters= filters,
         index= index
     )
 
@@ -173,9 +176,9 @@ async def delete_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     uuid: Annotated[UUID, Path()]
 ) -> None:
-    await db_delete_images(
+    await db_delete_images_by_id(
         session= session,
-        images= [Image(id= uuid)]
+        images_uuids= [uuid]
     )
 
 @images_router.get(

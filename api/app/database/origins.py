@@ -31,6 +31,23 @@ from ..models.database import Image, Model, Origin, OriginResult
 from .models import db_get_model
 
 
+async def db_origin_name_exists(
+    session: AsyncSession,
+    origin_name: Optional[str]
+) -> Optional[str]:
+    try:
+        if origin_name is not None:
+            await db_get_origin(
+                session= session,
+                origin= Origin(
+                    name= origin_name
+                )
+            )
+    except HTTPException:
+        my_logger.warning(f'"{origin_name}" is not a valid Origin. Returns NULL.')
+        origin_name = None
+    return origin_name
+
 async def db_create_new_origin(
     session: AsyncSession,
     origin: Origin
