@@ -1,0 +1,30 @@
+<article class="card user-select-none">
+    <button class="btn card-header p-0 ps-1 pe-1 d-flex justify-content-between align-items-center collapsed"
+            type="button" 
+            data-bs-toggle="collapse"
+            data-bs-target="#modelFilterCollapseCard" 
+            aria-expanded="false"
+            aria-controls="modelFilterCollapseCard"
+    >
+        <span class="fs-8 fst-italic p-0">Models:</span>
+        <span class="bi bi-caret-down-square fs-5"></span>
+    </button>
+    <section class="card-body collapse p-1"  id="modelFilterCollapseCard">
+        <label class="form-check mb-1 border-bottom">
+            <input class="form-check-input" type="checkbox" id="modelFilterSelectAll">
+            <strong>All</strong>
+        </label>
+        <ul class="list-group">
+            {% for model in models: %}
+                <li class="list-group-item p-0 ps-1 pe-1 text-truncate">
+                    <label class="d-flex gap-1">
+                        <input class="form-check-input" type="checkbox" name="model-filter-option" value="{{ model }}" {% if model in preselected_models %}checked{% endif %}>
+                        {{ model }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/filters/model.js') }}"></script>
+</article>

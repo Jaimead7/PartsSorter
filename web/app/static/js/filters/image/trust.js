@@ -57,4 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
+
+    loadImageTrustOptions();
 });

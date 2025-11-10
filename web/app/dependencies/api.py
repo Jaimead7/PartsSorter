@@ -27,6 +27,17 @@ async def api_get_origins() -> list[str]:
     origins: list[str] = [origin['name'] for origin in response.json()]
     return origins
 
+async def api_get_models() -> list[str]:
+    client: httpx.AsyncClient = current_app.extensions['httpx_client']
+    response: httpx.Response = await client.get(
+            url= f'http://{API_URL}/model/?limit=100&offset=0',
+            headers= {
+                'accept': 'application/json'
+            }
+        )
+    models: list[str] = [model['name'] for model in response.json()]
+    return models
+
 async def api_get_inspection_results() -> list[str]:
     client: httpx.AsyncClient = current_app.extensions['httpx_client']
     response: httpx.Response = await client.get(
