@@ -37,3 +37,14 @@ async def api_get_inspection_results() -> list[str]:
     )
     results: list[str] = [result['name'] for result in response.json()]
     return results
+
+async def api_get_image_extensions() -> list[str]:
+    client: httpx.AsyncClient = current_app.extensions['httpx_client']
+    response: httpx.Response = await client.get(
+        url= f'http://{API_URL}/image/extensions',
+        headers= {
+            'accept': 'application/json'
+        }
+    )
+    results: list[str] = [result for result in response.json()]
+    return results

@@ -362,3 +362,10 @@ async def db_get_images_with_filters(
     statement = statement.offset(offset).limit(limit)
     db_images: ScalarResult[Image] = await session.scalars(statement)
     return db_images.all()
+
+async def db_get_image_extensions(
+    session: AsyncSession
+) -> Sequence[str]:
+    statement: SelectOfScalar[str] = select(Image.extension).distinct()
+    result: ScalarResult[str] = await session.scalars(statement)
+    return result.all()

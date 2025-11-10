@@ -23,8 +23,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.images import (db_create_and_process_new_image,
                                db_create_new_image, db_delete_images_by_id,
-                               db_get_image_by_id, db_get_images_by_ids,
-                               db_get_next_hist_image, db_update_image)
+                               db_get_image_by_id, db_get_image_extensions,
+                               db_get_images_by_ids, db_get_next_hist_image,
+                               db_update_image)
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.api import ImageFilters, ImageHistResponse
@@ -138,6 +139,20 @@ async def get_next_hist_image(
         session= session,
         filters= filters,
         index= index
+    )
+
+@images_router.get(
+    '/extensions',
+    response_model= list[str],
+    summary= 'Get all extensions of the Images of the database.',
+    response_description= 'The extensions list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_image_extensions(
+    session: Annotated[AsyncSession, Depends(get_session)]
+) -> Sequence[str]:
+    return await db_get_image_extensions(
+        session= session
     )
 
 @images_router.put(

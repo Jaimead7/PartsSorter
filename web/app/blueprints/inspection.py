@@ -2,7 +2,8 @@ import httpx
 from quart import Blueprint, redirect, render_template, request
 from werkzeug import Response
 
-from ..dependencies.api import api_get_inspection_results, api_get_origins
+from ..dependencies.api import (api_get_image_extensions,
+                                api_get_inspection_results, api_get_origins)
 
 inspection_bp = Blueprint(
     'inspection',
@@ -29,11 +30,13 @@ async def image_inspection() -> Response | str:
     try:
         origins: list[str] = await api_get_origins()
         classes: list[str] = await api_get_inspection_results()
+        image_extensions: list[str] = await api_get_image_extensions()
     except httpx.ConnectError:
         return redirect('/', 302)
     return await render_template(
         'image-inspection.html',
         page_title= 'Image inspection',
         origins= origins,
-        classes= classes
+        classes= classes,
+        image_extensions= image_extensions
     )
