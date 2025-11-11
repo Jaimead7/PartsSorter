@@ -61,12 +61,15 @@
                 </button>
             </footer>
         </section>
-        <form class="col-3 p-1 h-100 overflow-auto">
-            {% include 'selectors/class.html' %}
-            <div class="d-flex justify-content-center">
-                <button type="submit" class="btn btn-secondary">Save</button>
-            </div>
-        </form>
+        <section class="col-3 p-1 h-100 overflow-auto">
+            <form class="border border-1 rounded p-1">
+                <div class="d-flex justify-content-between mb-1">
+                    <h3 class="mb-0"><strong>True result:</strong></h3>
+                    <button type="submit" class="btn btn-secondary">Save</button>
+                </div>
+                {% include 'selectors/class.html' %}
+            </form>
+        </section>
     </section>
 {% endblock %}
 
