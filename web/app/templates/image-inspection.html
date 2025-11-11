@@ -40,19 +40,23 @@
                         </li>
                         <li class="list-item">
                             <h5 class="fst-italic fw-normal m-0">Trust:</h5>
-                            <p class="h3 m-0"><strong id="img-0-trust" data-default-text="NULL">NULL</strong></p>
+                            <p class="h3 m-0 mb-3"><strong id="img-0-trust" data-default-text="NULL">NULL</strong></p>
+                        </li>
+                        <li class="list-item">
+                            <h5 class="fst-italic fw-normal m-0">Model:</h5>
+                            <p class="h3 m-0"><strong id="img-0-model" data-default-text="Unknown">Unknown</strong></p>
                         </li>
                     </ul>
                 </section>
             </article>
             <footer class="col-12 d-flex justify-content-center align-items-center">
-                <button class="btn btn-md p-0 align-self-start" type="button">
+                <button class="btn btn-md p-0 align-self-start" type="button" id="prevHistImgButton">
                     <span class="bi bi-caret-left-square fs-3"></span>
                 </button>
-                <p class="m-0 ms-1" data-default-text="-">-</p>
+                <p class="m-0 ms-1" data-default-text="-" id="currentHistImgIndex">-</p>
                 <p class="m-0">/</p>
-                <p class="m-0 me-1" data-default-text="-">-</p>
-                <button class="btn btn-md p-0 align-self-start" type="button">
+                <p class="m-0 me-1" data-default-text="-" id="totalHistImgIndex">-</p>
+                <button class="btn btn-md p-0 align-self-start" type="button" id="nextHistImgButton">
                     <span class="bi bi-caret-right-square fs-3"></span>
                 </button>
             </footer>

@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-document.addEventListener('DOMContentLoaded', function() {
+function initTrustFilter() {
     const minElement = document.getElementById('imageTrustMinFilter');
     const maxElement = document.getElementById('imageTrustMaxFilter');
     const minLabel = document.getElementById('imageTrustMinFilterLabel');
@@ -80,4 +80,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     loadImageTrustOptions();
-});
+};
+
+function getTrustQueryParameters() {
+    const minElement = document.getElementById('imageTrustMinFilter');
+    const maxElement = document.getElementById('imageTrustMaxFilter');
+
+    const minValue = parseFloat(minElement.value) / 100;
+    const maxValue = parseFloat(maxElement.value) / 100;
+
+    return `min_trust=${encodeURIComponent(minValue)}&max_trust=${encodeURIComponent(maxValue)}`;
+};

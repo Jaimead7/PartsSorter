@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-document.addEventListener('DOMContentLoaded', function() {
+function initOriginFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('originFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#originFilterCollapseCard"] .bi');
@@ -84,4 +84,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadOriginsOptions();
     updateSelectAllState();
-});
+};
+
+function getOriginQueryParameters() {
+    const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
+    let originParams = [];
+    originOptions.forEach(checkbox => {
+        if (checkbox.checked) {
+            originParams.push(`origin=${encodeURIComponent(checkbox.value)}`);
+        }
+    });
+    return originParams.join('&');
+};

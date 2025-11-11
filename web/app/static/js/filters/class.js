@@ -19,16 +19,16 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-document.addEventListener('DOMContentLoaded', function() {
+function initClassFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('classFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#classFilterCollapseCard"] .bi');
-    
+
     collapseElement.addEventListener('show.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
-    
+
     collapseElement.addEventListener('hide.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
@@ -36,27 +36,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // SELECT ALL
     const selectAllCheckbox = document.getElementById('classFilterSelectAll');
-    const optionCheckboxes = document.querySelectorAll('input[name="class-filter-option"]');
-    
-    function updateSelectAllState() {
-        const allChecked = Array.from(optionCheckboxes).every(checkbox => checkbox.checked);
-        const someChecked = Array.from(optionCheckboxes).some(checkbox => checkbox.checked);
-        
-        selectAllCheckbox.checked = allChecked;
-        selectAllCheckbox.indeterminate = someChecked && !allChecked;
-    }
-    
+    const classOptions = document.querySelectorAll('input[name="class-filter-option"]');
+
+    function saveClasssOptions() {
+        const selectedClasss = Array.from(classOptions)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+        localStorage.setItem('classFilterOptions', JSON.stringify(selectedClasss));
+    };
+
+    function loadClasssOptions() {
+        const savedClasss = localStorage.getItem('classFilterOptions');
+
+        if (savedClasss) {
+            const selectedClasss = JSON.parse(savedClasss);
+            classOptions.forEach(checkbox => {
+                checkbox.checked = selectedClasss.includes(checkbox.value);
+            });
+        }
+    };
+
     selectAllCheckbox.addEventListener('change', function() {
         const isChecked = this.checked;
-        optionCheckboxes.forEach(checkbox => {
+
+        classOptions.forEach(checkbox => {
             checkbox.checked = isChecked;
         });
+
         selectAllCheckbox.indeterminate = false;
+
+        saveClasssOptions();
     });
 
-    optionCheckboxes.forEach(checkbox => {
+    function updateSelectAllState() {
+        const allChecked = Array.from(classOptions).every(checkbox => checkbox.checked);
+        const someChecked = Array.from(classOptions).some(checkbox => checkbox.checked);
+
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+
+        saveClasssOptions();
+    };
+
+    classOptions.forEach(checkbox => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
+    loadClasssOptions();
     updateSelectAllState();
-});
+};
+
+function getClassQueryParameters() {
+    const classOptions = document.querySelectorAll('input[name="class-filter-option"]');
+    let classParams = [];
+    classOptions.forEach(checkbox => {
+        if (checkbox.checked) {
+            classParams.push(`inspection_result=${encodeURIComponent(checkbox.value)}`);
+        }
+    });
+    return classParams.join('&');
+};

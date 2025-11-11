@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-document.addEventListener('DOMContentLoaded', function() {
+function initExtensionFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('imageExtensionFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#imageExtensionFilterCollapseCard"] .bi');
@@ -84,4 +84,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadImageExtensionsOptions();
     updateSelectAllState();
-});
+};
+
+function getExtensionQueryParameters() {
+    const extensionOptions = document.querySelectorAll('input[name="image-extension-filter-option"]');
+    let extensionParams = [];
+    extensionOptions.forEach(checkbox => {
+        if (checkbox.checked) {
+            extensionParams.push(`extension=${encodeURIComponent(checkbox.value)}`);
+        }
+    });
+    return extensionParams.join('&');
+};

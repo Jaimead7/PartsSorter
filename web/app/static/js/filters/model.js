@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-document.addEventListener('DOMContentLoaded', function() {
+function initModelFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('modelFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#modelFilterCollapseCard"] .bi');
@@ -84,4 +84,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadModelsOptions();
     updateSelectAllState();
-});
+};
+
+function getModelQueryParameters() {
+    const modelOptions = document.querySelectorAll('input[name="model-filter-option"]');
+    let modelParams = [];
+    modelOptions.forEach(checkbox => {
+        if (checkbox.checked) {
+            modelParams.push(`model=${encodeURIComponent(checkbox.value)}`);
+        }
+    });
+    return modelParams.join('&');
+};

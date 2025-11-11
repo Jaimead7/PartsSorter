@@ -19,6 +19,7 @@ from typing import AsyncIterator
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .database.manager import initDB
@@ -78,6 +79,15 @@ app.include_router(
 
 STATIC_PATH.mkdir(parents= True, exist_ok= True)
 app.mount('/static', StaticFiles(directory= STATIC_PATH), name='static')
+
+#TODO: fix access policity
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins= ['http://localhost:5000'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -19,10 +19,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-document.addEventListener('DOMContentLoaded', function() {
+function initDateFilter() {
     // SET DATE
-    document.getElementById('dateStartFilter').valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
-    document.getElementById('dateEndFilter').valueAsDate = new Date();
+    document.getElementById('startDateFilter').valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+    document.getElementById('endDateFilter').valueAsDate = new Date();
 
     // COLLAPSE
     const collapseElement = document.getElementById('dateFilterCollapseCard');
@@ -37,4 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
-});
+};
+
+function getDateQueryParameters() {
+    const startDateElement = document.getElementById('startDateFilter');
+    const endDateElement = document.getElementById('endDateFilter');
+    return `start_date=${encodeURIComponent(startDateElement.value)}&end_date=${encodeURIComponent(endDateElement.value)}`;
+};

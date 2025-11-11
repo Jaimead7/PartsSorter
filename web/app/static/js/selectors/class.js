@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-document.addEventListener('DOMContentLoaded', function() {
+function initClassSelector() {
     // COLLAPSE
     const collapseElement = document.getElementById('classSelectorCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#classSelectorCollapseCard"] .bi');
@@ -47,4 +47,14 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         });
     });
-});
+};
+
+function checkClassSelector(option) {
+    const optionCheckboxes = document.querySelectorAll('input[name="class-selector-option"]');
+    optionCheckboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        if (checkbox.value === option) {
+            checkbox.checked = true;
+        }
+    });
+}
