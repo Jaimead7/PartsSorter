@@ -68,7 +68,9 @@ function connectWebSocket(url) {
                         data.insp_result,
                         "img-0-type",
                         (data.trust * 100).toFixed(2) + '%',
-                        "img-0-trust"
+                        "img-0-trust",
+                        data.model,
+                        "img-0-model"
                     )
                 }
         }
@@ -120,6 +122,7 @@ function transferImages() {
             transferText(`img-${i-1}-origin`, `img-${i}-origin`);
             transferText(`img-${i-1}-type`, `img-${i}-type`);
             transferText(`img-${i-1}-trust`, `img-${i}-trust`);
+            transferText(`img-${i-1}-model`, `img-${i}-model`);
         } catch (error) {}
     }
 }
@@ -144,11 +147,14 @@ function writeImageInfo(
     type,
     typeElementName,
     trust,
-    trustElementName
+    trustElementName,
+    model,
+    modelElementName
 ) {
     document.getElementById(originElementName).innerText = origin
     document.getElementById(typeElementName).innerText = type
     document.getElementById(trustElementName).innerText = trust
+    document.getElementById(modelElementName).innerText = model
 }
 
 function clearImageInfo(id) {
