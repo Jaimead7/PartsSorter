@@ -19,10 +19,16 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from pydantic import BaseModel
+from datetime import datetime, timezone
+
+from pydantic import BaseModel, Field
 
 
-class CameraParams(BaseModel):
+def now_utc_notz() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+class CameraParamsResponse(BaseModel):
     camera_width: int = 640
     camera_height: int = 480
     brightness: int = 128
@@ -34,7 +40,13 @@ class CameraParams(BaseModel):
     wb: int = 0
 
 
-class ActuatorParams(BaseModel):
+class ActuatorParamsResponse(BaseModel):
     tape_speed: float = 125 # mm/s
-    sensors_distance: float = 500  # mm
+    sensors_distance: float = 345  # mm
     actuator_delay: float = 100 # ms
+    actuator_cycle_time: float = 3000 # ms
+
+
+class ProcessImageResponse(BaseModel):
+    date: datetime = Field(default_factory= now_utc_notz)
+    result: bool = False

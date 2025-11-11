@@ -19,9 +19,16 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from dataclasses import dataclass
 from typing import Literal, Optional
 
 from utils.config import GPIO_CHIP, my_logger
+
+
+@dataclass
+class CheckEdgeRespone():
+    result: bool = False
+    new_value: bool = False
 
 
 class GPIO:
@@ -78,3 +85,23 @@ class GPIO:
             my_logger.error(msg)
             raise ValueError(msg)
         return GPIO_CHIP
+
+    @classmethod
+    def check_rise_edge(cls, pin: int, last_value: bool) -> CheckEdgeRespone:
+        new_value: Optional[bool] = GPIO.read(pin)
+        if new_value is None:
+            return CheckEdgeRespone()
+        return CheckEdgeRespone(
+            result= (new_value and not last_value),
+            new_value= new_value
+        )
+
+    @classmethod
+    def check_fall_edge(cls, pin: int, last_value: bool) -> CheckEdgeRespone:
+        new_value: Optional[bool] = GPIO.read(pin)
+        if new_value is None:
+            return CheckEdgeRespone()
+        return CheckEdgeRespone(
+            result= (not new_value and last_value),
+            new_value= new_value
+        )

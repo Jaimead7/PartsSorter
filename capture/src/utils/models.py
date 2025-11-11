@@ -19,11 +19,33 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from datetime import datetime, timezone
+import asyncio
+from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel
+T= TypeVar('T')
 
 
-class Result(BaseModel):
-    date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
-    result: bool = False
+class AsyncList(Generic[T]):
+    def __init__(self) -> None:
+        self._list: list[Any] = []
+        self._lock = asyncio.Lock()
+
+    async def put(self, element: T) -> None:
+        async with self._lock:
+            self._list.append(element)
+
+    async def get(self) -> T:
+        async with self._lock:
+            if not self._list:
+                raise asyncio.QueueEmpty
+            return self._list.pop(0)
+
+    async def check_first(self) -> T:
+        async with self._lock:
+            if not self._list:
+                raise asyncio.QueueEmpty
+            return self._list[0]
+
+    async def empty(self) -> bool:
+        async with self._lock:
+            return len(self._list) > 0

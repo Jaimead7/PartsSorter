@@ -27,7 +27,8 @@ import numpy as np
 from pydantic import ValidationError
 from utils.config import API_URL, ORIGIN_NAME, my_logger
 
-from .models import ActuatorParams, CameraParams
+from .models import (ActuatorParamsResponse, CameraParamsResponse,
+                     ProcessImageResponse)
 
 
 async def get_origin_params() -> httpx.Response:
@@ -41,27 +42,27 @@ async def get_origin_params() -> httpx.Response:
         raise RuntimeError(msg)
     return response
 
-async def get_camera_params() -> CameraParams:
+async def get_camera_params() -> CameraParamsResponse:
     response: httpx.Response = await get_origin_params()
     try:
-        return CameraParams(**response.json())
+        return CameraParamsResponse(**response.json())
     except ValidationError:
         msg: str = f'Error during validation of camera parameters from "{API_URL}". {response.json()}.'
         my_logger.error(msg)
         raise RuntimeError(msg)
 
-async def get_actuator_params() -> ActuatorParams:
+async def get_actuator_params() -> ActuatorParamsResponse:
     response: httpx.Response = await get_origin_params()
     try:
-        return ActuatorParams(**response.json())
+        return ActuatorParamsResponse(**response.json())
     except ValidationError:
         msg: str = f'Error during validation of actuator parameters from "{API_URL}". {response.json()}.'
         my_logger.error(msg)
         raise RuntimeError(msg)
 
-async def process_image(image: Optional[np.ndarray]) -> bool:
+async def process_image(image: Optional[np.ndarray]) -> ProcessImageResponse:
     if image is None:
-        return False
+        return ProcessImageResponse()
     img_bytes: bytes = cv2.imencode('.png', image)[1].tobytes()
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.post(
@@ -78,4 +79,4 @@ async def process_image(image: Optional[np.ndarray]) -> bool:
             timeout= httpx.Timeout(timeout= 10.0)
         )
         my_logger.debug(f'Response from server: {response}')
-    return bool(response.json()['result'])
+    return ProcessImageResponse(result= response.json()['result'])

@@ -22,16 +22,15 @@
 import asyncio
 import atexit
 from contextlib import contextmanager
-from datetime import datetime, timezone
 from typing import Any, Generator, NoReturn, Optional
 
 import cv2
 import numpy as np
-from gpio import GPIO
-from remote.models import CameraParams
+from gpio import GPIO, CheckEdgeRespone
+from remote.models import CameraParamsResponse, ProcessImageResponse
 from remote.requests import get_camera_params, process_image
 from utils.config import CAMERA_SENSOR_PIN, my_logger
-from utils.data_types import Result
+from utils.models import AsyncList
 
 
 class CameraManager:
@@ -72,7 +71,7 @@ class CameraManager:
             my_logger.debug(f'Camera {self.index} cleared.')
 
     async def load_camera_props(self, cap: cv2.VideoCapture) -> None:
-        props: CameraParams = await get_camera_params()
+        props: CameraParamsResponse = await get_camera_params()
         self.set_width(cap, props.camera_width)
         self.set_height(cap, props.camera_height)
         self.set_brightness(cap, props.brightness)
@@ -123,28 +122,36 @@ class CameraManager:
             return None
         return image
 
-    async def cycle(self, results_queue: asyncio.Queue[Result]) -> NoReturn:
+    async def loop(
+        self,
+        cap: cv2.VideoCapture,
+        results_queue: AsyncList[ProcessImageResponse]
+    ) -> NoReturn:
+        last_sensor_val: bool = False
+        while True:
+            await asyncio.sleep(0.001)
+            edge_response: CheckEdgeRespone = GPIO.check_rise_edge(
+                CAMERA_SENSOR_PIN,
+                last_sensor_val
+            )
+            if edge_response.result:
+                my_logger.debug('Capturing new image...')
+                result: ProcessImageResponse = await process_image(
+                    self.capture_image(cap)
+                )
+                await results_queue.put(result)
+                my_logger.debug(f'Image captured with Result({result}).')
+            last_sensor_val = edge_response.new_value
+
+    async def cycle(
+        self,
+        results_queue: AsyncList[ProcessImageResponse]
+    ) -> NoReturn:
         try:
-            last_sensor_val: bool = False
             with self.get_video_capture() as cap:
                 await self.load_camera_props(cap)
                 my_logger.info(f'Camera-{self.index} cycle started.')
-                while True:
-                    await asyncio.sleep(0.001)
-                    new_sensor_value: Optional[bool] = GPIO.read(CAMERA_SENSOR_PIN)
-                    if new_sensor_value is None:
-                        continue
-                    if new_sensor_value and not last_sensor_val:
-                        my_logger.debug('Capturing new image...')
-                        date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
-                        result: bool = await process_image(self.capture_image(cap))
-                        queue_result: Result = Result(
-                            date= date,
-                            result= result
-                        )
-                        await results_queue.put(queue_result)
-                        my_logger.debug(f'Image captured with Result({queue_result}).')
-                    last_sensor_val = new_sensor_value
+                await self.loop(cap= cap, results_queue= results_queue)
         except asyncio.CancelledError:
             my_logger.info('Camera cycle cancelled.')
             raise
