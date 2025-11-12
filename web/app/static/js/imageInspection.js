@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", function() {
     initModelFilter();
     initTrustFilter();
     initClassFilter();
+
+    getNewImage(0);
 });
 
 nextButton.addEventListener("click", function() {
@@ -78,7 +80,7 @@ function setImageData(data) {
         img = document.getElementById("img-0-img");
         img.src = data.image_url;
         img.hidden = false;
-        checkClassSelector(data.insp_result);
+        checkClassSelector(data.true_result);
     }
 }
 
