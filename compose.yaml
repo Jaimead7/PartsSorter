@@ -75,8 +75,6 @@ services:
     env_file:
       - path: ./api/.env.docker
         required: true
-    ports:
-      - "8000:8000"
     volumes:
       - images-volume:/api/dist/images
       - models-volume:/api/dist/models
@@ -98,18 +96,13 @@ services:
       dockerfile: Dockerfile
     container_name: web
     restart: unless-stopped
-    depends_on:
-      api:
-        condition: service_healthy
     env_file:
       - path: ./web/.env.docker
         required: true
-    ports:
-      - "5000:5000"
     volumes:
       - logs-volume:/app/dist/logs
     networks:
-      - api-network
+      - web-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
@@ -121,6 +114,9 @@ services:
     image: nginx:alpine
     container_name: nginx
     restart: unless-stopped
+    depends_on:
+      - web
+      - api
     ports:
       - "80:80"
     volumes:
@@ -128,9 +124,16 @@ services:
       - nginx-volume/conf.d/:/etc/nginx/conf.d/
       - logs-volume/nginx/:/var/log/nginx/
       - nginx-volume/ssl/:/etc/nginx/ssl/
-    depends_on:
-      - web
-      - api
+    networks:
+      - api-network
+      - web-network
+      - capture-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   capture:
     build:
@@ -140,7 +143,7 @@ services:
     init: true
     restart: unless-stopped
     depends_on:
-      api:
+      nginx:
         condition: service_healthy
     env_file:
       - path: ./capture/.env.docker
@@ -148,7 +151,7 @@ services:
     volumes:
       - logs-volume:/app/dist/logs
     networks:
-      - api-network
+      - capture-network
     devices:
       - "${GPIO_DEVICE:-/dev/gpiochip4}:/dev/gpiochip4"
       - "${CAMERA_DEVICE:-/dev/video0}:/dev/video0"
@@ -224,4 +227,8 @@ networks:
   db-network:
     driver: bridge
   api-network:
+    driver: bridge
+  web-network:
+    driver: bridge
+  capture-network:
     driver: bridge
