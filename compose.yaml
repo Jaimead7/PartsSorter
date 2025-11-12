@@ -117,6 +117,21 @@ services:
       retries: 10
       start_period: 30s
 
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - nginx-volume/nginx.conf:/etc/nginx/nginx.conf
+      - nginx-volume/conf.d/:/etc/nginx/conf.d/
+      - logs-volume/nginx/:/var/log/nginx/
+      - nginx-volume/ssl/:/etc/nginx/ssl/
+    depends_on:
+      - web
+      - api
+
   capture:
     build:
       context: ./capture
@@ -194,6 +209,15 @@ volumes:
     external: false
     labels:
       - "description=Logs volume."
+  nginx-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${NGINX_VOLUME_PATH:-/mnt/shared/nginx}
+    external: false
+    labels:
+      - "description=Nginx volume."
 
 
 networks:
