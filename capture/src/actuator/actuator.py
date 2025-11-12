@@ -21,7 +21,7 @@
 
 import asyncio
 from datetime import datetime, timedelta, timezone
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 from gpio.gpio import GPIO, CheckEdgeRespone
 from remote.models import ActuatorParamsResponse, ProcessImageResponse
@@ -35,7 +35,7 @@ class ActuatorManager:
         self
     ) -> None:
         self.last_sensor_val: bool = False
-        self.params: ActuatorParamsResponse = asyncio.run(get_actuator_params())
+        self.params: Optional[ActuatorParamsResponse] = None
         self.next_part_to_push: ProcessImageResponse = ProcessImageResponse(
             result= False
         )
@@ -43,9 +43,20 @@ class ActuatorManager:
 
     @property
     def sensors_interval_ms(self) -> float:
+        if self.params is None:
+            msg: str = 'Params not loaded. Call await load_params() first.'
+            my_logger.critical(msg)
+            raise RuntimeError(msg)
         return (self.params.sensors_distance / self.params.tape_speed) * 1000
 
+    async def load_params(self) -> None:
+        self.params = await get_actuator_params()
+
     async def push(self) -> None:
+        if self.params is None:
+            msg: str = 'Params not loaded. Call await load_params() first.'
+            my_logger.critical(msg)
+            raise RuntimeError(msg)
         await asyncio.sleep(self.params.actuator_delay / 1000.)
         now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
         if self.last_push - now > timedelta(milliseconds= self.params.actuator_cycle_time):
@@ -92,6 +103,8 @@ class ActuatorManager:
         self,
         results_queue: AsyncList[ProcessImageResponse]
     ) -> NoReturn:
+        if self.params is None:
+            await self.load_params()
         try:
             my_logger.info(f'Actuator cycle started.')
             while True:
