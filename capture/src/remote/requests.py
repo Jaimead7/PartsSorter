@@ -34,7 +34,7 @@ from .models import (ActuatorParamsResponse, CameraParamsResponse,
 async def get_origin_params() -> httpx.Response:
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.get(
-            url= f'http://{API_URL}/origin/{ORIGIN_NAME}/params'
+            url= f'{API_URL}/origin/{ORIGIN_NAME}/params'
         )
     if response.status_code // 100 != 2:
         msg: str = f'Could not obtain the origin parameters from "{API_URL}". {response}.'
@@ -66,7 +66,7 @@ async def process_image(image: Optional[np.ndarray]) -> ProcessImageResponse:
     img_bytes: bytes = cv2.imencode('.png', image)[1].tobytes()
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.post(
-            url= f'http://{API_URL}/image/process',
+            url= f'{API_URL}/image/process',
             headers= {
                 'accept': 'application/json'
             },
