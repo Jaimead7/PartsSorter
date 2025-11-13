@@ -22,11 +22,12 @@
 import asyncio
 import atexit
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from typing import Any, Generator, NoReturn, Optional
 
 import cv2
 import numpy as np
-from gpio import GPIO, CheckEdgeRespone
+from gpio import EdgeType, detect_edge
 from remote.models import CameraParamsResponse, ProcessImageResponse
 from remote.requests import get_camera_params, process_image
 from utils.config import CAMERA_SENSOR_PIN, my_logger
@@ -128,20 +129,21 @@ class CameraManager:
         results_queue: AsyncList[ProcessImageResponse]
     ) -> NoReturn:
         last_sensor_val: bool = False
+        edge_type: EdgeType = EdgeType.NONE
         while True:
             await asyncio.sleep(0.001)
-            edge_response: CheckEdgeRespone = GPIO.check_rise_edge(
-                CAMERA_SENSOR_PIN,
-                last_sensor_val
-            )
-            if edge_response.result:
-                my_logger.debug('Capturing new image...')
+            edge_type, last_sensor_val = await detect_edge(
+                    pin= CAMERA_SENSOR_PIN,
+                    last_value= last_sensor_val
+                )
+            if edge_type == EdgeType.RISING:
+                my_logger.info('Capturing new image...')
                 result: ProcessImageResponse = await process_image(
-                    self.capture_image(cap)
+                    image= self.capture_image(cap),
+                    date= datetime.now(timezone.utc).replace(tzinfo=None)
                 )
                 await results_queue.put(result)
                 my_logger.debug(f'Image captured with Result({result}).')
-            last_sensor_val = edge_response.new_value
 
     async def cycle(
         self,

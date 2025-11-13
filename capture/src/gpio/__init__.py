@@ -19,4 +19,4 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .gpio import GPIO, CheckEdgeRespone
+from .gpio import EdgeType, detect_edge, read, write

@@ -19,89 +19,73 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from dataclasses import dataclass
+import asyncio
+from enum import Enum
 from typing import Literal, Optional
 
 from utils.config import GPIO_CHIP, my_logger
 
 
-@dataclass
-class CheckEdgeRespone():
-    result: bool = False
-    new_value: bool = False
+def write(pin: int, status: bool = False) -> None:
+    try:
+        import gpiod
+        from gpiod.line import Direction, Value
+    except ImportError:
+        my_logger.error('"gpiod" not installed. Can\'t write on GPIO pins.')
+        return
+    with gpiod.request_lines(
+        GPIO_CHIP,
+        consumer= 'Me',
+        config= {
+            pin: gpiod.LineSettings(
+                direction= Direction.OUTPUT,
+            )
+        }
+    ) as chip:
+        def get_value(flag: bool) -> Literal[Value.ACTIVE] | Literal[Value.INACTIVE]:
+            if flag:
+                return Value.ACTIVE
+            return Value.INACTIVE
+        chip.set_value(pin, get_value(status))
+        #my_logger.debug(f'Writed to PIN-{pin}: {status}.')
 
+def read(pin: int) -> Optional[bool]:
+    try:
+        import gpiod
+        from gpiod.line import Bias, Direction
+    except ImportError:
+        my_logger.error('"gpiod" not installed. Can\'t read on GPIO pins.')
+        return None
+    with gpiod.request_lines(
+        GPIO_CHIP,
+        consumer= 'Me',
+        config= {
+            pin: gpiod.LineSettings(
+                direction= Direction.INPUT,
+                bias= Bias.PULL_DOWN
+            )
+        }
+    ) as chip:
+        result: bool = bool(chip.get_value(pin))
+        #my_logger.debug(f'Readed from PIN-{pin}: {result}.')
+        return result
 
-class GPIO:
-    @classmethod
-    def write(cls, pin: int, status: bool = False) -> None:
-        try:
-            import gpiod
-            from gpiod.line import Direction, Value
-        except ImportError:
-            my_logger.error('"gpiod" not installed. Can\'t write on GPIO pins.')
-            return
-        with gpiod.request_lines(
-            cls.get_chip(),
-            consumer= 'Me',
-            config= {
-                pin: gpiod.LineSettings(
-                    direction= Direction.OUTPUT,
-                )
-            }
-        ) as chip:
-            def get_value(flag: bool) -> Literal[Value.ACTIVE] | Literal[Value.INACTIVE]:
-                if flag:
-                    return Value.ACTIVE
-                return Value.INACTIVE
-            chip.set_value(pin, get_value(status))
-            #my_logger.debug(f'Writed to PIN-{pin}: {status}.')
+class EdgeType(Enum):
+    NONE = 0
+    RISING = 1
+    FALLING = 2
 
-    @classmethod
-    def read(cls, pin: int) -> Optional[bool]:
-        try:
-            import gpiod
-            from gpiod.line import Bias, Direction
-        except ImportError:
-            my_logger.error('"gpiod" not installed. Can\'t read on GPIO pins.')
-            return None
-        with gpiod.request_lines(
-            cls.get_chip(),
-            consumer= 'Me',
-            config= {
-                pin: gpiod.LineSettings(
-                    direction= Direction.INPUT,
-                    bias= Bias.PULL_DOWN
-                )
-            }
-        ) as chip:
-            result: bool = bool(chip.get_value(pin))
-            #my_logger.debug(f'Readed from PIN-{pin}: {result}.')
-            return result
-
-    @classmethod
-    def get_chip(cls) -> str:
-        if GPIO_CHIP is None:
-            msg: str = f'"{GPIO_CHIP}" not found in environmental variables.'
-            my_logger.error(msg)
-            raise ValueError(msg)
-        return GPIO_CHIP
-
-    @classmethod
-    def check_rise_edge(cls, pin: int, last_value: bool) -> CheckEdgeRespone:
-        new_value: Optional[bool] = GPIO.read(pin)
-        if new_value is None:
-            return CheckEdgeRespone()
-        return CheckEdgeRespone(
-            result= (new_value and not last_value),
-            new_value= new_value
-        )
-
-    @classmethod
-    def check_fall_edge(cls, pin: int, last_value: bool) -> CheckEdgeRespone:
-        new_value: Optional[bool] = GPIO.read(pin)
-        if new_value is None:
-            return CheckEdgeRespone()
-        return CheckEdgeRespone(
-            result= (not new_value and last_value),
-            new_value= new_value
-        )
+async def detect_edge(pin: int, last_value: bool) -> tuple[EdgeType, bool]:
+    current_value: list[Optional[bool]] = [None, None]
+    current_value[0] = read(pin)
+    await asyncio.sleep(0.01)
+    current_value[1] = read(pin)
+    if current_value[0] == current_value[1]:
+        value_filter: bool = all(current_value)
+    else:
+        value_filter = last_value
+    if value_filter and not last_value:
+        return EdgeType.RISING, value_filter
+    if not value_filter and last_value:
+        return EdgeType.FALLING, value_filter
+    return EdgeType.NONE, value_filter

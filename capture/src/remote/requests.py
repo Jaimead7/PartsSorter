@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from datetime import datetime, timezone
 from typing import Optional
 
 import cv2
@@ -34,7 +35,10 @@ from .models import (ActuatorParamsResponse, CameraParamsResponse,
 async def get_origin_params() -> httpx.Response:
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.get(
-            url= f'http://{API_URL}/origin/{ORIGIN_NAME}/params'
+            url= f'http://{API_URL}/origin/{ORIGIN_NAME}/params',
+            headers= {
+                'accept': 'application/json'
+            }
         )
     if response.status_code // 100 != 2:
         msg: str = f'Could not obtain the origin parameters from "{API_URL}". {response}.'
@@ -60,9 +64,14 @@ async def get_actuator_params() -> ActuatorParamsResponse:
         my_logger.error(msg)
         raise RuntimeError(msg)
 
-async def process_image(image: Optional[np.ndarray]) -> ProcessImageResponse:
+async def process_image(
+    image: Optional[np.ndarray],
+    date: datetime
+) -> ProcessImageResponse:
     if image is None:
-        return ProcessImageResponse()
+        return ProcessImageResponse(
+            date= date
+        )
     img_bytes: bytes = cv2.imencode('.png', image)[1].tobytes()
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.post(
@@ -79,4 +88,7 @@ async def process_image(image: Optional[np.ndarray]) -> ProcessImageResponse:
             timeout= httpx.Timeout(timeout= 10.0)
         )
         my_logger.debug(f'Response from server: {response}')
-    return ProcessImageResponse(result= response.json()['result'])
+    return ProcessImageResponse(
+        date= date,
+        result= response.json()['result']
+    )

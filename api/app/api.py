@@ -83,7 +83,7 @@ app.mount('/static', StaticFiles(directory= STATIC_PATH), name='static')
 #TODO: fix access policity
 app.add_middleware(
     CORSMiddleware,
-    allow_origins= ['http://localhost:5000'],
+    allow_origins= ['*'],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

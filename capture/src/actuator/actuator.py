@@ -23,7 +23,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import NoReturn, Optional
 
-from gpio.gpio import GPIO, CheckEdgeRespone
+from gpio import EdgeType, detect_edge, write
 from remote.models import ActuatorParamsResponse, ProcessImageResponse
 from remote.requests import get_actuator_params
 from utils.config import ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, my_logger
@@ -34,7 +34,6 @@ class ActuatorManager:
     def __init__(
         self
     ) -> None:
-        self.last_sensor_val: bool = False
         self.params: Optional[ActuatorParamsResponse] = None
         self.next_part_to_push: ProcessImageResponse = ProcessImageResponse(
             result= False
@@ -52,52 +51,49 @@ class ActuatorManager:
     async def load_params(self) -> None:
         self.params = await get_actuator_params()
 
-    async def push(self) -> None:
+    async def push(self, part: ProcessImageResponse) -> None:
         if self.params is None:
             msg: str = 'Params not loaded. Call await load_params() first.'
             my_logger.critical(msg)
             raise RuntimeError(msg)
         await asyncio.sleep(self.params.actuator_delay / 1000.)
         now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
-        if self.last_push - now > timedelta(milliseconds= self.params.actuator_cycle_time):
-            #FIXME: what happens if de delay is to long and a new part reach the actuator. self.next_part_to_push will be modified.
-            my_logger.debug(f'Pushing new part with Result({self.next_part_to_push}).')
+        if now - self.last_push > timedelta(milliseconds= self.params.actuator_cycle_time):
+            my_logger.debug(f'Pushing new part with Result({part}).')
             self.last_push = now
-            GPIO.write(ACTUATOR_PIN, True)
+            write(ACTUATOR_PIN, True)
             await asyncio.sleep(0.2)
-            GPIO.write(ACTUATOR_PIN, False)
+            write(ACTUATOR_PIN, False)
         else:
-            my_logger.error(f'Part skiped with Result({self.next_part_to_push}). Tried to push so early.')
+            my_logger.error(f'Part skiped with Result({part}). Tried to push so early.')
 
     async def get_next_result(
         self,
         results_queue: AsyncList[ProcessImageResponse]
-    ) -> None:
+    ) -> ProcessImageResponse:
         now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
         while True:
             try:
                 next_result: ProcessImageResponse = await results_queue.check_first()
             except asyncio.QueueEmpty:
                 my_logger.error('Result lost. There are no results in the queue. The part will be pushed.')
-                self.next_part_to_push = ProcessImageResponse(
+                return ProcessImageResponse(
                     date= now,
                     result= True
                 )
-                break
             if now - next_result.date < timedelta(milliseconds= self.sensors_interval_ms * 0.8):
                 my_logger.error('Result lost. The part doesn\'t have a result on the queue. The part will be pushed.')
-                self.next_part_to_push = ProcessImageResponse(
+                return ProcessImageResponse(
                     date= now,
                     result= True
                 )
-                break
             if now - next_result.date > timedelta(milliseconds= self.sensors_interval_ms * 1.2):
                 my_logger.error('Part lost. The part of this result didn\'t reach the actuator.')
                 await results_queue.get()
                 continue
-            self.next_part_to_push = await results_queue.get()
-            my_logger.debug(f'New part on the actuator with Result({self.next_part_to_push}).')
-            break
+            result: ProcessImageResponse = await results_queue.get()
+            my_logger.debug(f'New part on the actuator with Result({result}).')
+            return result
 
     async def cycle(
         self,
@@ -105,27 +101,28 @@ class ActuatorManager:
     ) -> NoReturn:
         if self.params is None:
             await self.load_params()
+        last_sensor_val: bool = False
+        edge_type: EdgeType = EdgeType.NONE
+        next_part_to_push: Optional[ProcessImageResponse] = None
         try:
             my_logger.info(f'Actuator cycle started.')
             while True:
                 await asyncio.sleep(0.001)
-                rise_edge_response: CheckEdgeRespone = GPIO.check_rise_edge(
-                    ACTUATOR_SENSOR_PIN,
-                    self.last_sensor_val
+                edge_type, last_sensor_val = await detect_edge(
+                    pin= ACTUATOR_SENSOR_PIN,
+                    last_value= last_sensor_val
                 )
-                fall_edge_response: CheckEdgeRespone = GPIO.check_fall_edge(
-                    ACTUATOR_SENSOR_PIN,
-                    self.last_sensor_val
-                )
-                self.last_sensor_val = fall_edge_response.new_value
-                if rise_edge_response.result:
-                    my_logger.debug(f'New part on the actuator.')
-                    await self.get_next_result(results_queue)
-                if fall_edge_response.result:
-                    my_logger.debug(f'Part to be pushed with Result({self.next_part_to_push}).')
-                    if self.next_part_to_push.result:
-                        asyncio.create_task(self.push())
-                    self.next_part_to_push = ProcessImageResponse(result= False)
+                if edge_type == EdgeType.RISING:
+                    my_logger.info(f'New part on the actuator.')
+                    if next_part_to_push is not None:
+                        my_logger.error(f'New part on the actuator without clearing last part.')
+                    next_part_to_push = await self.get_next_result(results_queue)
+                if edge_type == EdgeType.FALLING:
+                    my_logger.debug(f'Part to be pushed with Result({next_part_to_push}).')
+                    if next_part_to_push is not None:
+                        if next_part_to_push.result:
+                            asyncio.create_task(self.push(next_part_to_push))
+                    next_part_to_push = None
         except asyncio.CancelledError:
             my_logger.info('Actuator cycle cancelled.')
             raise
