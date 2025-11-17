@@ -21,4 +21,5 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     initOriginFilter();
+    initWebSocket();
 });

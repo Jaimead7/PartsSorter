@@ -171,5 +171,3 @@ function clearImageInfo(id) {
         trustElement.innerText = trustElement.getAttribute("data-default-text")
     }
 }
-
-initWebSocket();

@@ -70,6 +70,8 @@ function getQueryParameters(index) {
 
 function setImageData(data) {
     if (data.type === "new-image") {
+        console.table(data)
+        document.getElementById("img-0-name").innerText = data.image_url.split("/").pop();
         document.getElementById("img-0-origin").innerText = data.origin;
         document.getElementById("img-0-type").innerText = data.insp_result;
         document.getElementById("img-0-trust").innerText = (data.trust * 100).toFixed(2) + "%";
@@ -85,7 +87,9 @@ function setImageData(data) {
 }
 
 function clearImageData() {
-    let element = document.getElementById("img-0-origin");
+    let element = document.getElementById("img-0-name");
+    element.innerText = element.getAttribute("data-default-text");
+    element = document.getElementById("img-0-origin");
     element.innerText = element.getAttribute("data-default-text");
     element = document.getElementById("img-0-type");
     element.innerText = element.getAttribute("data-default-text");
