@@ -27,11 +27,11 @@ services:
     container_name: label-studio
     init: true
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     volumes:
       - label-studio-volume:/label-studio/data
       - images-volume:/local-storage/images
+    networks:
+      - label-network
     environment:
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/local-storage/images/training
@@ -50,8 +50,10 @@ services:
     env_file:
       - path: ./postgres/.env.docker
         required: true
+    #TODO: remove in production
     ports:
       - "5432:5432"
+    #-------------------------#
     volumes:
       - postgres-volume:/var/lib/postgresql/data
     networks:
@@ -75,8 +77,6 @@ services:
     env_file:
       - path: ./api/.env.docker
         required: true
-    ports:
-      - "8000:8000"
     volumes:
       - images-volume:/api/dist/images
       - models-volume:/api/dist/models
@@ -98,20 +98,41 @@ services:
       dockerfile: Dockerfile
     container_name: web
     restart: unless-stopped
-    depends_on:
-      api:
-        condition: service_healthy
     env_file:
       - path: ./web/.env.docker
         required: true
-    ports:
-      - "5000:5000"
     volumes:
       - logs-volume:/app/dist/logs
     networks:
-      - api-network
+      - web-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      - web
+      - api
+    ports:
+      - "80:80"
+    volumes:
+      - nginx-volume/nginx.conf:/etc/nginx/nginx.conf
+      - nginx-volume/conf.d/:/etc/nginx/conf.d/
+      - logs-volume/nginx/:/var/log/nginx/
+      - nginx-volume/ssl/:/etc/nginx/ssl/
+    networks:
+      - api-network
+      - web-network
+      - capture-network
+      - label-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -125,7 +146,7 @@ services:
     init: true
     restart: unless-stopped
     depends_on:
-      api:
+      nginx:
         condition: service_healthy
     env_file:
       - path: ./capture/.env.docker
@@ -133,7 +154,7 @@ services:
     volumes:
       - logs-volume:/app/dist/logs
     networks:
-      - api-network
+      - capture-network
     devices:
       - "${GPIO_DEVICE:-/dev/gpiochip4}:/dev/gpiochip4"
       - "${CAMERA_DEVICE:-/dev/video0}:/dev/video0"
@@ -194,10 +215,25 @@ volumes:
     external: false
     labels:
       - "description=Logs volume."
+  nginx-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${NGINX_VOLUME_PATH:-/mnt/shared/nginx}
+    external: false
+    labels:
+      - "description=Nginx volume."
 
 
 networks:
   db-network:
     driver: bridge
   api-network:
+    driver: bridge
+  web-network:
+    driver: bridge
+  capture-network:
+    driver: bridge
+  label-network:
     driver: bridge
