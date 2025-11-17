@@ -109,7 +109,7 @@
                 <mxCell id="67" value="" style="group" vertex="1" connectable="0" parent="34">
                     <mxGeometry x="97.13" y="340" width="62.31999999999999" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="8" value="Database&lt;div&gt;0.0.0.0:5432&lt;/div&gt;" style="image;aspect=fixed;html=1;points=[[0.5,0,0,0,-5]];align=center;fontSize=12;image=img/lib/azure2/databases/Azure_Database_PostgreSQL_Server.svg;" parent="67" vertex="1">
+                <mxCell id="8" value="postgres&lt;div&gt;0.0.0.0:5432&lt;/div&gt;" style="image;aspect=fixed;html=1;points=[[0.5,0,0,0,-5]];align=center;fontSize=12;image=img/lib/azure2/databases/Azure_Database_PostgreSQL_Server.svg;" parent="67" vertex="1">
                     <mxGeometry width="48" height="64" as="geometry"/>
                 </mxCell>
                 <mxCell id="Bq_ae5sH3zVn8YsV9z6w-53" value="" style="image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/Docker.svg;" parent="67" vertex="1">
