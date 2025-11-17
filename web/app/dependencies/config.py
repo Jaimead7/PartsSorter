@@ -63,4 +63,4 @@ save_web_logs(True)
 # ENV VARS
 SERVER_IP: str = getenv(EnvVars.SERVER_IP.value, 'localhost')
 SERVER_PORT: int = int(getenv(EnvVars.SERVER_PORT.value, 5000))
-API_URL: str = getenv(EnvVars.API_URL.value, 'localhost:8000')
+API_URL: str = getenv(EnvVars.API_URL.value, 'http://localhost:8000/')
