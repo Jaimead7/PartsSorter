@@ -64,7 +64,7 @@
                 <mxCell id="26" value="" style="group" parent="34" vertex="1" connectable="0">
                     <mxGeometry x="201.37" y="385" width="70" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="27" value="Label Studio&lt;br&gt;&lt;div&gt;0.0.0.0:8080&lt;/div&gt;" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.servers.web_server;points=[[0.5,1,0,0,40],[1,0.5,0,0,0]];" parent="26" vertex="1">
+                <mxCell id="27" value="label-studio&lt;br&gt;&lt;div&gt;0.0.0.0:8080&lt;/div&gt;" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.servers.web_server;points=[[0.5,1,0,0,40],[1,0.5,0,0,0]];" parent="26" vertex="1">
                     <mxGeometry width="67.37" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="28" value="" style="image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/Docker.svg;" parent="26" vertex="1">
