@@ -18,7 +18,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from pydantic import BaseModel
-from sqlmodel import col
+from sqlmodel import col, or_
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from typing_extensions import Self
 
@@ -44,9 +44,9 @@ class ImageFilters(BaseModel):
     extensions: list[str] = []
     start_date: datetime = datetime.now(timezone.utc) - timedelta(days=30)
     end_date: datetime = datetime.now(timezone.utc)
-    inspection_results: list[str] = []
+    inspection_results: list[Optional[str]] = []
     origins: list[str] = []
-    true_results: list[str] = []
+    true_results: list[Optional[str]] = []
     min_trust: float = 0.
     max_trust: float = 1.
     models: list[str] = []
@@ -68,9 +68,17 @@ class ImageFilters(BaseModel):
                 col(Image.extension).in_(self.extensions)
             )
         if len(self.inspection_results) > 0:
-            statement = statement.where(
-                col(Image.inspection_result).in_(self.inspection_results)
-            )
+            if None in self.inspection_results:
+                statement = statement.where(
+                    or_(
+                        col(Image.inspection_result).in_(self.inspection_results),
+                        col(Image.inspection_result).is_(None)
+                    )
+                )
+            else:
+                statement = statement.where(
+                    col(Image.inspection_result).in_(self.inspection_results)
+                )
         if len(self.origins) > 0:
             statement = statement.where(
                 col(Image.origin).in_(self.origins)
@@ -80,9 +88,17 @@ class ImageFilters(BaseModel):
                 col(Image.model).in_(self.models)
             )
         if len(self.true_results) > 0:
-            statement = statement.where(
-                col(Image.true_result).in_(self.true_results)
-            )
+            if None in self.true_results:
+                statement = statement.where(
+                    or_(
+                        col(Image.true_result).in_(self.true_results),
+                        col(Image.true_result).is_(None)
+                    )
+                )
+            else:
+                statement = statement.where(
+                    col(Image.true_result).in_(self.true_results)
+                )
         return statement
 
 
@@ -110,7 +126,7 @@ class CameraParams(BaseModel):
 class ImageStreamResponse(BaseModel):
     type: str = 'new-image'
     image_url: str
-    insp_result: str =  'No result'
+    insp_result: str = 'No result'
     origin: str = 'Unknown'
     model: str = 'Unknown'
     true_result: str = 'No result'

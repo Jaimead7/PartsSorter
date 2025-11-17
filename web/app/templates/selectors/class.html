@@ -11,6 +11,12 @@
     </button>
     <section class="card-body collapse p-1 show" id="classSelectorCollapseCard">
         <ul class="list-group">
+            <li class="list-group-item p-0 ps-1 pe-1 text-truncate">
+                <label class="d-flex gap-1">
+                    <input class="form-check-input" type="checkbox" name="class-selector-option" value="No result">
+                    No result
+                </label>
+            </li>
             {% for class in classes: %}
                 <li class="list-group-item p-0 ps-1 pe-1 text-truncate">
                     <label class="d-flex gap-1">

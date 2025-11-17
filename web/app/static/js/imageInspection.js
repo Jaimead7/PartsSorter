@@ -70,7 +70,6 @@ function getQueryParameters(index) {
 
 function setImageData(data) {
     if (data.type === "new-image") {
-        console.table(data)
         document.getElementById("img-0-name").innerText = data.image_url.split("/").pop();
         document.getElementById("img-0-origin").innerText = data.origin;
         document.getElementById("img-0-type").innerText = data.insp_result;
@@ -127,6 +126,7 @@ async function getNewImage(index) {
             return;
         }
         const data = await response.json();
+        console.table(data)
         setImageData(data);
     } catch (error) {
         console.error("Error fetching image:", error);

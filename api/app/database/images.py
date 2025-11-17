@@ -318,6 +318,8 @@ async def db_get_next_hist_image(
         session= session,
         filters= filters
     )
+    if index > total_images - 1:
+        index = total_images - 1
     db_images: Sequence[Image] = await db_get_images_with_filters(
         session= session,
         filters= filters,
