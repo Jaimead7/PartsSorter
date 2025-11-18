@@ -27,11 +27,11 @@ services:
     container_name: label-studio
     init: true
     restart: unless-stopped
+    ports:
+      - "8080:8080"
     volumes:
       - label-studio-volume:/label-studio/data
       - images-volume:/local-storage/images
-    networks:
-      - label-network
     environment:
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/local-storage/images/training
@@ -128,7 +128,6 @@ services:
       - api-network
       - web-network
       - capture-network
-      - label-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 10s
@@ -241,6 +240,4 @@ networks:
   web-network:
     driver: bridge
   capture-network:
-    driver: bridge
-  label-network:
     driver: bridge
