@@ -30,7 +30,7 @@ function initDateFilter() {
     }
 
     startDateElement.valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
-    endDateElement.valueAsDate = new Date();
+    endDateElement.valueAsDate = new Date(new Date().setDate(new Date().getDate() + 1));
 
     // COLLAPSE
     const collapseElement = document.getElementById('dateFilterCollapseCard');

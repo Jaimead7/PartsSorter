@@ -151,6 +151,21 @@ class ImageStreamResponse(BaseModel):
             trust= trust
         )
 
+    @classmethod
+    def from_image(
+        cls,
+        image: Image
+    ) -> Self:
+        return cls.factory(
+            image_url= image.external_url,
+            insp_result= image.inspection_result,
+            origin= image.origin,
+            model= image.model,
+            true_result= image.true_result,
+            trust= image.trust
+        )
+
+
 class ImageHistResponse(ImageStreamResponse):
     index: int = 0
     total: int = 0
@@ -176,4 +191,22 @@ class ImageHistResponse(ImageStreamResponse):
             trust= trust,
             index= index if index is not None else 0,
             total= total if total is not None else 0
+        )
+
+    @classmethod
+    def from_image(
+        cls,
+        image: Image,
+        index: Optional[int] = None,
+        total: Optional[int] = None
+    ) -> Self:
+        return cls.factory(
+            image_url= image.external_url,
+            insp_result= image.inspection_result,
+            origin= image.origin,
+            model= image.model,
+            true_result= image.true_result,
+            trust= image.trust,
+            index= index,
+            total= total
         )

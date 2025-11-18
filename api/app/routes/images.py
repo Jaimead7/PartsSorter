@@ -28,7 +28,7 @@ from ..database.images import (db_create_and_process_new_image,
                                db_update_image)
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
-from ..models.api import ImageFilters, ImageHistResponse
+from ..models.api import ImageFilters, ImageHistResponse, ImageStreamResponse
 from ..models.database import Image, ImageProcessed
 
 images_router: APIRouter = APIRouter()
@@ -196,7 +196,7 @@ async def update_image(
 
 @images_router.put(
     '/{uuid}/true-result',
-    response_model= Image,
+    response_model= ImageStreamResponse,
     summary= 'Update Image.true_result on the database.',
     response_description= 'The Image updated.',
     status_code= status.HTTP_200_OK
@@ -205,16 +205,17 @@ async def update_image_true_result(
     session: Annotated[AsyncSession, Depends(get_session)],
     uuid: Annotated[UUID, Path()],
     true_result: Annotated[Optional[str], Body()] = None,
-) -> Image:
+) -> ImageStreamResponse:
     image: Image = await db_get_image_by_id(
         session= session,
         image= Image(id= uuid)
     )
     image.true_result = true_result
-    return await db_update_image(
+    image = await db_update_image(
         session= session,
         image= image
     )
+    return ImageStreamResponse.from_image(image= image)
 
 @images_router.delete(
     '/{uuid}',

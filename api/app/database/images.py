@@ -333,13 +333,8 @@ async def db_get_next_hist_image(
             status_code= status.HTTP_404_NOT_FOUND,
             detail= msg
         )
-    return ImageHistResponse.factory(
-        image_url= db_images[0].external_url,
-        insp_result= db_images[0].inspection_result,
-        origin= db_images[0].origin,
-        model= db_images[0].model,
-        true_result= db_images[0].true_result,
-        trust= db_images[0].trust,
+    return ImageHistResponse.from_image(
+        image= db_images[0],
         index= index,
         total= total_images
     )

@@ -194,8 +194,11 @@ document.getElementById("trueResultForm")?.addEventListener("submit", (event) =>
             }
         )
         .then(response => {
-            console.table(response.json());
-            showAlert("Success", "success", 2);
+            if (response.ok) {
+                showAlert("Success", "success", 2);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         })
         .catch(error => {
             console.error("Error:", error);
