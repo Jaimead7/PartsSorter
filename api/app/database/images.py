@@ -106,6 +106,7 @@ async def db_create_new_image(
 async def db_update_image(
     session: AsyncSession,
     image: Image,
+    update_date: bool = True
 ) -> Image:
     db_image: Image = await db_get_image_by_id(
         session= session,
@@ -124,7 +125,8 @@ async def db_update_image(
         inspection_result_name= image.true_result
     )
     db_image.trust = image.trust
-    db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
+    if update_date:
+        db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     db_image = await _db_add_image_and_commit(
         session= session,
         image= image

@@ -213,7 +213,8 @@ async def update_image_true_result(
     image.true_result = true_result
     image = await db_update_image(
         session= session,
-        image= image
+        image= image,
+        update_date= False
     )
     return ImageStreamResponse.from_image(image= image)
 
