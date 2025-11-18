@@ -32,9 +32,9 @@ services:
     volumes:
       - label-studio-volume:/label-studio/data
       - images-volume:/local-storage/images
-    environment:
-      - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
-      - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/local-storage/images/training
+    env_file:
+      - path: ./label-studio/.env.docker
+        required: true
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s

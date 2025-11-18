@@ -43,6 +43,7 @@ This repository contains multiple independently licensed components:
 | API Server | [AGPL-3.0](./api/LICENSE) | **⚠️ Copyleft license** - see important notes below |
 | Web Application | [MIT](./web/LICENSE) | User interface component |
 | Reverse Proxy | [MIT](./proxy/LICENSE) | Reverse Proxy |
+| Label Studio | [MIT](./label-studio/LICENSE) | Label studio sql auxiliar scripts |
 
 ### Important Licensing Notes
 
