@@ -65,7 +65,7 @@
             </footer>
         </section>
         <section class="col-3 p-1 h-100 overflow-auto">
-            <form class="border border-1 rounded p-1">
+            <form class="border border-1 rounded p-1" id="trueResultForm">
                 <div class="d-flex justify-content-between mb-1">
                     <h3 class="mb-0"><strong>True result:</strong></h3>
                     <button type="submit" class="btn btn-secondary">Save</button>
@@ -77,5 +77,8 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/imageInspection.js') }}"></script>
+    <script
+        src="{{ url_for('static', filename='js/imageInspection.js') }}"
+        defer>
+    </script>
 {% endblock %}

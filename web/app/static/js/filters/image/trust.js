@@ -25,6 +25,11 @@ function initTrustFilter() {
     const minLabel = document.getElementById('imageTrustMinFilterLabel');
     const maxLabel = document.getElementById('imageTrustMaxFilterLabel');
 
+    if (!minElement || !maxElement || !minLabel || !maxLabel) {
+        console.error("No Trust Elements found.");
+        return;
+    }
+
     // LOCAL STORAGE
     function saveImageTrustOptions() {
         const minValue = minElement.value;
@@ -57,6 +62,7 @@ function initTrustFilter() {
         saveImageTrustOptions();
         minLabel.textContent = `${minElement.value}%`;
     });
+
     maxElement.addEventListener('input', function() {
         if (parseFloat(maxElement.value) < parseFloat(minElement.value)) {
             maxElement.value = minElement.value;
@@ -69,12 +75,12 @@ function initTrustFilter() {
     const collapseElement = document.getElementById('imageTrustFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#imageTrustFilterCollapseCard"] .bi');
     
-    collapseElement.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
     
-    collapseElement.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
@@ -85,6 +91,11 @@ function initTrustFilter() {
 function getTrustQueryParameters() {
     const minElement = document.getElementById('imageTrustMinFilter');
     const maxElement = document.getElementById('imageTrustMaxFilter');
+
+    if (!minElement || !maxElement) {
+        console.error("No Trust Elements found.");
+        return;
+    }
 
     const minValue = parseFloat(minElement.value) / 100;
     const maxValue = parseFloat(maxElement.value) / 100;

@@ -24,12 +24,12 @@ function initExtensionFilter() {
     const collapseElement = document.getElementById('imageExtensionFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#imageExtensionFilterCollapseCard"] .bi');
 
-    collapseElement.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
 
-    collapseElement.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
@@ -56,7 +56,7 @@ function initExtensionFilter() {
         }
     };
 
-    selectAllCheckbox.addEventListener('change', function() {
+    selectAllCheckbox?.addEventListener('change', () => {
         const isChecked = this.checked;
 
         imageExtensionOptions.forEach(checkbox => {
@@ -72,8 +72,10 @@ function initExtensionFilter() {
         const allChecked = Array.from(imageExtensionOptions).every(checkbox => checkbox.checked);
         const someChecked = Array.from(imageExtensionOptions).some(checkbox => checkbox.checked);
 
-        selectAllCheckbox.checked = allChecked;
-        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        }
 
         saveImageExtensionsOptions();
     };

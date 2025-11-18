@@ -24,12 +24,12 @@ function initClassSelector() {
     const collapseElement = document.getElementById('classSelectorCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#classSelectorCollapseCard"] .bi');
     
-    collapseElement.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
     
-    collapseElement.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });

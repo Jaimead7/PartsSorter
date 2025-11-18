@@ -21,19 +21,27 @@
 
 function initDateFilter() {
     // SET DATE
-    document.getElementById('startDateFilter').valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
-    document.getElementById('endDateFilter').valueAsDate = new Date();
+    const startDateElement = document.getElementById('startDateFilter');
+    const endDateElement = document.getElementById('endDateFilter');
+
+    if (!startDateElement || !endDateElement) {
+        console.error("No Date Elements found.");
+        return;
+    }
+
+    startDateElement.valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+    endDateElement.valueAsDate = new Date();
 
     // COLLAPSE
     const collapseElement = document.getElementById('dateFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#dateFilterCollapseCard"] .bi');
     
-    collapseElement.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
     
-    collapseElement.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
@@ -42,5 +50,11 @@ function initDateFilter() {
 function getDateQueryParameters() {
     const startDateElement = document.getElementById('startDateFilter');
     const endDateElement = document.getElementById('endDateFilter');
+
+    if (!startDateElement || !endDateElement) {
+        console.error("No Date Elements found.");
+        return;
+    }
+
     return `start_date=${encodeURIComponent(startDateElement.value)}&end_date=${encodeURIComponent(endDateElement.value)}`;
 };

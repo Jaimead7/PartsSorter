@@ -43,7 +43,7 @@ function connectWebSocket(url) {
         try{
             alertBlock.remove();
         } catch {}
-        console.log("Websocket connected");
+        console.log("Websocket connected.");
     };
 
     ws.onmessage = (event) => {
@@ -58,10 +58,15 @@ function connectWebSocket(url) {
             case "new-image":
                 if (selectedOrigins.includes(data.origin) || noneChecked) {
                     transferImages();
-                    document.getElementById("img-0-alt").hidden = true;
-                    img = document.getElementById("img-0-img");
-                    img.src = data.image_url;
-                    img.hidden = false;
+                    const imgAlt = document.getElementById(`img-0-alt`);
+                    if (imgAlt) {
+                        imgAlt.hidden = true;
+                    }
+                    const img = document.getElementById("img-0-img");
+                    if (img) {
+                        img.src = data.image_url;
+                        img.hidden = false;
+                    }
                     writeImageInfo(
                         data.origin,
                         "img-0-origin",
@@ -88,30 +93,25 @@ function connectWebSocket(url) {
 }
 
 function scheduleReconnect() {
-    showAlert("Reconnecting to server...", "warning");
+    showAlert("Reconnecting to server...", "warning", 4);
     clearTimeout(reconnectTimeout);
     reconnectTimeout = setTimeout(() => {
         initWebSocket();
     }, reconnectDelay);
 }
 
-function showAlert(message, type) {
-    try {
-        alertBlock.remove();
-    } catch (error) {}
-    alertBlock = document.createElement("dialog");
-    alertBlock.className = `d-inline-block position-absolute top-2 end-0 alert alert-${type} m-0`;
-    alertBlock.textContent = message;
-    document.getElementById("main-content").appendChild(alertBlock);
-}
-
 function clearImages() {
     for (let i = 4; i >= 0; i--) {
-        img = document.getElementById(`img-${i}-img`);
-        img.src = "";
-        img.hidden = true;
-        document.getElementById(`img-${i}-alt`).hidden = false;
-        clearImageInfo(i)
+        const img = document.getElementById(`img-${i}-img`);
+        if (img) {
+            img.src = "";
+            img.hidden = true;
+        }
+        const imgAlt = document.getElementById(`img-${i}-alt`);
+        if (imgAlt) {
+            imgAlt.hidden = false;
+        }
+        clearImageInfo(i);
     }
 }
 
@@ -128,17 +128,31 @@ function transferImages() {
 }
 
 function transferImage(idOrigin, idDestiny) {
-    imgDestiny = document.getElementById(`img-${idDestiny}-img`)
-    spanDestiny = document.getElementById(`img-${idDestiny}-alt`)
-    imgOrigin = document.getElementById(`img-${idOrigin}-img`)
-    spanOrigin = document.getElementById(`img-${idOrigin}-alt`)
+    const imgDestiny = document.getElementById(`img-${idDestiny}-img`)
+    const spanDestiny = document.getElementById(`img-${idDestiny}-alt`)
+    const imgOrigin = document.getElementById(`img-${idOrigin}-img`)
+    const spanOrigin = document.getElementById(`img-${idOrigin}-alt`)
+
+    if (!imgDestiny || !spanDestiny || !imgOrigin || !spanOrigin) {
+        console.error("No Image Elements found.");
+        return;
+    }
+
     imgDestiny.src = imgOrigin.getAttribute('src') === '' ? "" : imgOrigin.getAttribute('src');
     imgDestiny.hidden = imgDestiny.getAttribute('src') === '';
     spanDestiny.hidden = imgDestiny.getAttribute('src') !== '';
 }
 
 function transferText(idOrigin, idDestiny) {
-    document.getElementById(idDestiny).textContent = document.getElementById(idOrigin).textContent;
+    const originElement = document.getElementById(idOrigin);
+    const destinyElement = document.getElementById(idDestiny)
+
+    if (!originElement || !destinyElement) {
+        console.error("No Text Elements found.");
+        return;
+    }
+
+    destinyElement.textContent = originElement.textContent;
 }
 
 function writeImageInfo(
@@ -151,10 +165,22 @@ function writeImageInfo(
     model,
     modelElementName
 ) {
-    document.getElementById(originElementName).innerText = origin
-    document.getElementById(typeElementName).innerText = type
-    document.getElementById(trustElementName).innerText = trust
-    document.getElementById(modelElementName).innerText = model
+    let element = document.getElementById(originElementName);
+    if (element) {
+        element.innerText = origin;
+    }
+    element = document.getElementById(typeElementName);
+    if (element) {
+        element.innerText = type;
+    }
+    element = document.getElementById(trustElementName);
+    if (element) {
+        element.innerText = trust;
+    }
+    element = document.getElementById(modelElementName);
+    if (element) {
+        element.innerText = model;
+    }
 }
 
 function clearImageInfo(id) {

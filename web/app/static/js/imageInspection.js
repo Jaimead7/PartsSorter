@@ -19,11 +19,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-const prevButton = document.getElementById("prevHistImgButton");
-const nextButton = document.getElementById("nextHistImgButton");
-
-let apiIP = null;
-
 document.addEventListener("DOMContentLoaded", function() {
     initClassSelector();
     initDateFilter();
@@ -33,10 +28,11 @@ document.addEventListener("DOMContentLoaded", function() {
     initTrustFilter();
     initClassFilter();
 
-    getNewImage(0);
+    getNewImageFromHist(0);
 });
 
-nextButton.addEventListener("click", function() {
+// BUTTONS
+document.getElementById("nextHistImgButton")?.addEventListener("click", () => {
     const indexElement = document.getElementById("currentHistImgIndex");
     const totalIndexElement = document.getElementById("totalHistImgIndex");
     currentIndex = parseInt(indexElement.textContent) || 1;
@@ -44,18 +40,19 @@ nextButton.addEventListener("click", function() {
     if (currentIndex >= totalIndex - 1) {
         currentIndex = totalIndex - 1;
     }
-    getNewImage(currentIndex);
+    getNewImageFromHist(currentIndex);
 });
 
-prevButton.addEventListener("click", function() {
+document.getElementById("prevHistImgButton")?.addEventListener("click", () => {
     const indexElement = document.getElementById("currentHistImgIndex");
     currentIndex = parseInt(indexElement.textContent) || 2;
     if (currentIndex <= 2) {
         currentIndex = 2;
     }
-    getNewImage(currentIndex - 2);
+    getNewImageFromHist(currentIndex - 2);
 });
 
+// FILTERS
 function getQueryParameters(index) {
     let params = [];
     params.push(getExtensionQueryParameters());
@@ -68,56 +65,94 @@ function getQueryParameters(index) {
     return params.filter(item => item !== "").join("&");
 };
 
+// REFRESH IMAGE DATA
 function setImageData(data) {
     if (data.type === "new-image") {
-        document.getElementById("img-0-name").innerText = data.image_url.split("/").pop();
-        document.getElementById("img-0-origin").innerText = data.origin;
-        document.getElementById("img-0-type").innerText = data.insp_result;
-        document.getElementById("img-0-trust").innerText = (data.trust * 100).toFixed(2) + "%";
-        document.getElementById("img-0-model").innerText = data.model;
-        document.getElementById("currentHistImgIndex").innerText = parseInt(data.index) + 1;
-        document.getElementById("totalHistImgIndex").innerText = data.total;
-        document.getElementById("img-0-alt").hidden = true;
-        img = document.getElementById("img-0-img");
-        img.src = data.image_url;
-        img.hidden = false;
+        let element = document.getElementById("img-0-name");
+        if (element) {
+            element.innerText = data.image_url.split("/").pop();
+        }
+        element = document.getElementById("img-0-origin");
+        if (element) {
+            element.innerText = data.origin;
+        }
+        element = document.getElementById("img-0-type");
+        if (element) {
+            element.innerText = data.insp_result;
+        }
+        element = document.getElementById("img-0-trust");
+        if (element) {
+            element.innerText = (data.trust * 100).toFixed(2) + "%";
+        }
+        element = document.getElementById("img-0-model");
+        if (element) {
+            element.innerText = data.model;
+        }
+        element = document.getElementById("currentHistImgIndex");
+        if (element) {
+            element.innerText = parseInt(data.index) + 1;
+        }
+        element = document.getElementById("totalHistImgIndex");
+        if (element) {
+            element.innerText = data.total;
+        }
+        element = document.getElementById("img-0-alt");
+        if (element) {
+            element.hidden = true;
+        }
+        element = document.getElementById("img-0-img");
+        if (element) {
+            element.src = data.image_url;
+            element.hidden = false;
+        }
         checkClassSelector(data.true_result);
     }
 }
 
 function clearImageData() {
     let element = document.getElementById("img-0-name");
-    element.innerText = element.getAttribute("data-default-text");
+    if (element) {
+        element.innerText = element.getAttribute("data-default-text");
+    }
     element = document.getElementById("img-0-origin");
-    element.innerText = element.getAttribute("data-default-text");
+    if (element) {
+        element.innerText = element.getAttribute("data-default-text");
+    }
     element = document.getElementById("img-0-type");
-    element.innerText = element.getAttribute("data-default-text");
+    if (element) {
+        element.innerText = element.getAttribute("data-default-text");
+    }
     element = document.getElementById("img-0-trust");
-    element.innerText = element.getAttribute("data-default-text");
+    if (element) {
+        element.innerText = element.getAttribute("data-default-text");
+    }
     element = document.getElementById("img-0-model");
-    element.innerText = element.getAttribute("data-default-text");
+    if (element) {
+        element.innerText = element.getAttribute("data-default-text");
+    }
     element = document.getElementById("currentHistImgIndex");
-    element.innerText = element.getAttribute("data-default-text");
+    if (element) {
+        element.innerText = element.getAttribute("data-default-text");
+    }
     element = document.getElementById("totalHistImgIndex");
-    element.innerText = element.getAttribute("data-default-text");
-    document.getElementById("img-0-alt").hidden = false;
-    img = document.getElementById("img-0-img");
-    img.src = "";
-    img.hidden = true;
+    if (element) {
+        element.innerText = element.getAttribute("data-default-text");
+    }
+    element = document.getElementById("img-0-alt");
+    if (element) {
+        element.hidden = false;
+    }
+    element = document.getElementById("img-0-img");
+    if (element) {
+        element.src = "";
+        element.hidden = true;
+    }
 }
 
-async function getNewImage(index) {
-    if (apiIP === null) {
-        try {
-            const response = await fetch("/api/config");
-            const config = await response.json();
-            apiIP = config.ip;
-        } catch (error) {
-            console.error("Error loading config:", error);
-            return;
-        }
-    }
-    const endpoint = `http://${apiIP}/image/hist/next`;
+// GET DATA
+async function getNewImageFromHist(index) {
+    const ip = await getAPIIP();
+    const endpoint = `http://${ip}/image/hist/next`;
     const url = `${endpoint}?${getQueryParameters(index)}`;
     try {
         const response = await fetch(url);
@@ -126,10 +161,46 @@ async function getNewImage(index) {
             return;
         }
         const data = await response.json();
-        console.table(data)
         setImageData(data);
     } catch (error) {
         console.error("Error fetching image:", error);
         clearImageData();
     }
 }
+
+// TRUE RESULT FORM
+document.getElementById("trueResultForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const imageUUID = document.getElementById("img-0-name").innerText.split(".")[0]
+    const selectedCheckbox = Array.from(
+        document.querySelectorAll('input[name="class-selector-option"]')
+    )
+    .find(checkbox => checkbox.checked);
+    if (!selectedCheckbox) {
+        showAlert("Select a true result", "danger", 2);
+        return;
+    }
+    getAPIIP().then(ip => {
+        const endpoint = `http://${ip}/image/${imageUUID}/true-result`;
+        fetch(
+            endpoint,
+            {
+                method: "PUT",
+                headers: {
+                    "accept": "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(selectedCheckbox.value)
+            }
+        )
+        .then(response => {
+            console.table(response.json());
+            showAlert("Success", "success", 2);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            showAlert("Error", "danger", 2);
+        });
+    });
+
+});

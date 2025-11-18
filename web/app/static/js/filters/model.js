@@ -24,12 +24,12 @@ function initModelFilter() {
     const collapseElement = document.getElementById('modelFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#modelFilterCollapseCard"] .bi');
 
-    collapseElement.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
 
-    collapseElement.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', function() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
@@ -56,7 +56,7 @@ function initModelFilter() {
         }
     };
 
-    selectAllCheckbox.addEventListener('change', function() {
+    selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
         modelOptions.forEach(checkbox => {
@@ -72,8 +72,10 @@ function initModelFilter() {
         const allChecked = Array.from(modelOptions).every(checkbox => checkbox.checked);
         const someChecked = Array.from(modelOptions).some(checkbox => checkbox.checked);
 
-        selectAllCheckbox.checked = allChecked;
-        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        }
 
         saveModelsOptions();
     };
