@@ -44,4 +44,4 @@ async def health_check() -> HealthResponse:
     status_code= status.HTTP_200_OK
 )
 async def get_API_URL() -> ApiIPResponse:
-    return ApiIPResponse(ip= f'{HOST_IP}:{SERVER_PORT}')
+    return ApiIPResponse(ip= f'{HOST_IP}/api')

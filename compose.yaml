@@ -122,10 +122,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - nginx-volume/nginx.conf:/etc/nginx/nginx.conf
-      - nginx-volume/conf.d/:/etc/nginx/conf.d/
-      - logs-volume/nginx/:/var/log/nginx/
-      - nginx-volume/ssl/:/etc/nginx/ssl/
+      - nginx-volume:/etc/nginx
+      - nginx-logs-volume:/var/log/nginx/
     networks:
       - api-network
       - web-network
@@ -215,6 +213,15 @@ volumes:
     external: false
     labels:
       - "description=Logs volume."
+  nginx-logs-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOGS_VOLUME_PATH:-/mnt/shared/logs}/nginx
+    external: false
+    labels:
+      - "description=Nginx volume."
   nginx-volume:
     driver: local
     driver_opts:

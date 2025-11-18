@@ -15,10 +15,10 @@ API for managing the database and process the images.
 Use the [.env.example](./.env.example) as example.  
 - LOGS_PATH &rarr; Path where the logs will be saved.  
 - LOGGING_LVL &rarr; Logging level.  
-SERVER_IP &rarr; IP where the API will be exposed.  
-SERVER_PORT &rarr; Port where the API will be exposed.  
-DATABASE_URL &rarr; URL of the database with the protocol used.  
-HOST_IP &rarr; IP of the host of the container. Used for sending the URL of the files shared.  
+- SERVER_IP &rarr; IP where the API will be exposed.  
+- SERVER_PORT &rarr; Port where the API will be exposed.  
+- DATABASE_URL &rarr; URL of the database with the protocol used.  
+- HOST_IP &rarr; IP of the host of the container. Used for sending the URL of the files shared.  
 
 
 ### Create docker container  

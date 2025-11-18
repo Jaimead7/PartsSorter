@@ -25,14 +25,14 @@ from quart import Blueprint, Response
 from ..dependencies.api import api_get_ip
 from ..dependencies.config import my_logger
 
-api_bp = Blueprint(
+config_bp = Blueprint(
     'api',
     __name__,
-    url_prefix='/api'
+    url_prefix='/config'
 )
 
-@api_bp.route('/config')
-async def api_config() -> Response:
+@config_bp.route('/ip')
+async def config_ip() -> Response:
     try:
         ip: str = await api_get_ip()
         return Response(

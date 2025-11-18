@@ -35,7 +35,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     my_logger.info('Lifespan finished.')
     yield
 
-app = FastAPI(lifespan= lifespan)
+app = FastAPI(
+    lifespan= lifespan,
+    root_path= '/api'
+)
 app.include_router(
     web_sockets.ws_router,
     prefix= '/ws',

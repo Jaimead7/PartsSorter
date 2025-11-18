@@ -19,6 +19,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .api import api_bp
+from .config import config_bp
 from .inspection import inspection_bp
-from .well_known import wn_bp
+from .well_known import wk_bp

@@ -20,8 +20,6 @@ Use the [.env.example](./.env.example) as example.
 - ACTUATOR_PIN &rarr; Output pin connected to the relay of the actuator.  
 - CAMERA_SENSOR_PIN &rarr; Input pin of the sensor that detects the part in the camera position.  
 - ACTUATOR_SENSOR_PIN &rarr; Input pin of the sensor that detects the part in the actuator position.  
-- SENSORS_DISTANCE &rarr; Distance between sensors in mm.  
-- TAPE_SPEED &rarr; Speed of the tape of the conveyor in mm/s.  
 
 
 ### Create docker container  

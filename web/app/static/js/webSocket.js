@@ -27,7 +27,7 @@ let alertBlock;
 
 async function initWebSocket() {
     try {
-        const response = await fetch('/api/config');
+        const response = await fetch('/config/ip');
         const config = await response.json();
         connectWebSocket(`ws://${config.ip}/ws/image-stream`);
     } catch (error) {

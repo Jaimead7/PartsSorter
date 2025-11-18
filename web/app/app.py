@@ -23,7 +23,7 @@ import httpx
 import uvicorn
 from quart import Quart, render_template
 
-from .blueprints import api_bp, inspection_bp, wn_bp
+from .blueprints import config_bp, inspection_bp, wk_bp
 from .dependencies.config import SERVER_IP, SERVER_PORT
 
 app = Quart(__name__)
@@ -50,8 +50,8 @@ async def health_check() -> dict:
     return {"status": "healthy", "service": "web"}
 
 app.register_blueprint(inspection_bp)
-app.register_blueprint(api_bp)
-app.register_blueprint(wn_bp)
+app.register_blueprint(config_bp)
+app.register_blueprint(wk_bp)
 
 if __name__ == '__main__':
     uvicorn.run(

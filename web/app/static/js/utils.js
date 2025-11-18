@@ -16,7 +16,7 @@ async function showAlert(message, type, seconds) {
 async function getAPIIP() {
     if (apiIP === null) {
         try {
-            const response = await fetch("/api/config");
+            const response = await fetch("/config/ip");
             const config = await response.json();
             apiIP = config.ip;
         } catch (error) {

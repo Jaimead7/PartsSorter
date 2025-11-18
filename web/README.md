@@ -15,8 +15,8 @@ User interface of the parts sorter system as a web app.
 Use the [.env.example](./.env.example) as example.  
 - LOGS_PATH &rarr; Path where the logs will be saved.  
 - LOGGING_LVL &rarr; Logging level.  
-SERVER_IP &rarr; IP where the server will be exposed.  
-SERVER_PORT &rarr; Port where the server will be exposed.  
+- SERVER_IP &rarr; IP where the server will be exposed.  
+- SERVER_PORT &rarr; Port where the server will be exposed.  
 - API_URL &rarr; Base IP of the API.  
 
 ### Create docker container  
