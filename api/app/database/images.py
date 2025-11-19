@@ -179,6 +179,7 @@ async def db_get_images_by_ids(
         statement = statement.where(
             col(Image.id).in_(images_uuids)
         )
+    statement = statement.order_by(col(Image.processed_date).asc())
     statement = statement.offset(offset).limit(limit)
     db_images: Sequence[Image] = (await session.scalars(statement)).all()
     if len(db_images) == 0:
@@ -358,6 +359,7 @@ async def db_get_images_with_filters(
 ) -> Sequence[Image]:
     statement: SelectOfScalar[Image] = select(Image)
     statement = filters.add_filters_to_statement(statement)
+    statement = statement.order_by(col(Image.processed_date).asc())
     statement = statement.offset(offset).limit(limit)
     db_images: ScalarResult[Image] = await session.scalars(statement)
     return db_images.all()
