@@ -182,16 +182,26 @@ document.getElementById("trueResultForm")?.addEventListener("submit", (event) =>
     }
     getAPIIP().then(ip => {
         const endpoint = `http://${ip}/image/${imageUUID}/true-result`;
-        fetch(
-            endpoint,
-            {
+        let content = {
+            method: "PUT",
+            headers: {
+                "accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(selectedCheckbox.value)
+        }
+        if (selectedCheckbox.value === 'No result') {
+            content = {
                 method: "PUT",
                 headers: {
                     "accept": "application/json",
                     "Content-Type": "application/json",
-                },
-                body: JSON.stringify(selectedCheckbox.value)
+                }
             }
+        }
+        fetch(
+            endpoint,
+            content
         )
         .then(response => {
             if (response.ok) {
