@@ -98,3 +98,6 @@ function getClassQueryParameters() {
     });
     return classParams.join('&');
 };
+
+
+export { initClassFilter, getClassQueryParameters };

@@ -58,3 +58,6 @@ function getDateQueryParameters() {
 
     return `start_date=${encodeURIComponent(startDateElement.value)}&end_date=${encodeURIComponent(endDateElement.value)}`;
 };
+
+
+export { initDateFilter, getDateQueryParameters };

@@ -98,3 +98,6 @@ function getModelQueryParameters() {
     });
     return modelParams.join('&');
 };
+
+
+export { initModelFilter, getModelQueryParameters };

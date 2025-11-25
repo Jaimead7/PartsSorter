@@ -58,3 +58,6 @@ function checkClassSelector(option) {
         }
     });
 }
+
+
+export { initClassSelector, checkClassSelector };

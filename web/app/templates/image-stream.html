@@ -82,10 +82,10 @@
 {% block scripts %}
     <script
         src="{{ url_for('static', filename='js/imageStream.js') }}"
-        defer>
+        type="module">
     </script>
     <script
         src="{{ url_for('static', filename='js/webSocket.js') }}"
-        defer>
+        type="module">
     </script>
 {% endblock %}

@@ -102,3 +102,6 @@ function getTrustQueryParameters() {
 
     return `min_trust=${encodeURIComponent(minValue)}&max_trust=${encodeURIComponent(maxValue)}`;
 };
+
+
+export { initTrustFilter, getTrustQueryParameters };

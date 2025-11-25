@@ -26,3 +26,6 @@ async function getAPIIP() {
     }
     return apiIP;
 }
+
+
+export { getAPIIP, showAlert };

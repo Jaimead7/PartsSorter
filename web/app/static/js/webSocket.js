@@ -19,6 +19,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import { showAlert } from './utils';
+
+
 let ws;
 let reconnectDelay = 10000;
 let reconnectTimeout;
@@ -197,3 +200,6 @@ function clearImageInfo(id) {
         trustElement.innerText = trustElement.getAttribute("data-default-text")
     }
 }
+
+
+export { initWebSocket };

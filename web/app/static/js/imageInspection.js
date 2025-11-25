@@ -19,6 +19,15 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import { initClassSelector } from "./filters/class";
+import { initDateFilter } from "./filters/date";
+import { initExtensionFilter } from "./filters/image/extension";
+import { initOriginFilter } from "./filters/origin";
+import { initModelFilter } from "./filters/model";
+import { initTrustFilter } from "./filters/image/trust";
+import { initClassFilter } from "./filters/class";
+
+
 document.addEventListener("DOMContentLoaded", function() {
     initClassSelector();
     initDateFilter();

@@ -98,3 +98,6 @@ function getExtensionQueryParameters() {
     });
     return extensionParams.join('&');
 };
+
+
+export { initExtensionFilter, getExtensionQueryParameters };

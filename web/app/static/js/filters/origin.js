@@ -98,3 +98,6 @@ function getOriginQueryParameters() {
     });
     return originParams.join('&');
 };
+
+
+export { initOriginFilter, getOriginQueryParameters };
