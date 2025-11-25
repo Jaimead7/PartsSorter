@@ -20,63 +20,128 @@
 
 
 import json
+from typing import Optional, TypedDict
 
 import httpx
 from quart import current_app
 
-from ..dependencies.config import API_URL
+from ..dependencies.config import API_URL, my_logger
 
+
+class RequestOptions(TypedDict, total=False):
+    url: str
+    headers: dict
+    timeout: float
+
+
+async def api_request(options: RequestOptions, method: str = 'GET') -> Optional[httpx.Response]:
+    url_for_log: str = options.get('url', 'unknown').split('?')[0]
+    client: httpx.AsyncClient = current_app.extensions['httpx_client']
+    if client is None:
+        my_logger.error('HTTP client not available.')
+        return None
+    try:
+        if method.upper() == 'POST':
+            response: httpx.Response = await client.post(**options)
+        elif method.upper() == 'PUT':
+            response: httpx.Response = await client.put(**options)
+        elif method.upper() == 'DELETE':
+            response: httpx.Response = await client.delete(**options)
+        else:
+            response: httpx.Response = await client.get(**options)
+        response.raise_for_status()
+        return response
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            my_logger.warning(f'Response from "{url_for_log}": Not found.')
+            return None
+        my_logger.error(f'HTTP error from "{url_for_log}: {e.response.status_code}.')
+        return None
+    except httpx.RequestError as e:
+        my_logger.error(f'Request failed from "{url_for_log}": {e}.')
+        return None
+    except Exception as e:
+        my_logger.error(f'Unexpected error from "{url_for_log}": {e}')
+        return None
 
 async def api_get_ip() -> str:
-    client: httpx.AsyncClient = current_app.extensions['httpx_client']
-    response: httpx.Response = await client.get(
+    options: RequestOptions = RequestOptions(
         url= f'{API_URL}/config/ip',
         headers= {
             'accept': 'application/json'
-        }
+        },
+        timeout= 30.0
     )
+    response: httpx.Response = await api_request(options)
+    if response is None:
+        raise httpx.ConnectError
     return json.dumps(response.json())
 
 async def api_get_origins() -> list[str]:
-    client: httpx.AsyncClient = current_app.extensions['httpx_client']
-    response: httpx.Response = await client.get(
-            url= f'{API_URL}/origin/?limit=100&offset=0',
-            headers= {
-                'accept': 'application/json'
-            }
-        )
-    origins: list[str] = [origin['name'] for origin in response.json()]
-    return origins
+    options: RequestOptions = RequestOptions(
+        url= f'{API_URL}/origin/?limit=100&offset=0',
+        headers= {
+            'accept': 'application/json'
+        },
+        timeout= 30.0
+    )
+    response: httpx.Response = await api_request(options)
+    if response is None:
+        return []
+    try:
+        return [origin['name'] for origin in response.json()]
+    except Exception as e:
+        my_logger.error(f'Error processing origins from the api. {e}')
+        return []
 
 async def api_get_models() -> list[str]:
-    client: httpx.AsyncClient = current_app.extensions['httpx_client']
-    response: httpx.Response = await client.get(
-            url= f'{API_URL}/model/?limit=100&offset=0',
-            headers= {
-                'accept': 'application/json'
-            }
-        )
-    models: list[str] = [model['name'] for model in response.json()]
-    return models
+    options: RequestOptions = RequestOptions(
+        url= f'{API_URL}/model/?limit=100&offset=0',
+        headers= {
+            'accept': 'application/json'
+        },
+        timeout= 30.0
+    )
+    response: httpx.Response = await api_request(options)
+    if response is None:
+        return []
+    try:
+        return [model['name'] for model in response.json()]
+    except Exception as e:
+        my_logger.error(f'Error processing models from the api. {e}')
+        return []
 
 async def api_get_inspection_results() -> list[str]:
-    client: httpx.AsyncClient = current_app.extensions['httpx_client']
-    response: httpx.Response = await client.get(
+    options: RequestOptions = RequestOptions(
         url= f'{API_URL}/inspection-result/?limit=100&offset=0',
         headers= {
             'accept': 'application/json'
-        }
+        },
+        timeout= 30.0
     )
-    results: list[str] = [result['name'] for result in response.json()]
-    return results
+    response: httpx.Response = await api_request(options)
+    if response is None:
+        return []
+    try:
+        return [result['name'] for result in response.json()]
+    except Exception as e:
+        my_logger.error(f'Error processing inspection result from the api. {e}')
+        return []
+
 
 async def api_get_image_extensions() -> list[str]:
-    client: httpx.AsyncClient = current_app.extensions['httpx_client']
-    response: httpx.Response = await client.get(
+    options: RequestOptions = RequestOptions(
         url= f'{API_URL}/image/extensions',
         headers= {
             'accept': 'application/json'
-        }
+        },
+        timeout= 30.0
     )
-    results: list[str] = [result for result in response.json()]
-    return results
+    response: httpx.Response = await api_request(options)
+    if response is None:
+        return []
+    try:
+        return [extension for extension in response.json()]
+    except Exception as e:
+        my_logger.error(f'Error processing image extension from the api. {e}')
+        return []
