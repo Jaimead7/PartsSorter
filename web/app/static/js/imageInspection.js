@@ -26,7 +26,7 @@ import { initOriginFilter, getOriginQueryParameters } from "./filters/origin.js"
 import { initModelFilter, getModelQueryParameters } from "./filters/model.js";
 import { initTrustFilter, getTrustQueryParameters } from "./filters/image/trust.js";
 import { initClassFilter, getClassQueryParameters } from "./filters/class.js";
-import { getAPIIP, showAlert } from "./utils.js";
+import { showAlert } from "./utils.js";
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -64,30 +64,24 @@ document.getElementById("prevHistImgButton")?.addEventListener("click", () => {
 
 document.getElementById("delete-img-btn-0")?.addEventListener("click", () => {
     const imageUUID = document.getElementById("img-0-name").innerText.split(".")[0]
-    getAPIIP()
-    .then(ip => {
-        const endpoint = `http://${ip}/image/${imageUUID}`;
-        let content = {
-            method: "DELETE",
-            headers: {
-                "accept": "*/*",
-            }
+    const endpoint = `/image/${imageUUID}`;
+    let content = {
+        method: "DELETE",
+        headers: {
+            "accept": "*/*",
         }
-        fetch(
-            endpoint,
-            content
-        )
-        .then(response => {
-            if (response.ok) {
-                showAlert("Success", "success", 2);
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            showAlert("Error", "danger", 2);
-        });
+    }
+    fetch(endpoint, content)
+    .then(response => {
+        if (response.ok) {
+            showAlert("Success", "success", 2);
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        showAlert("Error", "danger", 2);
     });
     const indexElement = document.getElementById("currentHistImgIndex");
     let currentIndex = parseInt(indexElement.textContent) || 1;
@@ -197,9 +191,7 @@ function clearImageData() {
 
 // GET DATA
 async function getNewImageFromHist(index) {
-    const ip = await getAPIIP();
-    const endpoint = `http://${ip}/image/hist/next`;
-    const url = `${endpoint}?${getQueryParameters(index)}`;
+    const url = `/image/hist/next?${getQueryParameters(index)}`;
     try {
         const response = await fetch(url);
         if (response.status === 404) {
@@ -220,46 +212,39 @@ document.getElementById("trueResultForm")?.addEventListener("submit", (event) =>
     const imageUUID = document.getElementById("img-0-name").innerText.split(".")[0]
     const selectedCheckbox = Array.from(
         document.querySelectorAll('input[name="class-selector-option"]')
-    )
-    .find(checkbox => checkbox.checked);
+    ).find(checkbox => checkbox.checked);
     if (!selectedCheckbox) {
-        showAlert("Select a true result", "danger", 2);
+        showAlert("Select a true result", "warning", 2);
         return;
     }
-    getAPIIP().then(ip => {
-        const endpoint = `http://${ip}/image/${imageUUID}/true-result`;
-        let content = {
+    const endpoint = `/image/${imageUUID}/true-result`;
+    let content = {
+        method: "PUT",
+        headers: {
+            "accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(selectedCheckbox.value)
+    }
+    if (selectedCheckbox.value === 'No result') {
+        content = {
             method: "PUT",
             headers: {
                 "accept": "application/json",
                 "Content-Type": "application/json",
-            },
-            body: JSON.stringify(selectedCheckbox.value)
-        }
-        if (selectedCheckbox.value === 'No result') {
-            content = {
-                method: "PUT",
-                headers: {
-                    "accept": "application/json",
-                    "Content-Type": "application/json",
-                }
             }
         }
-        fetch(
-            endpoint,
-            content
-        )
-        .then(response => {
-            if (response.ok) {
-                showAlert("Success", "success", 2);
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            showAlert("Error", "danger", 2);
-        });
+    }
+    fetch(endpoint, content)
+    .then(response => {
+        if (response.ok) {
+            showAlert("Success", "success", 2);
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        showAlert("Error", "danger", 2);
     });
-
 });

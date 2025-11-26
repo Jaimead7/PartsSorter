@@ -1,5 +1,3 @@
-let apiIP = null;
-
 async function showAlert(message, type, seconds) {
     const alertBlock = document.createElement("div");
     alertBlock.className = `alert alert-${type} fade show position-absolute m-1 start-50 translate-middle-x text-truncate`;
@@ -13,19 +11,5 @@ async function showAlert(message, type, seconds) {
     }, seconds * 1000);
 }
 
-async function getAPIIP() {
-    if (apiIP === null) {
-        try {
-            const response = await fetch("/config/ip");
-            const config = await response.json();
-            apiIP = config.ip;
-        } catch (error) {
-            console.error("Error loading config:", error);
-            throw new Error("Error loading config:", error)
-        }
-    }
-    return apiIP;
-}
 
-
-export { getAPIIP, showAlert };
+export { showAlert };
