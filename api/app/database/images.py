@@ -14,9 +14,11 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Sequence, Tuple
+from types import CoroutineType
+from typing import Any, Optional, Sequence, Tuple
 from uuid import UUID
 
 import aiofiles
@@ -129,7 +131,7 @@ async def db_update_image(
         db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     db_image = await _db_add_image_and_commit(
         session= session,
-        image= image
+        image= db_image
     )
     my_logger.info(
         f'Image updated {db_image}.',
@@ -141,8 +143,18 @@ async def db_delete_images_by_id(
     session: AsyncSession,
     images_uuids: list[UUID]
 ) -> None:
-    #CHECK
     # Files are deleted by event after_delete
+    db_images: Sequence[Image] = await db_get_images_by_ids(
+        session= session,
+        images_uuids= images_uuids,
+        limit= len(images_uuids),
+        offset= 0
+    )
+    tasks: list[CoroutineType[Any, Any, Path]] = [
+        db_delete_image_file(db_image)
+        for db_image in db_images
+    ]
+    await asyncio.gather(*tasks)
     statement: Delete = (
         delete(Image)
         .where(col(Image.id).in_(images_uuids))
@@ -321,8 +333,17 @@ async def db_get_next_hist_image(
         session= session,
         filters= filters
     )
+    if total_images == 0:
+        msg: str = f'Images not found.'
+        my_logger.error(msg)
+        raise HTTPException(
+            status_code= status.HTTP_404_NOT_FOUND,
+            detail= msg
+        )
     if index > total_images - 1:
         index = total_images - 1
+    if index < 0:
+        index = 0
     db_images: Sequence[Image] = await db_get_images_with_filters(
         session= session,
         filters= filters,

@@ -19,13 +19,14 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { initClassSelector } from "./filters/class";
-import { initDateFilter } from "./filters/date";
-import { initExtensionFilter } from "./filters/image/extension";
-import { initOriginFilter } from "./filters/origin";
-import { initModelFilter } from "./filters/model";
-import { initTrustFilter } from "./filters/image/trust";
-import { initClassFilter } from "./filters/class";
+import { initClassSelector, checkClassSelector } from "./selectors/class.js";
+import { initDateFilter, getDateQueryParameters } from "./filters/date.js";
+import { initExtensionFilter, getExtensionQueryParameters } from "./filters/image/extension.js";
+import { initOriginFilter, getOriginQueryParameters } from "./filters/origin.js";
+import { initModelFilter, getModelQueryParameters } from "./filters/model.js";
+import { initTrustFilter, getTrustQueryParameters } from "./filters/image/trust.js";
+import { initClassFilter, getClassQueryParameters } from "./filters/class.js";
+import { getAPIIP, showAlert } from "./utils.js";
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -44,8 +45,8 @@ document.addEventListener("DOMContentLoaded", function() {
 document.getElementById("nextHistImgButton")?.addEventListener("click", () => {
     const indexElement = document.getElementById("currentHistImgIndex");
     const totalIndexElement = document.getElementById("totalHistImgIndex");
-    currentIndex = parseInt(indexElement.textContent) || 1;
-    totalIndex = parseInt(totalIndexElement.textContent) || 1;
+    let currentIndex = parseInt(indexElement.textContent) || 1;
+    let totalIndex = parseInt(totalIndexElement.textContent) || 1;
     if (currentIndex >= totalIndex - 1) {
         currentIndex = totalIndex - 1;
     }
@@ -54,12 +55,48 @@ document.getElementById("nextHistImgButton")?.addEventListener("click", () => {
 
 document.getElementById("prevHistImgButton")?.addEventListener("click", () => {
     const indexElement = document.getElementById("currentHistImgIndex");
-    currentIndex = parseInt(indexElement.textContent) || 2;
+    let currentIndex = parseInt(indexElement.textContent) || 2;
     if (currentIndex <= 2) {
         currentIndex = 2;
     }
     getNewImageFromHist(currentIndex - 2);
 });
+
+document.getElementById("delete-img-btn-0")?.addEventListener("click", () => {
+    const imageUUID = document.getElementById("img-0-name").innerText.split(".")[0]
+    getAPIIP()
+    .then(ip => {
+        const endpoint = `http://${ip}/image/${imageUUID}`;
+        let content = {
+            method: "DELETE",
+            headers: {
+                "accept": "*/*",
+            }
+        }
+        fetch(
+            endpoint,
+            content
+        )
+        .then(response => {
+            if (response.ok) {
+                showAlert("Success", "success", 2);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            showAlert("Error", "danger", 2);
+        });
+    });
+    const indexElement = document.getElementById("currentHistImgIndex");
+    let currentIndex = parseInt(indexElement.textContent) || 1;
+    if (currentIndex <= 2) {
+        currentIndex = 2;
+    }
+    getNewImageFromHist(currentIndex - 1);
+});
+
 
 // FILTERS
 function getQueryParameters(index) {

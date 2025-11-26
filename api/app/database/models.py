@@ -14,9 +14,11 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+import asyncio
 from pathlib import Path
 from shutil import rmtree
-from typing import Optional, Sequence
+from types import CoroutineType
+from typing import Any, Optional, Sequence
 
 import yaml
 from fastapi import HTTPException, UploadFile, status
@@ -133,6 +135,11 @@ async def db_delete_models(
         limit= len(models),
         offset= 0
     )
+    tasks: list[CoroutineType[Any, Any, Path]] = [
+        db_delete_model_dir(db_model)
+        for db_model in db_models
+    ]
+    await asyncio.gather(*tasks)
     for db_model in db_models:
         await session.delete(db_model)
     await session.commit()
@@ -266,7 +273,7 @@ async def db_get_model_metadata(
     )
     return db_model.model_metadata
 
-def db_delete_model_dir(
+async def db_delete_model_dir(
     model: Model
 ) -> Path:
     dir_path: Path = model.internal_absolute_path

@@ -59,4 +59,4 @@ def event_delete_image(mapper, connection, image: Image) -> None:
 
 @event.listens_for(Model, 'after_delete')
 def event_delete_model(mapper, connection, model: Model) -> None:
-    db_delete_model_dir(model)
+    asyncio.run(db_delete_model_dir(model))
