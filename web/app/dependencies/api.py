@@ -64,19 +64,6 @@ async def api_request(options: RequestOptions, method: str = 'GET') -> Optional[
         my_logger.error(f'Unexpected error from "{url_for_log}": {e}')
         return None
 
-async def api_get_ip() -> str:
-    options: RequestOptions = RequestOptions(
-        url= f'{API_URL}/config/ip',
-        headers= {
-            'accept': 'application/json'
-        },
-        timeout= 30.0
-    )
-    response: httpx.Response = await api_request(options)
-    if response is None:
-        raise httpx.ConnectError
-    return json.dumps(response.json())
-
 async def api_get_origins() -> list[str]:
     options: RequestOptions = RequestOptions(
         url= f'{API_URL}/origin/?limit=100&offset=0',
@@ -85,7 +72,7 @@ async def api_get_origins() -> list[str]:
         },
         timeout= 30.0
     )
-    response: httpx.Response = await api_request(options)
+    response: Optional[httpx.Response] = await api_request(options)
     if response is None:
         return []
     try:
@@ -102,7 +89,7 @@ async def api_get_models() -> list[str]:
         },
         timeout= 30.0
     )
-    response: httpx.Response = await api_request(options)
+    response: Optional[httpx.Response] = await api_request(options)
     if response is None:
         return []
     try:
@@ -119,7 +106,7 @@ async def api_get_inspection_results() -> list[str]:
         },
         timeout= 30.0
     )
-    response: httpx.Response = await api_request(options)
+    response: Optional[httpx.Response] = await api_request(options)
     if response is None:
         return []
     try:
@@ -137,7 +124,7 @@ async def api_get_image_extensions() -> list[str]:
         },
         timeout= 30.0
     )
-    response: httpx.Response = await api_request(options)
+    response: Optional[httpx.Response] = await api_request(options)
     if response is None:
         return []
     try:

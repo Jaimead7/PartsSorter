@@ -19,36 +19,10 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import httpx
-from quart import Blueprint, Response
-
-from ..dependencies.api import api_get_ip
-from ..dependencies.config import my_logger
+from quart import Blueprint
 
 config_bp = Blueprint(
     'api',
     __name__,
     url_prefix='/config'
 )
-
-@config_bp.route('/ip')
-async def config_ip() -> Response:
-    try:
-        ip: str = await api_get_ip()
-        return Response(
-            ip,
-            200,
-            content_type='application/json'
-        )
-    except httpx.ConnectError:
-        msg: str = 'Could not connect to the API.'
-        my_logger.error(f'ConnectionError: {msg}')
-        return Response(
-            {
-                'error': {
-                    'code': 'internal_error',
-                    'message': msg
-                }
-            },
-            500
-        )

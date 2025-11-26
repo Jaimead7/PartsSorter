@@ -30,9 +30,7 @@ let alertBlock;
 
 async function initWebSocket() {
     try {
-        const response = await fetch('/config/ip');
-        const config = await response.json();
-        connectWebSocket(`ws://${config.ip}/ws/image-stream`);
+        connectWebSocket(`ws://${window.location.host}/ws/image-stream`);
     } catch (error) {
         console.error('Error loading config:', error);
         connectWebSocket('ws://localhost:8000/ws/image-stream');
