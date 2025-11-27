@@ -83,7 +83,7 @@ app.include_router(
 STATIC_PATH.mkdir(parents= True, exist_ok= True)
 app.mount('/static', StaticFiles(directory= STATIC_PATH), name='static')
 
-#TODO: fix access policity
+#TODO: Change policity to only acept connections from nginx
 app.add_middleware(
     CORSMiddleware,
     allow_origins= ['*'],
@@ -95,6 +95,6 @@ app.add_middleware(
 if __name__ == "__main__":
     uvicorn.run(
         app,
-        host=SERVER_IP,
-        port=SERVER_PORT
+        host= SERVER_IP,
+        port= SERVER_PORT
     )
