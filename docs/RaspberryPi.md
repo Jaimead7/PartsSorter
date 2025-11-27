@@ -228,6 +228,11 @@ sudo docker run hello-world
 docker compose version
 ```
 
+- Add user to docker users
+```bash
+sudo usermod -aG docker $USER
+```
+
 # Usage
 ## SSH access
 ```powershell
