@@ -40,7 +40,6 @@ class EnvVars(Enum):
     SERVER_PORT = 'SERVER_PORT'
     DATABASE_URL = 'DATABASE_URL'
     DATABASE_GET_LIMIT = 'DATABASE_GET_LIMIT'
-    HOST_IP = 'HOST_IP'
 
 
 # APP
@@ -75,16 +74,13 @@ set_api_logs_path('api.log')
 set_api_logging_level(LOGGING_LVL)
 save_api_logs(True)
 
+
 # ENV VARS
 SERVER_IP: str = getenv(EnvVars.SERVER_IP.value, 'localhost')
 SERVER_PORT: int = int(getenv(EnvVars.SERVER_PORT.value, 8000))
-HOST_IP: str = getenv(EnvVars.HOST_IP.value, 'localhost')
 STATIC_PATH: Path = MY_APP[ProjectPathsDict.DIST_PATH]
 INTERNAL_IMAGES_FOLDER: Path = MY_APP['images']
-_static_images_path: str = (Path("static") / MY_APP['images'].relative_to(MY_APP[ProjectPathsDict.DIST_PATH])).as_posix()
-EXTERNAL_IMAGES_URL: str = f'http://{HOST_IP}/api/{_static_images_path}/'
+STATIC_IMAGES_FOLDER: Path = Path('static') / MY_APP['images'].relative_to(MY_APP[ProjectPathsDict.DIST_PATH])
 INTERNAL_MODELS_FOLDER: Path = MY_APP['models']
-_static_models_path: str = (Path("static") / MY_APP['models'].relative_to(MY_APP[ProjectPathsDict.DIST_PATH])).as_posix()
-EXTERNAL_MODELS_URL: str = f'http://{HOST_IP}:{SERVER_PORT}/{_static_models_path}/'
 DATABASE_URL: str = getenv(EnvVars.DATABASE_URL.value, 'sqlite+aiosqlite:///./database.db')
 DATABASE_GET_LIMIT = int(getenv(EnvVars.DATABASE_GET_LIMIT.value, 50))

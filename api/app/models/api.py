@@ -157,7 +157,7 @@ class ImageStreamResponse(BaseModel):
         image: Image
     ) -> Self:
         return cls.factory(
-            image_url= image.external_url,
+            image_url= image.external_relative_path,
             insp_result= image.inspection_result,
             origin= image.origin,
             model= image.model,
@@ -201,7 +201,7 @@ class ImageHistResponse(ImageStreamResponse):
         total: Optional[int] = None
     ) -> Self:
         return cls.factory(
-            image_url= image.external_url,
+            image_url= image.external_relative_path,
             insp_result= image.inspection_result,
             origin= image.origin,
             model= image.model,

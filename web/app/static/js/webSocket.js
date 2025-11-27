@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from './utils';
+import { showAlert } from './utils.js';
 
 
 let ws;
@@ -30,10 +30,9 @@ let alertBlock;
 
 async function initWebSocket() {
     try {
-        connectWebSocket(`ws://${window.location.host}/ws/image-stream`);
+        connectWebSocket(`ws://${window.location.host}/api/ws/image-stream`);
     } catch (error) {
-        console.error('Error loading config:', error);
-        connectWebSocket('ws://localhost:8000/ws/image-stream');
+        console.error('Error connecting to the web socket:', error);
     }
 }
 
@@ -65,7 +64,7 @@ function connectWebSocket(url) {
                     }
                     const img = document.getElementById("img-0-img");
                     if (img) {
-                        img.src = data.image_url;
+                        img.src = `/api/${data.image_url}`;
                         img.hidden = false;
                     }
                     writeImageInfo(

@@ -64,7 +64,7 @@ document.getElementById("prevHistImgButton")?.addEventListener("click", () => {
 
 document.getElementById("delete-img-btn-0")?.addEventListener("click", () => {
     const imageUUID = document.getElementById("img-0-name").innerText.split(".")[0]
-    const endpoint = `/image/${imageUUID}`;
+    const endpoint = `/api/image/${imageUUID}`;
     let content = {
         method: "DELETE",
         headers: {
@@ -78,17 +78,17 @@ document.getElementById("delete-img-btn-0")?.addEventListener("click", () => {
         } else {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const indexElement = document.getElementById("currentHistImgIndex");
+        let currentIndex = parseInt(indexElement.textContent) || 2;
+        if (currentIndex <= 2) {
+            currentIndex = 2;
+        }
+        getNewImageFromHist(currentIndex - 1);
     })
     .catch(error => {
         console.error("Error:", error);
         showAlert("Error", "danger", 2);
     });
-    const indexElement = document.getElementById("currentHistImgIndex");
-    let currentIndex = parseInt(indexElement.textContent) || 1;
-    if (currentIndex <= 2) {
-        currentIndex = 2;
-    }
-    getNewImageFromHist(currentIndex - 1);
 });
 
 
@@ -142,7 +142,7 @@ function setImageData(data) {
         }
         element = document.getElementById("img-0-img");
         if (element) {
-            element.src = data.image_url;
+            element.src = `/api/${data.image_url}`;
             element.hidden = false;
         }
         checkClassSelector(data.true_result);
@@ -191,7 +191,7 @@ function clearImageData() {
 
 // GET DATA
 async function getNewImageFromHist(index) {
-    const url = `/image/hist/next?${getQueryParameters(index)}`;
+    const url = `/api/image/hist/next?${getQueryParameters(index)}`;
     try {
         const response = await fetch(url);
         if (response.status === 404) {
@@ -217,7 +217,7 @@ document.getElementById("trueResultForm")?.addEventListener("submit", (event) =>
         showAlert("Select a true result", "warning", 2);
         return;
     }
-    const endpoint = `/image/${imageUUID}/true-result`;
+    const endpoint = `/api/image/${imageUUID}/true-result`;
     let content = {
         method: "PUT",
         headers: {

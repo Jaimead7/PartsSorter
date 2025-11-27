@@ -26,8 +26,9 @@ from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from typing_extensions import Self
 
-from ..dependencies.config import (EXTERNAL_IMAGES_URL, INTERNAL_IMAGES_FOLDER,
-                                   INTERNAL_MODELS_FOLDER)
+from ..dependencies.config import (INTERNAL_IMAGES_FOLDER,
+                                   INTERNAL_MODELS_FOLDER,
+                                   STATIC_IMAGES_FOLDER)
 from .typing import ModelMetadataDict
 
 
@@ -193,20 +194,11 @@ class BaseImage(SQLModel):
 
     @property
     def internal_absolute_path(self) -> Path:
-        """Get the complete path of the image file inside the server.
-        Returns:
-            Path: Path of the image file.
-        """
         return INTERNAL_IMAGES_FOLDER / self.file_name
 
     @property
-    def external_url(self) -> str:
-        """Get the URL for access the image outside the server.
-        Returns:
-            str: URL of the image.
-        """
-        relativePath = Path(self.file_name)
-        return EXTERNAL_IMAGES_URL + relativePath.as_posix()
+    def external_relative_path(self) -> str:
+        return (STATIC_IMAGES_FOLDER / Path(self.file_name)).as_posix()
 
 
 class Image(BaseImage, table= True):

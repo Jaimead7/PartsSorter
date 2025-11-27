@@ -19,8 +19,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { initOriginFilter } from "./filters/origin";
-import { initWebSocket } from './webSocket';
+import { initOriginFilter } from "./filters/origin.js";
+import { initWebSocket } from './webSocket.js';
 
 
 document.addEventListener('DOMContentLoaded', function() {
