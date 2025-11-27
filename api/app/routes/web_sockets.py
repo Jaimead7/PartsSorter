@@ -16,6 +16,7 @@
 
 from fastapi import APIRouter, WebSocket
 
+from ..dependencies.config import my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
 
 ws_router = APIRouter()
@@ -30,6 +31,6 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         while True:
             await websocket.receive_bytes()
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        my_logger.error(f"WebSocket error: {e}")
     finally:
         await ImageStreamSocketManager.disconnect(websocket)
