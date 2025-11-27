@@ -19,18 +19,54 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initDateFilter() {
-    // SET DATE
-    const startDateElement = document.getElementById('startDateFilter');
-    const endDateElement = document.getElementById('endDateFilter');
+const startDateFieldElement = document.getElementById('startDateFilterField');
+const startDateCheckElement = document.getElementById('startDateFilterCheck');
+const endDateFieldElement = document.getElementById('endDateFilterField');
+const endDateCheckElement = document.getElementById('endDateFilterCheck');
 
-    if (!startDateElement || !endDateElement) {
+function initDateFilter() {
+    function saveDateOptions() {
+        try {
+            const options = [
+                startDateCheckElement.checked,
+                startDateFieldElement.value,
+                endDateCheckElement.checked,
+                endDateFieldElement.value
+            ];
+            localStorage.setItem('dateFilterOptions', JSON.stringify(options));
+        } catch (error) {
+            console.warn('Unable to save date to local storage.')
+        }
+    };
+
+    function loadDateOptions() {
+        try {
+            const savedDateOptions = JSON.parse(localStorage.getItem('dateFilterOptions'));
+            startDateCheckElement.checked = savedDateOptions[0];
+            startDateFieldElement.value = savedDateOptions[1];
+            startDateFieldElement.disabled = startDateCheckElement.checked;
+            endDateCheckElement.checked = savedDateOptions[2];
+            endDateFieldElement.value = savedDateOptions[3];
+            endDateFieldElement.disabled = endDateCheckElement.checked;
+        } catch (error) {
+            startDateFieldElement.valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+            endDateFieldElement.valueAsDate = new Date(new Date().setDate(new Date().getDate() + 1));
+            console.warn('Unable to load dates from local storage.')
+        }
+    };
+
+    if (!startDateFieldElement || !startDateCheckElement || !endDateFieldElement || !endDateCheckElement) {
         console.error("No Date Elements found.");
         return;
     }
 
-    startDateElement.valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
-    endDateElement.valueAsDate = new Date(new Date().setDate(new Date().getDate() + 1));
+    startDateCheckElement?.addEventListener('change', () => {
+        startDateFieldElement.disabled = startDateCheckElement.checked;
+    });
+
+    startDateCheckElement?.addEventListener('change', () => {
+        endDateFieldElement.disabled = endDateCheckElement.checked;
+    });
 
     // COLLAPSE
     const collapseElement = document.getElementById('dateFilterCollapseCard');
@@ -45,18 +81,19 @@ function initDateFilter() {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
+
+    loadDateOptions();
 };
 
 function getDateQueryParameters() {
-    const startDateElement = document.getElementById('startDateFilter');
-    const endDateElement = document.getElementById('endDateFilter');
-
-    if (!startDateElement || !endDateElement) {
+    if (!startDateFieldElement || !endDateFieldElement) {
         console.error("No Date Elements found.");
         return;
     }
+    const start = startDateCheckElement.checked ? `start_date=${encodeURIComponent(startDateFieldElement.value)}` : '';
+    const end = endDateCheckElement.checked ? `end_date=${encodeURIComponent(endDateFieldElement.value)}` : '';
 
-    return `start_date=${encodeURIComponent(startDateElement.value)}&end_date=${encodeURIComponent(endDateElement.value)}`;
+    return [start, end].filter(part => part !== '').join('&');
 };
 
 

@@ -42,27 +42,39 @@ class ProcessImageResult(BaseModel):
 
 class ImageFilters(BaseModel):
     extensions: list[str] = []
-    start_date: datetime = datetime.now(timezone.utc) - timedelta(days=30)
-    end_date: datetime = datetime.now(timezone.utc)
+    start_date: Optional[datetime] = datetime.now(timezone.utc) - timedelta(days=30)
+    end_date: Optional[datetime] = datetime.now(timezone.utc)
     inspection_results: list[Optional[str]] = []
     origins: list[str] = []
     true_results: list[Optional[str]] = []
-    min_trust: float = 0.
-    max_trust: float = 1.
+    min_trust: Optional[float] = 0.
+    max_trust: Optional[float] = 1.
     models: list[str] = []
 
     def add_filters_to_statement(
         self,
         statement: SelectOfScalar[Any]
     ) -> SelectOfScalar[Any]:
-        statement = statement.where(
-            col(Image.processed_date).is_not(None),
-            col(Image.processed_date) >= self.start_date,
-            col(Image.processed_date) <= self.end_date,
-            col(Image.trust).is_not(None),
-            col(Image.trust) >= self.min_trust,
-            col(Image.trust) <= self.max_trust
-        )
+        if self.start_date:
+            statement = statement.where(
+                col(Image.processed_date) >= self.start_date
+            )
+        if self.end_date:
+            statement = statement.where(
+                col(Image.processed_date) <= self.end_date,
+            )
+        if self.min_trust or self.max_trust:
+            statement = statement.where(
+                col(Image.trust).is_not(None),
+            )
+        if self.min_trust:
+            statement = statement.where(
+                col(Image.trust) >= self.min_trust,
+            )
+        if self.max_trust:
+            statement = statement.where(
+                col(Image.trust) <= self.max_trust
+            )
         if len(self.extensions) > 0:
             statement = statement.where(
                 col(Image.extension).in_(self.extensions)

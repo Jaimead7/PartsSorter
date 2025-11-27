@@ -114,14 +114,14 @@ async def process_new_image(
 async def get_next_hist_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     extension: Annotated[list[str], Query()] = [],
-    start_date: Annotated[datetime, Query()] = datetime.now(timezone.utc) - timedelta(days=30),
-    end_date: Annotated[datetime, Query()] = datetime.now(timezone.utc),
+    start_date: Annotated[Optional[datetime], Query()] = None,
+    end_date: Annotated[Optional[datetime], Query()] = None,
     inspection_result: Annotated[list[Optional[str]], Query()] = [],
     origin: Annotated[list[str], Query()] = [],
     model: Annotated[list[str], Query()] = [],
     true_result: Annotated[list[Optional[str]], Query()] = [],
-    min_trust: Annotated[float, Query()] = 0.,
-    max_trust: Annotated[float, Query()] = 1.,
+    min_trust: Annotated[Optional[float], Query()] = None,
+    max_trust: Annotated[Optional[float], Query()] = None,
     index: Annotated[int, Query()] = 0
 )-> ImageHistResponse:
     inspection_result = [
