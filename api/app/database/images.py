@@ -252,7 +252,7 @@ async def db_process_image(
     my_logger.info(f'Image "{db_image.file_name}" processed with Model "{model_name}".')
     if result is None or trust is None:
         return ProcessImageResult(
-                model_name= None,
+                model_name= model_name,
                 inpection_result_name= None,
                 trust= None
             )
@@ -264,7 +264,7 @@ async def db_process_image(
         )
     except HTTPException:
         return ProcessImageResult(
-                model_name= None,
+                model_name= model_name,
                 inpection_result_name= None,
                 trust= None
             )
