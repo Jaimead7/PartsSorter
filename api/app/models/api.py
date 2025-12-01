@@ -17,7 +17,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlmodel import col, or_
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from typing_extensions import Self
@@ -45,11 +45,47 @@ class ImageFilters(BaseModel):
     start_date: Optional[datetime] = datetime.now(timezone.utc) - timedelta(days=30)
     end_date: Optional[datetime] = datetime.now(timezone.utc)
     inspection_results: list[Optional[str]] = []
-    origins: list[str] = []
+    origins: list[Optional[str]] = []
     true_results: list[Optional[str]] = []
     min_trust: Optional[float] = 0.
     max_trust: Optional[float] = 1.
     models: list[str] = []
+
+    @field_validator('inspection_results')
+    def validate_inspection_results(
+        cls,
+        inspection_results: list[Optional[str]]
+    ) -> list[Optional[str]]:
+        return [
+            None
+            if inspection_result == 'No result'
+            else inspection_result
+            for inspection_result in inspection_results
+        ]
+
+    @field_validator('origins')
+    def validate_origins(
+        cls,
+        origins: list[Optional[str]]
+    ) -> list[Optional[str]]:
+        return [
+            None
+            if origin == 'Unknown'
+            else origin
+            for origin in origins
+        ]
+
+    @field_validator('true_results')
+    def validate_true_results(
+        cls,
+        true_results: list[Optional[str]]
+    ) -> list[Optional[str]]:
+        return [
+            None
+            if true_result == 'No result'
+            else true_result
+            for true_result in true_results
+        ]
 
     def add_filters_to_statement(
         self,
@@ -92,9 +128,17 @@ class ImageFilters(BaseModel):
                     col(Image.inspection_result).in_(self.inspection_results)
                 )
         if len(self.origins) > 0:
-            statement = statement.where(
-                col(Image.origin).in_(self.origins)
-            )
+            if None in self.origins:
+                statement = statement.where(
+                    or_(
+                        col(Image.origin).in_(self.origins),
+                        col(Image.origin).is_(None)
+                    )
+                )
+            else:
+                statement = statement.where(
+                    col(Image.origin).in_(self.origins)
+                )
         if len(self.models) > 0:
             statement = statement.where(
                 col(Image.model).in_(self.models)

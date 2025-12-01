@@ -116,25 +116,13 @@ async def get_next_hist_image(
     start_date: Annotated[Optional[datetime], Query()] = None,
     end_date: Annotated[Optional[datetime], Query()] = None,
     inspection_result: Annotated[list[Optional[str]], Query()] = [],
-    origin: Annotated[list[str], Query()] = [],
+    origin: Annotated[list[Optional[str]], Query()] = [],
     model: Annotated[list[str], Query()] = [],
     true_result: Annotated[list[Optional[str]], Query()] = [],
     min_trust: Annotated[Optional[float], Query()] = None,
     max_trust: Annotated[Optional[float], Query()] = None,
     index: Annotated[int, Query()] = 0
 )-> ImageHistResponse:
-    inspection_result = [
-        None
-        if result == 'No result'
-        else result
-        for result in inspection_result
-    ]
-    true_result = [
-        None
-        if result == 'No result'
-        else result
-        for result in true_result
-    ]
     filters: ImageFilters = ImageFilters(
         extensions= extension,
         start_date= start_date,

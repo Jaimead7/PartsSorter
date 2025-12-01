@@ -56,6 +56,7 @@ function connectWebSocket(url) {
             .map(checkbox => checkbox.value);
         switch (data.type) {
             case "new-image":
+                data.origin = data.origin ? data.origin : 'Unknown';
                 if (selectedOrigins.includes(data.origin) || noneChecked) {
                     transferImages();
                     const imgAlt = document.getElementById(`img-0-alt`);
