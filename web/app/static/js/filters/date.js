@@ -61,11 +61,11 @@ function initDateFilter() {
     }
 
     startDateCheckElement?.addEventListener('change', () => {
-        startDateFieldElement.disabled = startDateCheckElement.checked;
+        startDateFieldElement.disabled = !startDateCheckElement.checked;
     });
 
-    startDateCheckElement?.addEventListener('change', () => {
-        endDateFieldElement.disabled = endDateCheckElement.checked;
+    endDateCheckElement?.addEventListener('change', () => {
+        endDateFieldElement.disabled = !endDateCheckElement.checked;
     });
 
     // COLLAPSE
