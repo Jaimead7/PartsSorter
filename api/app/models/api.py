@@ -49,7 +49,7 @@ class ImageFilters(BaseModel):
     true_results: list[Optional[str]] = []
     min_trust: Optional[float] = 0.
     max_trust: Optional[float] = 1.
-    models: list[str] = []
+    models: list[Optional[str]] = []
 
     @field_validator('inspection_results')
     def validate_inspection_results(
@@ -85,6 +85,18 @@ class ImageFilters(BaseModel):
             if true_result == 'No result'
             else true_result
             for true_result in true_results
+        ]
+
+    @field_validator('models')
+    def validate_models(
+        cls,
+        models: list[Optional[str]]
+    ) -> list[Optional[str]]:
+        return [
+            None
+            if model == 'Unknown'
+            else model
+            for model in models
         ]
 
     def add_filters_to_statement(
@@ -140,9 +152,17 @@ class ImageFilters(BaseModel):
                     col(Image.origin).in_(self.origins)
                 )
         if len(self.models) > 0:
-            statement = statement.where(
-                col(Image.model).in_(self.models)
-            )
+            if None in self.models:
+                statement = statement.where(
+                    or_(
+                        col(Image.model).in_(self.models),
+                        col(Image.model).is_(None)
+                    )
+                )
+            else:
+                statement = statement.where(
+                    col(Image.model).in_(self.models)
+                )
         if len(self.true_results) > 0:
             if None in self.true_results:
                 statement = statement.where(

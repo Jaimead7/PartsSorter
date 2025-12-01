@@ -117,7 +117,7 @@ async def get_next_hist_image(
     end_date: Annotated[Optional[datetime], Query()] = None,
     inspection_result: Annotated[list[Optional[str]], Query()] = [],
     origin: Annotated[list[Optional[str]], Query()] = [],
-    model: Annotated[list[str], Query()] = [],
+    model: Annotated[list[Optional[str]], Query()] = [],
     true_result: Annotated[list[Optional[str]], Query()] = [],
     min_trust: Annotated[Optional[float], Query()] = None,
     max_trust: Annotated[Optional[float], Query()] = None,
