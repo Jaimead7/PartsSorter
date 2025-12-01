@@ -80,10 +80,9 @@ async def delete_images(
     session: Annotated[AsyncSession, Depends(get_session)],
     uuids: Annotated[list[UUID], Body()]
 ) -> None:
-    images: list[Any] = [Image(id= uuid) for uuid in uuids]
     await db_delete_images_by_id(
         session= session,
-        images_uuids= images
+        images_uuids= uuids
     )
 
 @images_router.post(
