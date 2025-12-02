@@ -38,6 +38,9 @@
         sqlite = [
             "aiosqlite >= 0.21.0"
         ]
+        dev = [
+            "pytest"
+        ]
 
     [project.urls]
         Homepage = "https://github.com/Jaimead7/PartsSorter/api"
