@@ -12,7 +12,7 @@ This software includes components from third-party libraries under the following
 **License:** Apache License 2.0  
 **Copyright:** (c) 2016 Tin Tvrtkovic  
 **Source:** https://github.com/Tinche/aiofiles  
-**Full License:** [Apache-2.0](./licenses/Apache-2.0.txt)  
+**Full License:** [Apache-2.0](./licenses/Apache-2.0-aiofiles.txt)  
 
 ## fastapi  
 **License:** MIT License  
@@ -30,7 +30,7 @@ This software includes components from third-party libraries under the following
 **License:** GNU Affero General Public License v3.0 (AGPL-3.0 License)  
 **Copyright:** (c) 2007 Free Software Foundation, Inc. [fsf.com](https://fsf.org/)  
 **Source:** https://github.com/ultralytics/ultralytics  
-**Full License:** [AGPL-3.0](./licenses/AGPL-3.0.txt)  
+**Full License:** [AGPL-3.0](./licenses/AGPL-3.0-ultralytics.txt)  
 
 ## ncnn  
 **License:** BSD 3-Clause  
