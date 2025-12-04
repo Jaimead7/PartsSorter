@@ -13,12 +13,3 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-
-LOGGING_LVL="debug"
-SERVER_IP="0.0.0.0"
-SERVER_PORT=8000
-#DATABASE_URL="sqlite+aiosqlite:///./database.db"
-#DATABASE_URL="postgresql+asyncpg://postgres-user:super-save-password@postgres:5432/database-name"
-DATABASE_GET_LIMIT=50
-STATIC_PATH="/mnt/static"
-LOGS_PATH="/mnt/static/logs"  #Container absolute path

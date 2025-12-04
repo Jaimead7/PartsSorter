@@ -33,11 +33,15 @@ def none_filter(
 def bgr2gray(
         img: np.ndarray
     ) -> np.ndarray:
+        if len(img.shape) == 2:
+            return img
         return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 def gray2bgr(
         img: np.ndarray
     ) -> np.ndarray:
+        if len(img.shape) == 3:
+            return img
         return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 def resize(
@@ -76,8 +80,8 @@ def border(
 
 def padding(
         img: np.ndarray,
-        target_height: int,
-        target_width: int,
+        target_height: int = 640,
+        target_width: int = 640,
         color: tuple[int, int, int, int] = (255, 255, 255, 255)
     ) -> np.ndarray:
         height: int
