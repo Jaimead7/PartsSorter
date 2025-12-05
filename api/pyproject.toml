@@ -1,3 +1,7 @@
+[build-system]
+    requires = ["setuptools>=61.0", "wheel"]
+    build-backend = "setuptools.build_meta"
+
 [project]
     name = "jaimead7-parts-sorter-api"
     version = "0.0.1"
@@ -26,8 +30,11 @@
         "aiofiles >= 24.1.0",
         "fastapi[standard] >= 0.116.0",
         "sqlmodel >= 0.0.24",
-        "ultralytics >= 8.3.179",
-        "ncnn >= 1.0.20250916"
+        #TODO: Try not to use ultralytics
+        "ncnn >= 1.0.20250916",
+        "ultralytics == 8.3.179",
+        "torch @ https://download.pytorch.org/whl/cpu/torch-2.5.0%2Bcpu-cp312-cp312-linux_x86_64.whl ; platform_system == 'Linux' and platform_machine != 'aarch64'",
+        "torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.20.0%2Bcpu-cp312-cp312-linux_x86_64.whl ; platform_system == 'Linux' and platform_machine  != 'aarch64'"
     ]
     requires-python = ">=3.10, <3.13"
 
@@ -45,3 +52,8 @@
     [project.urls]
         Homepage = "https://github.com/Jaimead7/PartsSorter/api"
         Repository = "https://github.com/Jaimead7/PartsSorter"
+
+[tool.setuptools.packages.find]
+    where = ['.']
+    include = ['*']
+    exclude = ['licenses']
