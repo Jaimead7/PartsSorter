@@ -1,18 +1,36 @@
-Dockerfile
+# Project files
 .dockerignore
-
-.git
-.gitignore
-
-__pycache__
-.venv
-
-.env*
-
-build
-*.egg-info
-
+.env.example
+ATTRIBUTIONS.md
+Dockerfile
+licenses/
+README.md
 *.db
 *.log
 
-README.md
+# Python files
+__pycache__/
+build/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+
+# Tools
+.venv/
+venv/
+env/
+.env*
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Git
+.git/
+.gitignore
+
+# ide
+.vscode/
+.idea/
+*.swp
+*.swo

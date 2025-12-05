@@ -35,11 +35,11 @@ FROM python:3.12.11-slim AS production
 
 # Set metadata
 LABEL org.opencontainers.image.title="parts-sorter-web"
-LABEL org.opencontainers.image.description="Microservice for user interface"
+LABEL org.opencontainers.image.description="Microservice for API"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>"
 LABEL org.opencontainers.image.licenses="AGPL-3.0"
-LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/tree/mainBranch/web"
+LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/tree/mainBranch/api"
 LABEL license.warning="This software is licensed under AGPL-3.0. Modifications must be shared under the same license."
 
 # Set the working directory
@@ -63,6 +63,9 @@ COPY --from=builder /api/.venv /api/.venv
 # Copy project files
 COPY . .
 
+# Create folders
+RUN mkdir -p /mnt/static/images/production /mnt/static/models /mnt/static/datasets /mnt/static/logs
+
 # Set up environment variables for production
 ENV PATH="/api/.venv/bin:$PATH"
 
@@ -70,4 +73,4 @@ ENV PATH="/api/.venv/bin:$PATH"
 EXPOSE 8000
 
 # Run the app
-CMD ["python3.12", "-m", "app.api"]
+CMD ["python3.12", "-m", "parts_sorter_api.src.api"]
