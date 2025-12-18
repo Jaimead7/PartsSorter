@@ -25,94 +25,85 @@ class ImageFilterFunction(Protocol):
         ...
 
 
-def none_filter(
+def no_filter(
     img: np.ndarray
 ) -> np.ndarray:
     return img
 
+def resize(
+    img: np.ndarray,
+    width: int = 640,
+    height: int = 640
+) -> np.ndarray:
+    return cv2.resize(
+        img,
+        (width, height),
+        interpolation= cv2.INTER_LINEAR
+    )
+
+def redim(
+    img: np.ndarray,
+    height: int = 640,
+    width: int = 640,
+    gray: int = 114
+) -> np.ndarray:
+    org_h: int
+    org_w: int
+    org_h, org_w = img.shape[:2]
+    scale: float = min(width/org_w, height/org_h)
+    new_w = int(org_w * scale)
+    new_h = int(org_h * scale)
+    img_resized: np.ndarray = resize(img= img, width= new_w, height= new_h)
+    result: np.ndarray = np.ones((height, width, 3), dtype= np.uint8) * gray
+    result[:new_h, :new_w] = img_resized
+    return result
+
 def bgr2gray(
-        img: np.ndarray
-    ) -> np.ndarray:
-        if len(img.shape) == 2:
-            return img
-        return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img: np.ndarray
+) -> np.ndarray:
+    if len(img.shape) == 2:
+        return img
+    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 def gray2bgr(
-        img: np.ndarray
-    ) -> np.ndarray:
-        if len(img.shape) == 3:
-            return img
-        return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    img: np.ndarray
+) -> np.ndarray:
+    if len(img.shape) == 3:
+        return img
+    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-def resize(
-        img: np.ndarray,
-        width: int = 640,
-        height: int = 640
-    ) -> np.ndarray:
-        return cv2.resize(
-            img,
-            (width, height),
-            interpolation= cv2.INTER_LINEAR
-        )
+def bgr2rgb(
+    img: np.ndarray
+) -> np.ndarray:
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+def rgb2bgr(
+    img: np.ndarray
+) -> np.ndarray:
+    return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
 def cut(
-        img: np.ndarray,
-        width: int = 640,
-        height: int = 640
-    ) -> np.ndarray:
-        ... #TODO: Do cut filter
-        return img
+    img: np.ndarray,
+    width: int = 640,
+    height: int = 640
+) -> np.ndarray:
+    ... #TODO: Do cut filter
+    return img
 
-def border(
-        img: np.ndarray,
-        width: int = 1,
-        color: tuple[int, int, int, int] = (255, 255, 255, 255)
-    ) -> np.ndarray:
-        return cv2.copyMakeBorder(
-            img,
-            width,
-            width,
-            width,
-            width,
-            cv2.BORDER_CONSTANT,
-            value= color
-        )
-
-def padding(
-        img: np.ndarray,
-        target_height: int = 640,
-        target_width: int = 640,
-        color: tuple[int, int, int, int] = (255, 255, 255, 255)
-    ) -> np.ndarray:
-        height: int
-        width: int
-        height, width = img.shape[:2]
-        delta_h: int = target_height - height
-        delta_h = delta_h if delta_h >= 0 else 0
-        delta_w: int = target_width - width
-        delta_w = delta_w if delta_w >= 0 else 0
-        return cv2.copyMakeBorder(
-            img,
-            delta_h // 2,
-            delta_h - (delta_h // 2),
-            delta_w // 2,
-            delta_w - (delta_w // 2),
-            cv2.BORDER_CONSTANT,
-            value= color
-        )
 
 IMAGE_FILTERS: dict[str, ImageFilterFunction] = {
-    'NONE': none_filter,
-    'GRAY': bgr2gray,
-    'COLOR': gray2bgr,
+    'NONE': no_filter,
     'RESIZE': resize,
-    'CUT': cut,
-    'BORDER': border,
-    'PADDING': padding,
+    'REDIM': redim,
+    'COLOR': gray2bgr,
+    'GRAY': bgr2gray,
+    'RGB': bgr2rgb,
+    'BGR': rgb2bgr,
+    'CUT': cut
 }
 
 def image_filter_factory(name: str) -> ImageFilterFunction:
     try:
         return IMAGE_FILTERS[name.upper()]
     except KeyError:
-        return IMAGE_FILTERS['NONE']
+        return no_filter

@@ -1,0 +1,298 @@
+# Copyright (C) 2025 Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
+from abc import ABC, abstractmethod
+from datetime import datetime, timezone
+from functools import cached_property
+from pathlib import Path
+from typing import Any, Iterable, Optional, Self, Sequence, Type, cast
+
+import cv2
+import numpy as np
+import yaml
+from pyUtils import NoInstantiable
+
+from ..dependencies.config import my_logger
+from .engines import ModelEngine, NCCEngine
+from .filters import ImageFilterFunction, image_filter_factory
+from .metadata_models import ModelMetadataDict
+
+
+class ModelManager(ABC):
+    def __init__(self) -> None:
+        self._path: Optional[Path] = None
+        self._model_engine: Optional[ModelEngine] = None
+        self.last_use: datetime = datetime.now(timezone.utc)
+
+    @cached_property
+    def path(self) -> Path:
+        if self._path is None:
+            msg: str = f'Path is not loaded. Try {self.__class__.__name__}.load(path).'
+            my_logger.error(msg)
+            raise AttributeError(msg)
+        return self._path
+
+    @property
+    def model_engine(self) -> ModelEngine:
+        if self._model_engine is None:
+            msg: str = f'Model engine is not loaded. Try {self.__class__.__name__}.load(path).'
+            my_logger.error(msg)
+            raise AttributeError(msg)
+        return self._model_engine
+
+    @cached_property
+    def name(self) -> str:
+        return self.path.name
+
+    @cached_property
+    def metadata_path(self) -> Path:
+        return self.path / 'metadata.yaml'
+
+    @cached_property
+    def metadata(self) -> ModelMetadataDict:
+        return self.get_metadata(self.path)
+
+    @cached_property
+    def files(self) -> Iterable[Path]:
+        return ()
+
+    @cached_property
+    def folders(self) -> Iterable[Path]:
+        return ()
+
+    @cached_property
+    def filters(self) -> Sequence[tuple[ImageFilterFunction, dict[str, Any]]]:
+        filters_names: tuple[str] = self.metadata.filters
+        filters_attrs: dict[str, dict[str, Any]] = self.metadata.filters_attrs
+        return tuple(
+            (image_filter_factory(filter_name), filters_attrs[filter_name])
+            for filter_name in filters_names
+        )
+
+    @staticmethod
+    def get_metadata(model_path: Path) -> ModelMetadataDict:
+        metadata_path: Path = model_path / 'metadata.yaml'
+        if not metadata_path.is_file():
+            msg: str = f'"{metadata_path}" does\'t exists.'
+            my_logger.error(msg)
+            raise FileNotFoundError(msg)
+        try:
+            with open(model_path / 'metadata.yaml', 'r') as f:
+                return ModelMetadataDict(**yaml.safe_load(f))
+        except Exception as e:
+            msg: str = f'"{metadata_path}" is not a valid model metadata file.'
+            my_logger.error(msg)
+            raise ImportError(msg)
+
+    @staticmethod
+    def get_sources_arrays(
+        sources: Sequence[np.ndarray | str | Path]
+    ) -> Sequence[np.ndarray]:
+        sources_arrays: list[np.ndarray] = []
+        for source in sources:
+            if isinstance(source, np.ndarray):
+                sources_arrays.append(source)
+                continue
+            try:
+                array: Optional[np.ndarray] = cv2.imread(str(source))
+                if array is None:
+                    raise ValueError(f'Could not read image from "{str(source)}".')
+                sources_arrays.append(array)
+            except Exception as e:
+                msg: str = f'Error reading image "{source}": {str(e)}'
+                my_logger.error(msg)
+        return sources_arrays
+
+    def validate(self) -> bool:
+        if not self.path.is_dir():
+            msg: str = f'Model folder "{self.path}" doesn\'t exist.'
+            my_logger.error(msg)
+            return False
+        files_ok: bool = all(file.is_file() for file in self.files)
+        folders_ok: bool = all(folder.is_dir() for folder in self.folders)
+        if not files_ok or not folders_ok:
+            msg: str = f'Model folder "{self.path}" doesn\'t have a valid structure.'
+            my_logger.error(msg)
+            return False
+        return True
+
+    def inspect(
+        self,
+        source: np.ndarray | str | Path | list | tuple
+    ) -> list: #TODO: elements type
+        source_iter: Iterable[np.ndarray | str | Path]
+        if isinstance(source, tuple | list):
+            source_iter = source
+        else:
+            source_iter = [source]
+        sources_arrays: Sequence[np.ndarray] = self.get_sources_arrays(source_iter)
+        in_imgs: Sequence[np.ndarray] = self.apply_img_filters(sources_arrays)
+        results: list = self.model_engine(tuple(in_imgs))
+        return results
+
+    def apply_img_filters(
+        self,
+        sources_arrays: Sequence[np.ndarray]
+    ) -> Sequence[np.ndarray]:
+        def apply_filters(
+            source_array: np.ndarray
+        ) -> np.ndarray:
+            result_array: np.ndarray = source_array
+            for filter_fn, filter_attrs in self.filters:
+                result_array = filter_fn(result_array, **filter_attrs)
+            return result_array
+        return tuple(apply_filters(source_array) for source_array in sources_arrays)
+
+    @abstractmethod
+    def load(self, path: Path) -> Self: ...
+
+"""
+class PyTorchModelManager(ModelManager):
+    def __init__(self) -> None:
+        super().__init__()
+
+    @property
+    def model_engine(self) -> YOLO:
+        return cast(YOLO, super().model_engine)
+
+    @cached_property
+    def pt_path(self) -> Path:
+        return self.path / f'{self.name}.pt'
+
+    @cached_property
+    def files(self) -> Iterable[Path]:
+        return (
+            self.metadata_path,
+            self.pt_path
+        )
+
+    @cached_property
+    def folders(self) -> Iterable[Path]:
+        return ()
+
+    def load(self, path: Path) -> Self:
+        self._path = path
+        if not self.validate():
+            msg: str = 'Can\'t load a model. Folder not valid.'
+            my_logger.error(msg)
+            raise NotADirectoryError(msg)
+        self._model_engine = YOLO((self.path / (self.name + '_ncnn_model')), task= 'detect')
+        return self
+"""
+
+class NCNNModelManager(ModelManager):
+    def __init__(self) -> None:
+        super().__init__()
+    
+    @property
+    def model_engine(self) -> NCCEngine:
+        return cast(NCCEngine, super().model_engine)
+
+    @cached_property
+    def ncnn_folder_path(self) -> Path:
+        return self.path / (self.name + '_ncnn_model')
+
+    @cached_property
+    def ncnn_metadata_path(self) -> Path:
+        return self.ncnn_folder_path / 'metadata.yaml'
+
+    @cached_property
+    def ncnn_bin_path(self) -> Path:
+        return self.ncnn_folder_path / 'model.ncnn.bin'
+
+    @cached_property
+    def ncnn_param_path(self) -> Path:
+        return self.ncnn_folder_path / 'model.ncnn.param'
+
+    @cached_property
+    def files(self) -> Iterable[Path]:
+        return (
+            self.metadata_path,
+            self.ncnn_metadata_path,
+            self.ncnn_bin_path,
+            self.ncnn_param_path
+        )
+
+    @cached_property
+    def folders(self) -> Iterable[Path]:
+        return (
+            self.ncnn_folder_path,
+        )
+
+    def load(self, path: Path) -> Self:
+        self._path = path
+        if not self.validate():
+            msg: str = 'Can\'t load a model. Folder not valid.'
+            my_logger.error(msg)
+            raise NotADirectoryError(msg)
+        self._model_engine = NCCEngine(self.ncnn_folder_path)
+        self.last_use = datetime.now(timezone.utc)
+        return self
+
+
+class ModelsContainer(NoInstantiable):
+    models: dict[str, ModelManager] = {}
+    MAX_MODELS: int = 5
+
+    @classmethod
+    def get_model(
+        cls,
+        model_path: Path
+    ) -> ModelManager:
+        model_name: str = model_path.name
+        try:
+            return cls.models[model_name]
+        except KeyError:
+            pass
+        model_type: str = ModelManager.get_metadata(model_path).model_type
+        model: ModelManager = model_manager_factory(model_type).load(model_path)
+        cls.models[model_name] = model
+        my_logger.info(f'"{model_name}" added to loaded models.')
+        cls.clear_models()
+        return cls.models[model_name]
+
+    @classmethod
+    def clear_models(cls) -> None:
+        if len(cls.models) == 0:
+            return
+        if len(cls.models) <= cls.MAX_MODELS:
+            return
+        model_to_delete: str = list(cls.models.keys())[0]
+        for name, model in cls.models.items():
+            if model.last_use < cls.models[model_to_delete].last_use:
+                model_to_delete = name
+        cls.models.pop(model_to_delete)
+        my_logger.info(f'"{model_to_delete}" deleted from loaded models.')
+
+
+MODEL_MANAGERS: dict[str, ModelManager] = {
+    #'PYTORCH': PyTorchModelManager(),
+    'NCNN': NCNNModelManager()
+}
+
+def model_manager_factory(model_manager: Type[ModelManager] | str) -> ModelManager:
+    if isinstance(model_manager, str):
+        try:
+            return MODEL_MANAGERS[model_manager.upper()]
+        except KeyError:
+            msg: str = f'Can\'t load "{model_manager}" from MODEL_MANAGERS.'
+            my_logger.error(msg)
+            raise KeyError(msg)
+    if issubclass(model_manager, ModelManager):
+        return model_manager()
+    msg: str = f'"{model_manager}" is not a valid type for a ModelManager.'
+    my_logger.error(msg)
+    raise TypeError(msg)
