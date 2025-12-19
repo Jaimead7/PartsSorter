@@ -137,10 +137,11 @@ class CameraManager:
                     last_value= last_sensor_val
                 )
             if edge_type == EdgeType.RISING:
+                date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
                 my_logger.info('Capturing new image...')
                 result: ProcessImageResponse = await process_image(
                     image= self.capture_image(cap),
-                    date= datetime.now(timezone.utc).replace(tzinfo=None)
+                    date= date
                 )
                 await results_queue.put(result)
                 my_logger.debug(f'Image captured with Result({result}).')
