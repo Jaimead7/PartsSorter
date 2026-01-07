@@ -33,3 +33,8 @@
     [project.urls]
         Homepage = "https://github.com/Jaimead7/PartsSorter/web"
         Repository = "https://github.com/Jaimead7/PartsSorter"
+
+[tool.setuptools.packages.find]
+    where = ['.']
+    include = ['*']
+    exclude = ['licenses']
