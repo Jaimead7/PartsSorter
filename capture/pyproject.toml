@@ -26,8 +26,8 @@
         "jaimead7-pyutils >= 0.2.0",
         "httpx >= 0.28.1",
         "opencv-python-headless >= 4.11.0.86",
-        "gpiod >= 2.3.0",
         "pydantic >= 2.12.3",
+        "gpiod >= 2.3.0; sys_platform == 'linux' and platform_machine == 'aarch64'",
     ]
     requires-python = ">=3.10"
 
