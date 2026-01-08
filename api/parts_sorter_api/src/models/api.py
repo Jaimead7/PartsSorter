@@ -117,11 +117,10 @@ class ImageFilters(BaseModel):
         self,
         statement: SelectOfScalar[Any]
     ) -> SelectOfScalar[Any]:
-        if self.min_trust or self.max_trust:
+        if self.min_trust:
             statement = statement.where(
                 col(Image.trust).is_not(None),
             )
-        if self.min_trust:
             statement = statement.where(
                 col(Image.trust) >= self.min_trust,
             )

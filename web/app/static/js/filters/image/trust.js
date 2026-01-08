@@ -19,13 +19,15 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initTrustFilter() {
-    const minElement = document.getElementById('imageTrustMinFilter');
-    const maxElement = document.getElementById('imageTrustMaxFilter');
-    const minLabel = document.getElementById('imageTrustMinFilterLabel');
-    const maxLabel = document.getElementById('imageTrustMaxFilterLabel');
+const minElement = document.getElementById('imageTrustMinFilter');
+const maxElement = document.getElementById('imageTrustMaxFilter');
+const minCheck = document.getElementById('minTrustFilterCheck');
+const maxCheck = document.getElementById('maxTrustFilterCheck');
+const minLabel = document.getElementById('imageTrustMinFilterLabel');
+const maxLabel = document.getElementById('imageTrustMaxFilterLabel');
 
-    if (!minElement || !maxElement || !minLabel || !maxLabel) {
+function initTrustFilter() {
+    if (!minElement || !maxElement || !minCheck || !maxCheck || !minLabel || !maxLabel) {
         console.error("No Trust Elements found.");
         return;
     }
@@ -33,8 +35,10 @@ function initTrustFilter() {
     // LOCAL STORAGE
     function saveImageTrustOptions() {
         const minValue = minElement.value;
+        const minChecked = minCheck.checked;
         const maxValue = maxElement.value;
-        localStorage.setItem('imageTrustFilterOptions', JSON.stringify([minValue, maxValue]));
+        const maxChecked = maxCheck.checked;
+        localStorage.setItem('imageTrustFilterOptions', JSON.stringify([minChecked, minValue, maxChecked, maxValue]));
     };
 
     function loadImageTrustOptions() {
@@ -42,11 +46,15 @@ function initTrustFilter() {
 
         if (savedImageTrust) {
             const selectedImageExtensions = JSON.parse(savedImageTrust);
-            minElement.value = selectedImageExtensions[0];
-            maxElement.value = selectedImageExtensions[1];
+            minCheck.checked = selectedImageExtensions[0];
+            maxCheck.checked = selectedImageExtensions[2];
+            minElement.value = selectedImageExtensions[1];
+            maxElement.value = selectedImageExtensions[3];
             minLabel.textContent = `${minElement.value}%`;
             maxLabel.textContent = `${maxElement.value}%`;
         } else {
+            minCheck.checked = false;
+            maxCheck.checked = false;
             minElement.value = 0;
             maxElement.value = 100;
             minLabel.textContent = '0%';
@@ -71,6 +79,16 @@ function initTrustFilter() {
         maxLabel.textContent = `${maxElement.value}%`;
     });
 
+    minCheck.addEventListener('change', () => {
+        minElement.disabled = !minCheck.checked;
+        saveImageTrustOptions();
+    });
+
+    maxCheck.addEventListener('change', () => {
+        maxElement.disabled = !maxCheck.checked;
+        saveImageTrustOptions();
+    });
+
     // COLLAPSE
     const collapseElement = document.getElementById('imageTrustFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#imageTrustFilterCollapseCard"] .bi');
@@ -89,18 +107,15 @@ function initTrustFilter() {
 };
 
 function getTrustQueryParameters() {
-    const minElement = document.getElementById('imageTrustMinFilter');
-    const maxElement = document.getElementById('imageTrustMaxFilter');
-
-    if (!minElement || !maxElement) {
+    if (!minElement || !maxElement || !minCheck || !maxCheck || !minLabel || !maxLabel) {
         console.error("No Trust Elements found.");
         return;
     }
 
-    const minValue = parseFloat(minElement.value) / 100;
-    const maxValue = parseFloat(maxElement.value) / 100;
+    const minValue = minCheck.checked ? `min_trust=${parseFloat(minElement.value) / 100}` : '';
+    const maxValue = maxCheck.checked ? `max_trust=${parseFloat(maxElement.value) / 100}` : '';
 
-    return `min_trust=${encodeURIComponent(minValue)}&max_trust=${encodeURIComponent(maxValue)}`;
+    return [minValue, maxValue].filter(part => part !== '').join('&');
 };
 
 
