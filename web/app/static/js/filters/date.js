@@ -53,6 +53,8 @@ function initDateFilter() {
             endDateFieldElement.valueAsDate = new Date(new Date().setDate(new Date().getDate() + 1));
             console.warn('Unable to load dates from local storage.')
         }
+        startDateFieldElement.disabled = !startDateCheckElement.checked;
+        endDateFieldElement.disabled = !endDateCheckElement.checked;
     };
 
     if (!startDateFieldElement || !startDateCheckElement || !endDateFieldElement || !endDateCheckElement) {

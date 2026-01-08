@@ -60,6 +60,8 @@ function initTrustFilter() {
             minLabel.textContent = '0%';
             maxLabel.textContent = '100%';
         }
+        minElement.disabled = !minCheck.checked;
+        maxElement.disabled = !maxCheck.checked;
     };
 
     // CALLBACKS
