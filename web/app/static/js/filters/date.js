@@ -60,12 +60,22 @@ function initDateFilter() {
         return;
     }
 
+    startDateFieldElement?.addEventListener('change', () => {
+        saveDateOptions();
+    });
+
+    endDateFieldElement?.addEventListener('change', () => {
+        saveDateOptions();
+    });
+
     startDateCheckElement?.addEventListener('change', () => {
         startDateFieldElement.disabled = !startDateCheckElement.checked;
+        saveDateOptions();
     });
 
     endDateCheckElement?.addEventListener('change', () => {
         endDateFieldElement.disabled = !endDateCheckElement.checked;
+        saveDateOptions();
     });
 
     // COLLAPSE
@@ -90,6 +100,7 @@ function getDateQueryParameters() {
         console.error("No Date Elements found.");
         return;
     }
+
     const start = startDateCheckElement.checked ? `start_date=${encodeURIComponent(startDateFieldElement.value)}` : '';
     const end = endDateCheckElement.checked ? `end_date=${encodeURIComponent(endDateFieldElement.value)}` : '';
 
