@@ -56,7 +56,7 @@ function initExtensionFilter() {
         }
     };
 
-    selectAllCheckbox?.addEventListener('change', () => {
+    selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
         imageExtensionOptions.forEach(checkbox => {

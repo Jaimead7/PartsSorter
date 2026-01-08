@@ -23,7 +23,7 @@ import { initOriginFilter } from "./filters/origin.js";
 import { initWebSocket } from './webSocket.js';
 
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     initOriginFilter();
     initWebSocket();
 });

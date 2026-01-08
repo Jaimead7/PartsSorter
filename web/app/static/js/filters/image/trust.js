@@ -55,7 +55,7 @@ function initTrustFilter() {
     };
 
     // CALLBACKS
-    minElement.addEventListener('input', function() {
+    minElement.addEventListener('input', () => {
         if (parseFloat(minElement.value) > parseFloat(maxElement.value)) {
             minElement.value = maxElement.value;
         }
@@ -63,7 +63,7 @@ function initTrustFilter() {
         minLabel.textContent = `${minElement.value}%`;
     });
 
-    maxElement.addEventListener('input', function() {
+    maxElement.addEventListener('input', () => {
         if (parseFloat(maxElement.value) < parseFloat(minElement.value)) {
             maxElement.value = minElement.value;
         }
@@ -75,12 +75,12 @@ function initTrustFilter() {
     const collapseElement = document.getElementById('imageTrustFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#imageTrustFilterCollapseCard"] .bi');
     
-    collapseElement?.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
     
-    collapseElement?.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
