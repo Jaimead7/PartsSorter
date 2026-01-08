@@ -30,9 +30,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col, delete, func, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
-from ..dependencies.config import my_logger
+from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
-from ..engine.inspection import ModelsManager
+from ..engine.managers import ModelManager, ModelsContainer
+from ..engine.results import ResutlsType, extract_one_result
 from ..models.api import ImageFilters, ImageHistResponse, ProcessImageResult
 from ..models.database import (Image, ImageProcessed, InspectionResult,
                                OriginResult)
@@ -243,14 +244,20 @@ async def db_process_image(
                 trust= None
             )
         model_name = db_image.origin_of_image.model
-    result: Optional[int]
+    model_manager: ModelManager = ModelsContainer.get_model(INTERNAL_MODELS_FOLDER / model_name)
+    results_list: list[ResutlsType] = model_manager.inspect(db_image.internal_absolute_path)
+    if len(results_list) < 1:
+        my_logger.error(f'Error processing image.')
+        return ProcessImageResult(
+            model_name= model_name,
+            inpection_result_name= None,
+            trust= None
+        )
+    result_id: Optional[int]
     trust: Optional[float]
-    result, trust = await ModelsManager.inspect(
-        db_image= db_image,
-        model_name= model_name
-    )
+    result_id, trust = extract_one_result(results_list[0])
     my_logger.info(f'Image "{db_image.file_name}" processed with Model "{model_name}".')
-    if result is None or trust is None:
+    if result_id is None or trust is None:
         return ProcessImageResult(
                 model_name= model_name,
                 inpection_result_name= None,
@@ -260,7 +267,7 @@ async def db_process_image(
         inpection_result: InspectionResult = await db_get_model_inspection_result(
             session= session,
             model_name= model_name,
-            result_id= result
+            result_id= result_id
         )
     except HTTPException:
         return ProcessImageResult(

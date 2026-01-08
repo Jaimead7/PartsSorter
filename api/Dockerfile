@@ -20,7 +20,6 @@ FROM python:3.12.11-slim AS builder
 # Set the working directory
 WORKDIR /api
 
-
 # Copy project files
 COPY ./pyproject.toml ./pyproject.toml
 
@@ -45,16 +44,11 @@ LABEL license.warning="This software is licensed under AGPL-3.0. Modifications m
 # Set the working directory
 WORKDIR /api
 
-# Instal opencv dependencies #TODO: use opencv-python-headless mantain curl
+# Instal opencv dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     libgl1 \
-    libglx-mesa0 \
     libglib2.0-0 \
-    libsm6 \
-    libxrender1 \
-    libxext6 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies

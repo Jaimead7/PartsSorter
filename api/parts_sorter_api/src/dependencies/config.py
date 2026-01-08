@@ -20,8 +20,8 @@ from os import getenv
 from pathlib import Path
 from typing import Optional
 
-from pyUtils import (MyLogger, ProjectPathsDict, save_pyutils_logs,
-                     set_pyutils_logging_level, set_pyutils_logs_path)
+from pyUtils import (MyLogger, save_pyutils_logs, set_pyutils_logging_level,
+                     set_pyutils_logs_path)
 
 
 class TAGS(Enum):

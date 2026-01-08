@@ -25,8 +25,8 @@ import numpy as np
 import yaml
 
 from ..dependencies.config import my_logger
+from ..models.metadata_files import NCNNMetadataDict
 from .filters import bgr2rgb, gray2bgr, redim
-from .metadata_models import NCNNMetadataDict
 from .results import MyBoxes, MyResults, ResutlsType, SpeedDict
 
 
@@ -43,7 +43,7 @@ class ModelEngine(Protocol):
         source: np.ndarray | str | Path | list | tuple,
         *args: Any,
         **kwargs: Any
-    ) -> list[Any]: ...
+    ) -> list[ResutlsType]: ...
 
 
 class NCCEngine:

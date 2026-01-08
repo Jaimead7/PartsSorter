@@ -27,7 +27,7 @@ from ..database.models import (db_create_new_model, db_delete_models,
                                db_update_model)
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.database import Model, ModelClass, Origin
-from ..models.typing import ModelMetadataDict
+from ..models.metadata_files import ModelMetadataDict
 
 models_router = APIRouter()
 

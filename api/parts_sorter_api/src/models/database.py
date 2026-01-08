@@ -30,7 +30,7 @@ from typing_extensions import Self
 from ..dependencies.config import (INTERNAL_IMAGES_FOLDER,
                                    INTERNAL_MODELS_FOLDER,
                                    STATIC_IMAGES_FOLDER)
-from .typing import ModelMetadataDict
+from .metadata_files import ModelMetadataDict
 
 
 #TODO: Create response classes

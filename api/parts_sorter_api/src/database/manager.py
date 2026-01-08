@@ -55,8 +55,20 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 @event.listens_for(Image, 'after_delete')
 def event_delete_image(mapper, connection, image: Image) -> None:
-    asyncio.run(db_delete_image_file(image))
+    try:
+        if asyncio.get_event_loop().is_running():
+            asyncio.create_task(db_delete_image_file(image))
+            return
+    except RuntimeError:
+        pass
+    asyncio.run(db_delete_image_file(image))    
 
 @event.listens_for(Model, 'after_delete')
 def event_delete_model(mapper, connection, model: Model) -> None:
+    try:
+        if asyncio.get_event_loop().is_running():
+            asyncio.create_task(db_delete_model_dir(model))
+            return
+    except RuntimeError:
+        pass
     asyncio.run(db_delete_model_dir(model))

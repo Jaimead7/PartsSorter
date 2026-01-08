@@ -31,7 +31,7 @@ from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import my_logger
 from ..models.database import InspectionResult, Model, ModelClass, Origin
-from ..models.typing import ModelMetadataDict
+from ..models.metadata_files import ModelMetadataDict
 from .inspection_results import db_create_new_inspection_result
 from .model_classes import db_create_new_model_class, db_get_model_class
 
@@ -97,12 +97,12 @@ async def db_create_new_model(
                     inspection_result= inspection_result.name
                 )
             )
-    except:
+    except Exception as e:
         await db_delete_models(
             session= session,
             models= [model]
         )
-        msg: str = f'Error saving model file "{file.filename}".'
+        msg: str = f'Error saving model file "{file.filename}". {e}.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -218,8 +218,8 @@ async def db_save_model_zip_file(
         with open(zip_file_path, 'wb') as f:
             f.write(await file.read())
         unzip_dir(zip_file_path)
-    except:
-        msg: str = f'Error saving zip file.'
+    except Exception as e:
+        msg: str = f'Error saving zip file. {e}.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,
