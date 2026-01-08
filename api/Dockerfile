@@ -20,7 +20,6 @@ FROM python:3.12.11-slim AS builder
 # Set the working directory
 WORKDIR /api
 
-
 # Copy project files
 COPY ./pyproject.toml ./pyproject.toml
 
@@ -35,26 +34,20 @@ FROM python:3.12.11-slim AS production
 
 # Set metadata
 LABEL org.opencontainers.image.title="parts-sorter-web"
-LABEL org.opencontainers.image.description="Microservice for user interface"
+LABEL org.opencontainers.image.description="Microservice for API"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>"
-LABEL org.opencontainers.image.licenses="AGPL-3.0"
-LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/tree/mainBranch/web"
-LABEL license.warning="This software is licensed under AGPL-3.0. Modifications must be shared under the same license."
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/tree/mainBranch/api"
 
 # Set the working directory
 WORKDIR /api
 
-# Instal opencv dependencies #TODO: use opencv-python-headless mantain curl
+# Instal opencv dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     libgl1 \
-    libglx-mesa0 \
     libglib2.0-0 \
-    libsm6 \
-    libxrender1 \
-    libxext6 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
@@ -63,6 +56,9 @@ COPY --from=builder /api/.venv /api/.venv
 # Copy project files
 COPY . .
 
+# Create folders
+RUN mkdir -p /mnt/static/images/production /mnt/static/models /mnt/static/datasets /mnt/static/logs
+
 # Set up environment variables for production
 ENV PATH="/api/.venv/bin:$PATH"
 
@@ -70,4 +66,4 @@ ENV PATH="/api/.venv/bin:$PATH"
 EXPOSE 8000
 
 # Run the app
-CMD ["python3.12", "-m", "app.api"]
+CMD ["python3.12", "-m", "parts_sorter_api.src.api"]

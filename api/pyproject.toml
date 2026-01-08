@@ -1,3 +1,7 @@
+[build-system]
+    requires = ["setuptools>=61.0", "wheel"]
+    build-backend = "setuptools.build_meta"
+
 [project]
     name = "jaimead7-parts-sorter-api"
     version = "0.0.1"
@@ -9,7 +13,7 @@
         {name = "Jaime Álvarez", email = "alvarez.diaz.jaime1@gmail.com"},
     ]
     readme = {file = "README.md", content-type = "text/markdown"}
-    license = "AGPL-3.0"
+    license = "MIT"
     license-files = [
         "LICENSE",
     ]
@@ -26,8 +30,7 @@
         "aiofiles >= 24.1.0",
         "fastapi[standard] >= 0.116.0",
         "sqlmodel >= 0.0.24",
-        "ultralytics >= 8.3.179",
-        "ncnn >= 1.0.20250916"
+        "ncnn >= 1.0.20250916",
     ]
     requires-python = ">=3.10, <3.13"
 
@@ -38,7 +41,15 @@
         sqlite = [
             "aiosqlite >= 0.21.0"
         ]
+        dev = [
+            "pytest"
+        ]
 
     [project.urls]
         Homepage = "https://github.com/Jaimead7/PartsSorter/api"
         Repository = "https://github.com/Jaimead7/PartsSorter"
+
+[tool.setuptools.packages.find]
+    where = ['.']
+    include = ['*']
+    exclude = ['licenses']

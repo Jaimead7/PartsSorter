@@ -39,18 +39,13 @@ This repository contains multiple independently licensed components:
 | Component | License | Description |
 |-----------|---------|-------------|
 | Project Infrastructure | [MIT](./LICENSE) | Common scripts, configs, and documentation |
-| Capture App | [MIT](./capture/LICENSE) | Data capture utility |
-| API Server | [AGPL-3.0](./api/LICENSE) | **⚠️ Copyleft license** - see important notes below |
+| Capture App | [MIT](./capture/LICENSE) | Data capture component |
+| API Server | [MIT](./api/LICENSE) | API component |
 | Web Application | [MIT](./web/LICENSE) | User interface component |
 | Reverse Proxy | [MIT](./proxy/LICENSE) | Reverse Proxy |
 | Label Studio | [MIT](./label-studio/LICENSE) | Label studio sql auxiliar scripts |
 
 ### Important Licensing Notes
-
-⚠️ **AGPL-3.0 Compliance**: The API component is licensed under GNU Affero GPL v3.0. This license requires that:
-- Modified versions must be released under the same license
-- Source code must be made available to network users
-- All derivative works inherit the AGPL-3.0 terms
 
 **Third-Party Attributions**: Each subproject includes an `ATTRIBUTIONS.md` file detailing third-party licenses and copyrights.
 

@@ -20,6 +20,7 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 import yaml
+from pydantic import field_validator
 from sqlalchemy import JSON, Column
 #from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -29,7 +30,7 @@ from typing_extensions import Self
 from ..dependencies.config import (INTERNAL_IMAGES_FOLDER,
                                    INTERNAL_MODELS_FOLDER,
                                    STATIC_IMAGES_FOLDER)
-from .typing import ModelMetadataDict
+from .metadata_files import ModelMetadataDict
 
 
 #TODO: Create response classes
@@ -302,3 +303,25 @@ class OriginResult(SQLModel, table= True):
     result_of_origin_result: Optional['InspectionResult'] = Relationship(
         back_populates= 'origin_results_of_result'
     )
+
+
+#********** IMAGE FILTERS **********
+"""
+class BaseImageFilter(SQLModel):
+    name: str = Field(
+        primary_key= True
+    )
+    comments: str = Field(
+        default= '',
+        nullable= False
+    )
+
+    @field_validator('comments')
+    def validator_comments(cls, comments: str) -> str:
+        if isinstance(comments, str):
+            return comments
+        return ''
+
+class ImageFilter(BaseImageFilter, table= True):
+    ...
+"""

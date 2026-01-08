@@ -14,11 +14,40 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-LOGGING_LVL="debug"
-SERVER_IP="0.0.0.0"
-SERVER_PORT=8000
-#DATABASE_URL="sqlite+aiosqlite:///./database.db"
-#DATABASE_URL="postgresql+asyncpg://postgres-user:super-save-password@postgres:5432/database-name"
-DATABASE_GET_LIMIT=50
-STATIC_PATH="/mnt/static"
-LOGS_PATH="/mnt/static/logs"  #Container absolute path
+from datetime import datetime
+from typing import Any
+
+from pydantic import BaseModel
+
+
+class ModelMetadataDict(BaseModel):
+    date: datetime
+    camera_width: int
+    camera_height: int
+    brightness: float
+    contrast: float
+    saturation: float
+    exposure: float
+    wb: float
+    dataset: str
+    model_type: str
+    filters: tuple[str]
+    filters_attrs: dict[str, dict[str, Any]]
+    task: str
+    name: dict[int, str]
+
+
+class NCNNMetadataDict(BaseModel):
+    description: str
+    author: str
+    date: datetime
+    version: str
+    license: str
+    docs: str
+    stride: int
+    task: str
+    batch: int
+    imgsz: tuple[int, int]
+    names: dict[int, str]
+    args: dict[str, Any]
+    channels: int

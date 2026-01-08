@@ -78,10 +78,10 @@ services:
       - path: ./api/.env.docker
         required: true
     volumes:
-      - images-volume:/api/dist/images
-      - models-volume:/api/dist/models
-      - datasets-volume:/api/dist/datasets
-      - logs-volume:/api/dist/logs
+      - images-volume:/mnt/static/images
+      - models-volume:/mnt/static/models
+      - datasets-volume:/mnt/static/datasets
+      - logs-volume:/mnt/static/logs
     networks:
       - db-network
       - api-network

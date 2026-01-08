@@ -13,37 +13,3 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-
-from datetime import datetime
-
-from pydantic import BaseModel
-
-
-class DatasetDataDict(BaseModel):
-    path: str
-    task: str
-    train: str
-    val: str
-    test: str
-    nc: int
-    name: dict[int, str]
-
-
-class DatasetMetadataDict(BaseModel):
-    date: datetime
-    camera_width: int
-    camera_height: int
-    filters: list[str]
-    brightness: float
-    contrast: float
-    saturation: float
-    exposure: float
-    wb: float
-
-
-class ModelMetadataDict(DatasetMetadataDict):
-    train_images: int
-    val_images: int
-    test_images: int
-    task: str
-    name: dict[int, str]

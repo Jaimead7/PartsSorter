@@ -44,28 +44,21 @@ docker run -d \
 ```
 
 ## License  
-[AGPL-3.0](./LICENSE)  
-
-## License  
-⚠️ **Important Licensing Notice**
-This component is licensed under the **[GNU Affero General Public License v3.0 (AGPL-3.0)](./LICENSE)**.  
-
-### Key Requirements (Copyleft)
-- 🔄 Source Availability: You must provide source code to all users interacting with the software over a network  
-- 🔄 Same License: Modifications must be released under AGPL-3.0  
-- 🔄 License Inheritance: Derivative works inherit AGPL-3.0 terms
-
+This component is licensed under the **[MIT License](./LICENSE)**.  
 ### Permissions  
 - ✅ Commercial use  
 - ✅ Modification  
 - ✅ Distribution  
-- ✅ Patent grant  
-- ✅ Private use (with limitations)  
- 
+- ✅ Private use  
+- ✅ Sublicensing  
+
+### Requirements  
+- ℹ️ Include copyright notice  
+- ℹ️ Include license copy  
+
 ### Limitations  
-- ❌ Same license for derivatives  
-- ❌ Network use triggers source distribution  
-- ❌ No additional restrictions allowed  
+- ❌ No liability  
+- ❌ No warranty  
 
 ### Third-Party Attributions  
 This software includes third-party components under various licenses.  
