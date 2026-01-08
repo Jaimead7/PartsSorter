@@ -53,6 +53,8 @@ function initDateFilter() {
             endDateFieldElement.valueAsDate = new Date(new Date().setDate(new Date().getDate() + 1));
             console.warn('Unable to load dates from local storage.')
         }
+        startDateFieldElement.disabled = !startDateCheckElement.checked;
+        endDateFieldElement.disabled = !endDateCheckElement.checked;
     };
 
     if (!startDateFieldElement || !startDateCheckElement || !endDateFieldElement || !endDateCheckElement) {
@@ -60,24 +62,34 @@ function initDateFilter() {
         return;
     }
 
+    startDateFieldElement?.addEventListener('change', () => {
+        saveDateOptions();
+    });
+
+    endDateFieldElement?.addEventListener('change', () => {
+        saveDateOptions();
+    });
+
     startDateCheckElement?.addEventListener('change', () => {
         startDateFieldElement.disabled = !startDateCheckElement.checked;
+        saveDateOptions();
     });
 
     endDateCheckElement?.addEventListener('change', () => {
         endDateFieldElement.disabled = !endDateCheckElement.checked;
+        saveDateOptions();
     });
 
     // COLLAPSE
     const collapseElement = document.getElementById('dateFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#dateFilterCollapseCard"] .bi');
     
-    collapseElement?.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
     
-    collapseElement?.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
@@ -90,6 +102,7 @@ function getDateQueryParameters() {
         console.error("No Date Elements found.");
         return;
     }
+
     const start = startDateCheckElement.checked ? `start_date=${encodeURIComponent(startDateFieldElement.value)}` : '';
     const end = endDateCheckElement.checked ? `end_date=${encodeURIComponent(endDateFieldElement.value)}` : '';
 

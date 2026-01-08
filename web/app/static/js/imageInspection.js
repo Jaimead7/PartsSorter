@@ -29,7 +29,7 @@ import { initClassFilter, getClassQueryParameters } from "./filters/class.js";
 import { showAlert } from "./utils.js";
 
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
     initClassSelector();
     initDateFilter();
     initExtensionFilter();

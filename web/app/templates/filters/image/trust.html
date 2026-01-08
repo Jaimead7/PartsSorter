@@ -12,7 +12,10 @@
     <section class="card-body collapse p-1"  id="imageTrustFilterCollapseCard">
         <ul class="list-group">
             <li class="list-group-item p-1 text-truncate d-flex align-items-center justify-content-between">
-                <label for="imageTrustMinFilter">Min:</label>
+                <label>
+                    <input class="form-check-input" type="checkbox" id="minTrustFilterCheck" value="minTrustFilterCheck" checked>
+                    Min:
+                </label>
                 <div class="col-9 d-flex">
                     <input id="imageTrustMinFilter"
                         type="range"
@@ -26,7 +29,10 @@
                 </div>
             </li>
             <li class="list-group-item p-1 text-truncate d-flex align-items-center justify-content-between">
-                <label for="imageTrustMaxFilter">Max:</label>
+                <label>
+                    <input class="form-check-input" type="checkbox" id="maxTrustFilterCheck" value="maxTrustFilterCheck" checked>
+                    Max:
+                </label>
                 <div class="col-9 d-flex">
                     <input id="imageTrustMaxFilter"
                         type="range"

@@ -24,12 +24,12 @@ function initOriginFilter() {
     const collapseElement = document.getElementById('originFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#originFilterCollapseCard"] .bi');
 
-    collapseElement?.addEventListener('show.bs.collapse', function() {
+    collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
         buttonIcon.classList.add('bi-caret-up-square');
     });
 
-    collapseElement?.addEventListener('hide.bs.collapse', function() {
+    collapseElement?.addEventListener('hide.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-up-square');
         buttonIcon.classList.add('bi-caret-down-square');
     });
