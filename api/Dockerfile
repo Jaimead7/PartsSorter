@@ -37,9 +37,8 @@ LABEL org.opencontainers.image.title="parts-sorter-web"
 LABEL org.opencontainers.image.description="Microservice for API"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>"
-LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/tree/mainBranch/api"
-LABEL license.warning="This software is licensed under AGPL-3.0. Modifications must be shared under the same license."
 
 # Set the working directory
 WORKDIR /api
