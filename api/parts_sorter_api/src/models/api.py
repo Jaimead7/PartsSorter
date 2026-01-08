@@ -99,7 +99,7 @@ class ImageFilters(BaseModel):
             for model in models
         ]
 
-    def add_filters_to_statement(
+    def add_date_filter_to_statement(
         self,
         statement: SelectOfScalar[Any]
     ) -> SelectOfScalar[Any]:
@@ -111,6 +111,12 @@ class ImageFilters(BaseModel):
             statement = statement.where(
                 col(Image.processed_date) <= self.end_date,
             )
+        return statement
+
+    def add_trust_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
         if self.min_trust or self.max_trust:
             statement = statement.where(
                 col(Image.trust).is_not(None),
@@ -123,10 +129,22 @@ class ImageFilters(BaseModel):
             statement = statement.where(
                 col(Image.trust) <= self.max_trust
             )
+        return statement
+
+    def add_extensions_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
         if len(self.extensions) > 0:
             statement = statement.where(
                 col(Image.extension).in_(self.extensions)
             )
+        return statement
+
+    def add_inspection_result_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
         if len(self.inspection_results) > 0:
             if None in self.inspection_results:
                 statement = statement.where(
@@ -139,6 +157,12 @@ class ImageFilters(BaseModel):
                 statement = statement.where(
                     col(Image.inspection_result).in_(self.inspection_results)
                 )
+        return statement
+
+    def add_origins_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
         if len(self.origins) > 0:
             if None in self.origins:
                 statement = statement.where(
@@ -151,6 +175,12 @@ class ImageFilters(BaseModel):
                 statement = statement.where(
                     col(Image.origin).in_(self.origins)
                 )
+        return statement
+
+    def add_models_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
         if len(self.models) > 0:
             if None in self.models:
                 statement = statement.where(
@@ -163,6 +193,12 @@ class ImageFilters(BaseModel):
                 statement = statement.where(
                     col(Image.model).in_(self.models)
                 )
+        return statement
+
+    def add_true_results_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
         if len(self.true_results) > 0:
             if None in self.true_results:
                 statement = statement.where(
@@ -175,6 +211,19 @@ class ImageFilters(BaseModel):
                 statement = statement.where(
                     col(Image.true_result).in_(self.true_results)
                 )
+        return statement
+
+    def add_filters_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        statement = self.add_date_filter_to_statement(statement)
+        statement = self.add_trust_filter_to_statement(statement)
+        statement = self.add_extensions_filter_to_statement(statement)
+        statement = self.add_inspection_result_filter_to_statement(statement)
+        statement = self.add_origins_filter_to_statement(statement)
+        statement = self.add_models_filter_to_statement(statement)
+        statement = self.add_true_results_filter_to_statement(statement)
         return statement
 
 
