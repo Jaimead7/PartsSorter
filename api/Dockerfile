@@ -43,11 +43,14 @@ LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/t
 # Set the working directory
 WORKDIR /api
 
-# Instal opencv dependencies
+# Instal opencv dependencies.
+    # libgl1, libglib2.0-0 for opencv
+    # curl for healthcheck
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
