@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <section class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3">
+            <article class="p-1">
+                <div class="card">
+                    <a
+                        href="/config/models"
+                        class="text-decoration-none text-reset text-center p-2"
+                    >
+                        <h3 class="m-0">Models</h3>
+                    </a>
+                </div>
+            </article>
+            <article class="p-1">
+                <div class="card">
+                    <a
+                        href="/config/origins"
+                        class="text-decoration-none text-reset text-center p-2"
+                    >
+                        <h3 class="m-0">Origins</h3>
+                    </a>
+                </div>
+            </article>
+            <article class="p-1">
+                <div class="card">
+                    <a
+                        href="/config/inspection-result"
+                        class="text-decoration-none text-reset text-center p-2"
+                    >
+                        <h3 class="m-0">Inspection results</h3>
+                    </a>
+                </div>
+            </article>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

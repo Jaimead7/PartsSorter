@@ -19,19 +19,14 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import json
 from typing import Optional, TypedDict
 
 import httpx
 from quart import current_app
 
 from ..dependencies.config import API_URL, my_logger
-
-
-class RequestOptions(TypedDict, total=False):
-    url: str
-    headers: dict
-    timeout: float
+from ..models.api import (InspectionResultResponse, ModelResponse,
+                          OriginResponse, RequestOptions)
 
 
 async def api_request(options: RequestOptions, method: str = 'GET') -> Optional[httpx.Response]:
@@ -64,7 +59,7 @@ async def api_request(options: RequestOptions, method: str = 'GET') -> Optional[
         my_logger.error(f'Unexpected error from "{url_for_log}": {e}')
         return None
 
-async def api_get_origins() -> list[str]:
+async def api_get_origins() -> list[OriginResponse]:
     options: RequestOptions = RequestOptions(
         url= f'{API_URL}/origin/?limit=100&offset=0',
         headers= {
@@ -76,12 +71,12 @@ async def api_get_origins() -> list[str]:
     if response is None:
         return []
     try:
-        return [origin['name'] for origin in response.json()]
+        return [OriginResponse(**origin) for origin in response.json()]
     except Exception as e:
         my_logger.error(f'Error processing origins from the api. {e}')
         return []
 
-async def api_get_models() -> list[str]:
+async def api_get_models() -> list[ModelResponse]:
     options: RequestOptions = RequestOptions(
         url= f'{API_URL}/model/?limit=100&offset=0',
         headers= {
@@ -93,12 +88,29 @@ async def api_get_models() -> list[str]:
     if response is None:
         return []
     try:
-        return [model['name'] for model in response.json()]
+        return [ModelResponse(**model) for model in response.json()]
     except Exception as e:
         my_logger.error(f'Error processing models from the api. {e}')
         return []
 
-async def api_get_inspection_results() -> list[str]:
+async def api_get_model(model_name: str) -> Optional[ModelResponse]:
+    options: RequestOptions = RequestOptions(
+        url= f'{API_URL}/model/{model_name}',
+        headers= {
+            'accept': 'application/json'
+        },
+        timeout= 30.0
+    )
+    response: Optional[httpx.Response] = await api_request(options)
+    if response is None:
+        return None
+    try:
+        return ModelResponse(**response.json())
+    except Exception as e:
+        my_logger.error(f'Error processing models from the api. {e}')
+        return None
+
+async def api_get_inspection_results() -> list[InspectionResultResponse]:
     options: RequestOptions = RequestOptions(
         url= f'{API_URL}/inspection-result/?limit=100&offset=0',
         headers= {
@@ -110,11 +122,10 @@ async def api_get_inspection_results() -> list[str]:
     if response is None:
         return []
     try:
-        return [result['name'] for result in response.json()]
+        return [InspectionResultResponse(**result) for result in response.json()]
     except Exception as e:
         my_logger.error(f'Error processing inspection result from the api. {e}')
         return []
-
 
 async def api_get_image_extensions() -> list[str]:
     options: RequestOptions = RequestOptions(

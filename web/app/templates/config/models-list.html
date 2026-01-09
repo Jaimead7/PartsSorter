@@ -1,0 +1,26 @@
+{% extends "index.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <section class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3">
+            {% for model in models: %}
+                <article class="p-1">
+                    <div class="card">
+                        <a
+                            href="/config/models/{{ model.name }}"
+                            class="text-decoration-none text-reset text-center p-2"
+                        >
+                            <h3 class="m-0">{{ model.name }}</h3>
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
