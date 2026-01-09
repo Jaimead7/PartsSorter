@@ -303,25 +303,3 @@ class OriginResult(SQLModel, table= True):
     result_of_origin_result: Optional['InspectionResult'] = Relationship(
         back_populates= 'origin_results_of_result'
     )
-
-
-#********** IMAGE FILTERS **********
-"""
-class BaseImageFilter(SQLModel):
-    name: str = Field(
-        primary_key= True
-    )
-    comments: str = Field(
-        default= '',
-        nullable= False
-    )
-
-    @field_validator('comments')
-    def validator_comments(cls, comments: str) -> str:
-        if isinstance(comments, str):
-            return comments
-        return ''
-
-class ImageFilter(BaseImageFilter, table= True):
-    ...
-"""

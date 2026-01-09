@@ -30,10 +30,6 @@ class HealthResponse(BaseModel):
     service: str
 
 
-class ApiIPResponse(BaseModel):
-    ip: str
-
-
 class ProcessImageResult(BaseModel):
     model_name: Optional[str]
     inpection_result_name: Optional[str]
