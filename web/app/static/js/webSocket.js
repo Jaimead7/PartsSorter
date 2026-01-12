@@ -43,19 +43,19 @@ function connectWebSocket(url) {
         try{
             alertBlock.remove();
         } catch {}
-        console.log("Websocket connected.");
+        console.log('Websocket connected.');
     };
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("New message received:", data);
+        console.log('New message received:', data);
         const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
         const noneChecked = Array.from(originOptions).every(checkbox => !checkbox.checked);
         const selectedOrigins = Array.from(originOptions)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
         switch (data.type) {
-            case "new-image":
+            case 'new-image':
                 data.origin = data.origin ? data.origin : 'Unknown';
                 if (selectedOrigins.includes(data.origin) || noneChecked) {
                     transferImages();
@@ -63,38 +63,38 @@ function connectWebSocket(url) {
                     if (imgAlt) {
                         imgAlt.hidden = true;
                     }
-                    const img = document.getElementById("img-0-img");
+                    const img = document.getElementById('img-0-img');
                     if (img) {
                         img.src = `/api/${data.image_url}`;
                         img.hidden = false;
                     }
                     writeImageInfo(
                         data.origin,
-                        "img-0-origin",
+                        'img-0-origin',
                         data.insp_result,
-                        "img-0-type",
+                        'img-0-type',
                         (data.trust * 100).toFixed(2) + '%',
-                        "img-0-trust",
+                        'img-0-trust',
                         data.model,
-                        "img-0-model"
+                        'img-0-model'
                     )
                 }
         }
     };
 
     ws.onerror = () => {
-        console.error("Connection error");
+        console.error('Connection error');
         scheduleReconnect();
     };
 
     ws.onclose = () => {
-        console.warn("Websocket disconnected");
+        console.warn('Websocket disconnected');
         scheduleReconnect();
     };
 }
 
 function scheduleReconnect() {
-    showAlert("Reconnecting to server...", "warning", 4);
+    showAlert('Reconnecting to server...', 'warning', 4);
     clearTimeout(reconnectTimeout);
     reconnectTimeout = setTimeout(() => {
         initWebSocket();
@@ -105,7 +105,7 @@ function clearImages() {
     for (let i = 4; i >= 0; i--) {
         const img = document.getElementById(`img-${i}-img`);
         if (img) {
-            img.src = "";
+            img.src = '';
             img.hidden = true;
         }
         const imgAlt = document.getElementById(`img-${i}-alt`);
@@ -135,11 +135,11 @@ function transferImage(idOrigin, idDestiny) {
     const spanOrigin = document.getElementById(`img-${idOrigin}-alt`)
 
     if (!imgDestiny || !spanDestiny || !imgOrigin || !spanOrigin) {
-        console.error("No Image Elements found.");
+        console.error('No Image Elements found.');
         return;
     }
 
-    imgDestiny.src = imgOrigin.getAttribute('src') === '' ? "" : imgOrigin.getAttribute('src');
+    imgDestiny.src = imgOrigin.getAttribute('src') === '' ? '' : imgOrigin.getAttribute('src');
     imgDestiny.hidden = imgDestiny.getAttribute('src') === '';
     spanDestiny.hidden = imgDestiny.getAttribute('src') !== '';
 }
@@ -149,7 +149,7 @@ function transferText(idOrigin, idDestiny) {
     const destinyElement = document.getElementById(idDestiny)
 
     if (!originElement || !destinyElement) {
-        console.error("No Text Elements found.");
+        console.error('No Text Elements found.');
         return;
     }
 
@@ -187,15 +187,15 @@ function writeImageInfo(
 function clearImageInfo(id) {
     const originElement = document.getElementById(`img-${id}-origin`);
     if (originElement) {
-        originElement.innerText = originElement.getAttribute("data-default-text")
+        originElement.innerText = originElement.getAttribute('data-default-text')
     }
     const typeElement = document.getElementById(`img-${id}-type`);
     if (typeElement) {
-        typeElement.innerText = typeElement.getAttribute("data-default-text")
+        typeElement.innerText = typeElement.getAttribute('data-default-text')
     }
     const trustElement = document.getElementById(`img-${id}-trust`);
     if (trustElement) {
-        trustElement.innerText = trustElement.getAttribute("data-default-text")
+        trustElement.innerText = trustElement.getAttribute('data-default-text')
     }
 }
 

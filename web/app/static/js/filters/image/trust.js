@@ -28,7 +28,7 @@ const maxLabel = document.getElementById('imageTrustMaxFilterLabel');
 
 function initTrustFilter() {
     if (!minElement || !maxElement || !minCheck || !maxCheck || !minLabel || !maxLabel) {
-        console.error("No Trust Elements found.");
+        console.error('No Trust Elements found.');
         return;
     }
 
@@ -110,7 +110,7 @@ function initTrustFilter() {
 
 function getTrustQueryParameters() {
     if (!minElement || !maxElement || !minCheck || !maxCheck || !minLabel || !maxLabel) {
-        console.error("No Trust Elements found.");
+        console.error('No Trust Elements found.');
         return;
     }
 

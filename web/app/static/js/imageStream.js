@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { initOriginFilter } from "./filters/origin.js";
+import { initOriginFilter } from './filters/origin.js';
 import { initWebSocket } from './webSocket.js';
 
 

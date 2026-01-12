@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from "../utils.js";
+import { showAlert } from '../utils.js';
 
 const form = document.getElementById('modelForm');
 const resetButton = form?.querySelector('button[type="reset"]');
@@ -38,10 +38,10 @@ form?.addEventListener('submit', function(e) {
     const endpoint = `/api/model/${modelName}`;
 
     let content = {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-            "accept": "application/json",
-            "Content-Type": "application/json",
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify()
     }
@@ -50,7 +50,7 @@ form?.addEventListener('submit', function(e) {
     .then(response => {
         if (response.ok) {
             location.reload();
-            showAlert("Success", "success", 2); //CHECK
+            showAlert('Success', 'success', 2); //CHECK
         } else {
             throw new Error('Error en la respuesta del servidor');
         }

@@ -58,7 +58,7 @@ function initDateFilter() {
     };
 
     if (!startDateFieldElement || !startDateCheckElement || !endDateFieldElement || !endDateCheckElement) {
-        console.error("No Date Elements found.");
+        console.error('No Date Elements found.');
         return;
     }
 
@@ -99,7 +99,7 @@ function initDateFilter() {
 
 function getDateQueryParameters() {
     if (!startDateFieldElement || !endDateFieldElement) {
-        console.error("No Date Elements found.");
+        console.error('No Date Elements found.');
         return;
     }
 
