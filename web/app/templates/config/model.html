@@ -4,10 +4,45 @@
 {% endblock %}
 
 {% block content %}
-    <h3>
-        This is the model config of {{ model.name }}
-    </h3>
+    <section class="d-flex h-100">
+        <aside class="col-2 p-1 h-100 overflow-auto user-select-none">
+            <article class="card border border-1 rounded p-2">
+                <h3 class="text-truncate"><strong>Models:</strong></h3>
+                <section class="card-body p-0">
+                    <ul class="list-group">
+                        {% for item in models: %}
+                            <li class="list-group-item p-1 text-truncate">
+                                <a
+                                    href="/config/models/{{ item.name }}"
+                                    class="text-decoration-none text-reset d-block"
+                                >
+                                    {{ item.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </article>
+        </aside>
+        <section class="w-100 d-flex ms-3">
+            <form id="modelForm" class="col-5">
+                <h1 class="h3 mb-3 pb-1 border-bottom border-2" id="modelName">{{ model.name }}</h1>
+                <div class="">
+                    <label class="form-label" for="modelDescription">Description:</label>
+                    <textarea class="form-control" rows="3" id="modelDescription">{{ model.description }}</textarea>
+                </div>
+                <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
+                    <button type="reset" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </footer>
+            </form>
+        </section>
+    </section>
 {% endblock %}
 
 {% block scripts %}
+    <script
+        src="{{ url_for('static', filename='js/config/model.js') }}"
+        type="module">
+    </script>
 {% endblock %}

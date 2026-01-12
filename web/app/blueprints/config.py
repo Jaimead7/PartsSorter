@@ -57,6 +57,7 @@ async def config_models() -> Response | str:
 async def config_model(model_name: str) -> Response | str:
     try:
         model: Optional[ModelResponse] = await api_get_model(model_name)
+        models: list[ModelResponse] = await api_get_models()
     except httpx.ConnectError:
         return redirect('/config/models', 302)
     if model is None:
@@ -64,5 +65,6 @@ async def config_model(model_name: str) -> Response | str:
     return await render_template(
         'config/model.html',
         page_title= 'Configuration',
-        model= model
+        model= model,
+        models= models
     )
