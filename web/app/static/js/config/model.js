@@ -49,17 +49,15 @@ form?.addEventListener('submit', function(e) {
     fetch(endpoint, content)
     .then(response => {
         if (response.ok) {
-            showAlert("Success", "success", 2);
-            console.log('ok from server');
             location.reload();
-            console.log('ok from server');
+            showAlert("Success", "success", 2); //CHECK
         } else {
             throw new Error('Error en la respuesta del servidor');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al guardar los datos: ' + error.message);
         location.reload();
+        alert('Error al guardar los datos: ' + error.message); //CHECK
     });
 });
