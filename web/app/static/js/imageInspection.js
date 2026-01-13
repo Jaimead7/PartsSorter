@@ -191,7 +191,7 @@ function clearImageData() {
 
 // GET DATA
 async function getNewImageFromHist(index) {
-    const endpoint = `/api/image/hist/next?${getQueryParameters(index)}/`;
+    const endpoint = `/api/image/hist/next/?${getQueryParameters(index)}`;
     try {
         const response = await fetch(endpoint);
         if (response.status === 404) {
