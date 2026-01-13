@@ -53,6 +53,13 @@ async def config_models() -> Response | str:
         models= models
     )
 
+@config_bp.route('/models/load')
+async def load_model() -> Response | str:
+    return await render_template(
+        'config/model-load.html',
+        page_title= 'Configuration'
+    )
+
 @config_bp.route(f'/models/<path:model_name>')
 async def config_model(model_name: str) -> Response | str:
     try:

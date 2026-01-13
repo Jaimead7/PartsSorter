@@ -7,7 +7,10 @@
     <section class="d-flex h-100">
         <aside class="col-2 p-1 h-100 overflow-auto user-select-none">
             <article class="card border border-1 rounded p-2">
-                <h3 class="text-truncate"><strong>Models:</strong></h3>
+                <section class="d-flex">
+                    <h3 class="text-truncate"><strong>Models:</strong></h3>
+                    
+                </section>
                 <section class="card-body p-0">
                     <ul class="list-group">
                         {% for item in models: %}
@@ -26,14 +29,22 @@
         </aside>
         <section class="w-100 d-flex ms-3">
             <form id="modelForm" class="col-5">
-                <h1 class="h3 mb-3 pb-1 border-bottom border-2" id="modelName">{{ model.name }}</h1>
-                <div class="">
+                <header class="d-flex align-items-center justify-content-between mb-3 pb-1 border-bottom border-2">
+                    <h1 class="h3 m-0" id="modelName">{{ model.name }}</h1>
+                    <button class="btn btn-md p-0" type="button" id="deleteModelButton">
+                        <span class="bi bi-trash fs-3"></span>
+                    </button>
+                </header>
+                <section class="">
                     <label class="form-label" for="modelDescription">Description:</label>
                     <textarea class="form-control" rows="3" id="modelDescription">{{ model.description }}</textarea>
-                </div>
+                </section>
                 <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
                     <button type="reset" class="btn btn-secondary">Cancel</button>
-                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm" role="status" id="submitSpinner" hidden></span>
+                        <span id="submitLabel">Save</span>
+                    </button>
                 </footer>
             </form>
         </section>

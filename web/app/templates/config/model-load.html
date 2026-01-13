@@ -1,0 +1,31 @@
+{% extends "index.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <section class="d-flex h-100">
+        <section class="w-100 d-flex ms-3">
+            <form id="modelLoadForm" class="col-5">
+                <h1 class="h3 mb-3 pb-1 border-bottom border-2" id="modelName">Load model</h1>
+                <div class="input-group">
+                    <input type="file" accept=".zip" class="form-control" id="modelFile" aria-describedby="modelFileLabel">
+                </div>
+                <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
+                    <button type="reset" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm" role="status" id="submitSpinner" hidden></span>
+                        <span id="submitLabel">Load</span>
+                    </button>
+                </footer>
+            </form>
+        </section>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script
+        src="{{ url_for('static', filename='js/config/model-load.js') }}"
+        type="module">
+    </script>
+{% endblock %}
