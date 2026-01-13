@@ -50,7 +50,7 @@ function initOriginFilter() {
 
         if (savedOrigins) {
             const selectedOrigins = JSON.parse(savedOrigins);
-            originOptions.forEach(checkbox => {
+            originOptions.forEach((checkbox) => {
                 checkbox.checked = selectedOrigins.includes(checkbox.value);
             });
         }
@@ -59,7 +59,7 @@ function initOriginFilter() {
     selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
-        originOptions.forEach(checkbox => {
+        originOptions.forEach((checkbox) => {
             checkbox.checked = isChecked;
         });
 
@@ -80,7 +80,7 @@ function initOriginFilter() {
         saveOriginsOptions();
     };
 
-    originOptions.forEach(checkbox => {
+    originOptions.forEach((checkbox) => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
@@ -91,7 +91,7 @@ function initOriginFilter() {
 function getOriginQueryParameters() {
     const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
     let originParams = [];
-    originOptions.forEach(checkbox => {
+    originOptions.forEach((checkbox) => {
         if (checkbox.checked) {
             originParams.push(`origin=${encodeURIComponent(checkbox.value)}`);
         }

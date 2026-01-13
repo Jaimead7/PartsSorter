@@ -72,7 +72,7 @@ document.getElementById('delete-img-btn-0')?.addEventListener('click', () => {
         }
     }
     fetch(endpoint, content)
-    .then(response => {
+    .then((response) => {
         if (response.ok) {
             showAlert('Success', 'success', 2);
         } else {
@@ -85,7 +85,7 @@ document.getElementById('delete-img-btn-0')?.addEventListener('click', () => {
         }
         getNewImageFromHist(currentIndex - 1);
     })
-    .catch(error => {
+    .catch((error) => {
         console.error('Error:', error);
         showAlert('Error', 'danger', 2);
     });
@@ -236,14 +236,14 @@ document.getElementById('trueResultForm')?.addEventListener('submit', (event) =>
         }
     }
     fetch(endpoint, content)
-    .then(response => {
+    .then((response) => {
         if (response.ok) {
             showAlert('Success', 'success', 2);
         } else {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     })
-    .catch(error => {
+    .catch((error) => {
         console.error('Error:', error);
         showAlert('Error', 'danger', 2);
     });

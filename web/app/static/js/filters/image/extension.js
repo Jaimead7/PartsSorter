@@ -50,7 +50,7 @@ function initExtensionFilter() {
 
         if (savedImageExtensions) {
             const selectedImageExtensions = JSON.parse(savedImageExtensions);
-            imageExtensionOptions.forEach(checkbox => {
+            imageExtensionOptions.forEach((checkbox) => {
                 checkbox.checked = selectedImageExtensions.includes(checkbox.value);
             });
         }
@@ -59,7 +59,7 @@ function initExtensionFilter() {
     selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
-        imageExtensionOptions.forEach(checkbox => {
+        imageExtensionOptions.forEach((checkbox) => {
             checkbox.checked = isChecked;
         });
 
@@ -80,7 +80,7 @@ function initExtensionFilter() {
         saveImageExtensionsOptions();
     };
 
-    imageExtensionOptions.forEach(checkbox => {
+    imageExtensionOptions.forEach((checkbox) => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
@@ -91,7 +91,7 @@ function initExtensionFilter() {
 function getExtensionQueryParameters() {
     const extensionOptions = document.querySelectorAll('input[name="image-extension-filter-option"]');
     let extensionParams = [];
-    extensionOptions.forEach(checkbox => {
+    extensionOptions.forEach((checkbox) => {
         if (checkbox.checked) {
             extensionParams.push(`extension=${encodeURIComponent(checkbox.value)}`);
         }

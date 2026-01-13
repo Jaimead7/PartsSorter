@@ -50,7 +50,7 @@ function initClassFilter() {
 
         if (savedClasss) {
             const selectedClasss = JSON.parse(savedClasss);
-            classOptions.forEach(checkbox => {
+            classOptions.forEach((checkbox) => {
                 checkbox.checked = selectedClasss.includes(checkbox.value);
             });
         }
@@ -59,7 +59,7 @@ function initClassFilter() {
     selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
-        classOptions.forEach(checkbox => {
+        classOptions.forEach((checkbox) => {
             checkbox.checked = isChecked;
         });
 
@@ -80,7 +80,7 @@ function initClassFilter() {
         saveClasssOptions();
     };
 
-    classOptions.forEach(checkbox => {
+    classOptions.forEach((checkbox) => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
@@ -91,7 +91,7 @@ function initClassFilter() {
 function getClassQueryParameters() {
     const classOptions = document.querySelectorAll('input[name="class-filter-option"]');
     let classParams = [];
-    classOptions.forEach(checkbox => {
+    classOptions.forEach((checkbox) => {
         if (checkbox.checked) {
             classParams.push(`inspection_result=${encodeURIComponent(checkbox.value)}`);
         }

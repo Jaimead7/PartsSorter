@@ -50,7 +50,7 @@ function initModelFilter() {
 
         if (savedModels) {
             const selectedModels = JSON.parse(savedModels);
-            modelOptions.forEach(checkbox => {
+            modelOptions.forEach((checkbox) => {
                 checkbox.checked = selectedModels.includes(checkbox.value);
             });
         }
@@ -59,7 +59,7 @@ function initModelFilter() {
     selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
-        modelOptions.forEach(checkbox => {
+        modelOptions.forEach((checkbox) => {
             checkbox.checked = isChecked;
         });
 
@@ -80,7 +80,7 @@ function initModelFilter() {
         saveModelsOptions();
     };
 
-    modelOptions.forEach(checkbox => {
+    modelOptions.forEach((checkbox) => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
@@ -91,7 +91,7 @@ function initModelFilter() {
 function getModelQueryParameters() {
     const modelOptions = document.querySelectorAll('input[name="model-filter-option"]');
     let modelParams = [];
-    modelOptions.forEach(checkbox => {
+    modelOptions.forEach((checkbox) => {
         if (checkbox.checked) {
             modelParams.push(`model=${encodeURIComponent(checkbox.value)}`);
         }

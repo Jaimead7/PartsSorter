@@ -37,10 +37,10 @@ function initClassSelector() {
     // SELECT ONLY ONE
     const optionCheckboxes = document.querySelectorAll('input[name="class-selector-option"]');
 
-    optionCheckboxes.forEach(checkbox => {
+    optionCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', function() {
             if (this.checked) {
-                optionCheckboxes.forEach(checkbox => {
+                optionCheckboxes.forEach((checkbox) => {
                     checkbox.checked = false;
                 });
                 this.checked = true;
@@ -51,7 +51,7 @@ function initClassSelector() {
 
 function checkClassSelector(option) {
     const optionCheckboxes = document.querySelectorAll('input[name="class-selector-option"]');
-    optionCheckboxes.forEach(checkbox => {
+    optionCheckboxes.forEach((checkbox) => {
         checkbox.checked = false;
         if (checkbox.value === option) {
             checkbox.checked = true;
