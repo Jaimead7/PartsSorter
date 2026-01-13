@@ -14,8 +14,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional
-
 from fastapi import WebSocket
 from pyUtils import NoInstantiable
 

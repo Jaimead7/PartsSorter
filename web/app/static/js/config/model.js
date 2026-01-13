@@ -59,7 +59,7 @@ resetButton?.addEventListener('click', (event) => {
 saveButton?.addEventListener('click', async function(event) {
     event.preventDefault();
 
-    const endpoint = `/api/model/${modelName}`;
+    const endpoint = `/api/model/${modelName}/`;
     const modelName = document.getElementById('modelName')?.textContent;
     const spinner = document.getElementById('submitSpinner');
     const label = document.getElementById('submitLabel');

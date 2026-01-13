@@ -64,7 +64,7 @@ document.getElementById('prevHistImgButton')?.addEventListener('click', () => {
 
 document.getElementById('delete-img-btn-0')?.addEventListener('click', () => {
     const imageUUID = document.getElementById('img-0-name').innerText.split('.')[0]
-    const endpoint = `/api/image/${imageUUID}`;
+    const endpoint = `/api/image/${imageUUID}/`;
     let content = {
         method: 'DELETE',
         headers: {
@@ -191,9 +191,9 @@ function clearImageData() {
 
 // GET DATA
 async function getNewImageFromHist(index) {
-    const url = `/api/image/hist/next?${getQueryParameters(index)}`;
+    const endpoint = `/api/image/hist/next?${getQueryParameters(index)}/`;
     try {
-        const response = await fetch(url);
+        const response = await fetch(endpoint);
         if (response.status === 404) {
             clearImageData();
             return;
@@ -217,7 +217,7 @@ document.getElementById('trueResultForm')?.addEventListener('submit', (event) =>
         showAlert('Select a true result', 'warning', 2);
         return;
     }
-    const endpoint = `/api/image/${imageUUID}/true-result`;
+    const endpoint = `/api/image/${imageUUID}/true-result/`;
     let content = {
         method: 'PUT',
         headers: {

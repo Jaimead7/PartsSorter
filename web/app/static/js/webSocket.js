@@ -30,7 +30,7 @@ let alertBlock;
 
 async function initWebSocket() {
     try {
-        connectWebSocket(`ws://${window.location.host}/api/ws/image-stream`);
+        connectWebSocket(`ws://${window.location.host}/api/ws/image-stream/`);
     } catch (error) {
         console.error('Error connecting to the web socket:', error);
     }

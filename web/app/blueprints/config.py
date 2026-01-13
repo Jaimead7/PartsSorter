@@ -41,7 +41,7 @@ async def config() -> str:
         page_title= 'Configuration'
     )
 
-@config_bp.route('/models')
+@config_bp.route('/models/')
 async def config_models() -> Response | str:
     try:
         models: list[ModelResponse] = await api_get_models()
@@ -53,22 +53,22 @@ async def config_models() -> Response | str:
         models= models
     )
 
-@config_bp.route('/models/load')
+@config_bp.route('/models/load/')
 async def load_model() -> Response | str:
     return await render_template(
         'config/model-load.html',
         page_title= 'Configuration'
     )
 
-@config_bp.route(f'/models/<path:model_name>')
+@config_bp.route(f'/models/<path:model_name>/')
 async def config_model(model_name: str) -> Response | str:
     try:
         model: Optional[ModelResponse] = await api_get_model(model_name)
         models: list[ModelResponse] = await api_get_models()
     except httpx.ConnectError:
-        return redirect('/config/models', 302)
+        return redirect('/config/models/', 302)
     if model is None:
-        return redirect('/config/models', 302)
+        return redirect('/config/models/', 302)
     return await render_template(
         'config/model.html',
         page_title= 'Configuration',

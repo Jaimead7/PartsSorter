@@ -86,7 +86,7 @@ services:
       - db-network
       - api-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/config/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/config/health/"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -106,7 +106,7 @@ services:
     networks:
       - web-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -129,7 +129,7 @@ services:
       - web-network
       - capture-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost/health/"]
       interval: 10s
       timeout: 5s
       retries: 10

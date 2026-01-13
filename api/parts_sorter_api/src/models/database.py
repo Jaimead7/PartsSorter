@@ -20,9 +20,7 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 import yaml
-from pydantic import field_validator
 from sqlalchemy import JSON, Column
-#from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from typing_extensions import Self
@@ -78,7 +76,7 @@ class Origin(SQLModel, table= True):
     )
     params: Optional[dict[str, Any]] = Field(
         default= None,
-        sa_type= JSON #JSONB  #CHECK: Works ok with postgres?
+        sa_type= JSON
     )
 
     images_of_origin: Optional[list['Image']] = Relationship(

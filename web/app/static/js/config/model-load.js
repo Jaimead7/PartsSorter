@@ -27,7 +27,7 @@ const resetButton = form?.querySelector('button[type="reset"]');
 
 resetButton?.addEventListener('click', (event) => {
     event.preventDefault();
-    window.location.replace('/config/models');
+    window.location.replace('/config/models/');
 });
 
 loadButton?.addEventListener('click', async function(event) {
@@ -62,7 +62,7 @@ loadButton?.addEventListener('click', async function(event) {
     fetch(endpoint, content)
     .then(response => {
         if (response.ok) {
-            window.location.replace('/config/models');
+            window.location.replace('/config/models/');
         } else {
             throw new Error(`Error on server response (${response.status}) ${response.statusText}`);
         }

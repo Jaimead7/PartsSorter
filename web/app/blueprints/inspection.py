@@ -35,7 +35,7 @@ inspection_bp = Blueprint(
     url_prefix='/inspection'
 )
 
-@inspection_bp.route('/image-stream')
+@inspection_bp.route('/image-stream/')
 async def image_stream() -> str:
     try:
         origins: list[OriginResponse] = await api_get_origins()
@@ -49,7 +49,7 @@ async def image_stream() -> str:
         preselected_origins= preselected_origins
     )
 
-@inspection_bp.route('/image-inspection')
+@inspection_bp.route('/image-inspection/')
 async def image_inspection() -> Response | str:
     try:
         origins: list[OriginResponse] = await api_get_origins()

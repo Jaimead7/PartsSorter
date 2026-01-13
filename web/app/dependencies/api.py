@@ -19,7 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from typing import Optional, TypedDict
+from typing import Optional
 
 import httpx
 from quart import current_app
@@ -95,7 +95,7 @@ async def api_get_models() -> list[ModelResponse]:
 
 async def api_get_model(model_name: str) -> Optional[ModelResponse]:
     options: RequestOptions = RequestOptions(
-        url= f'{API_URL}/model/{model_name}',
+        url= f'{API_URL}/model/{model_name}/',
         headers= {
             'accept': 'application/json'
         },
@@ -129,7 +129,7 @@ async def api_get_inspection_results() -> list[InspectionResultResponse]:
 
 async def api_get_image_extensions() -> list[str]:
     options: RequestOptions = RequestOptions(
-        url= f'{API_URL}/image/extensions',
+        url= f'{API_URL}/image/extensions/',
         headers= {
             'accept': 'application/json'
         },

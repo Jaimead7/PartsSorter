@@ -38,14 +38,14 @@ async def close_httpx_client() -> None:
     await client.aclose()
 
 @app.route('/')
-@app.route('/index')
+@app.route('/index/')
 async def home() -> str:
     return await render_template(
         'index.html',
         page_title= 'Part inspection'
     )
 
-@app.get('/health')
+@app.get('/health/')
 async def health_check() -> dict:
     return {"status": "healthy", "service": "web"}
 
