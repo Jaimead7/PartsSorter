@@ -83,7 +83,7 @@ async def get_models(
     )
 
 @models_router.get(
-    '/{name}',
+    '/{name}/',
     response_model= Model,
     summary= 'Get Model of the database.',
     response_description= 'The Model list.',
@@ -99,7 +99,7 @@ async def get_model(
     )
 
 @models_router.put(
-    '/{name}',
+    '/{name}/',
     response_model= Model,
     summary= 'Update Model on the database.',
     response_description= 'The Model updated.',
@@ -115,7 +115,7 @@ async def update_model(
     )
 
 @models_router.delete(
-    '/{name}',
+    '/{name}/',
     summary= 'Delete Model from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
@@ -129,7 +129,7 @@ async def delete_model(
     )
 
 @models_router.get(
-    '/{name}/model-classes',
+    '/{name}/model-classes/',
     response_model= list[ModelClass],
     summary= 'Get the ModelClass\'s of a Model of the database.',
     response_description= 'The ModelClass\'s list.',
@@ -145,7 +145,7 @@ async def get_model_model_classes(
     )
 
 @models_router.get(
-    '/{name}/origins',
+    '/{name}/origins/',
     response_model= list[Origin],
     summary= 'Get the Origin\'s of a Model of the database.',
     response_description= 'The Origin\'s list.',
@@ -165,7 +165,7 @@ async def get_model_origins(
     )
 
 @models_router.get(
-    '/{name}/metadata',
+    '/{name}/metadata/',
     response_model= ModelMetadataDict,
     summary= 'Get the metadata of a Model.',
     response_description= 'The metadata.',

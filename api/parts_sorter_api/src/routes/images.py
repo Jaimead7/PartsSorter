@@ -86,7 +86,7 @@ async def delete_images(
     )
 
 @images_router.post(
-    '/process',
+    '/process/',
     response_model= ImageProcessed,
     summary= 'Process new Image and save it to the database.',
     response_description= 'The new Image created.',
@@ -104,7 +104,7 @@ async def process_new_image(
     )
 
 @images_router.get(
-    '/hist/next',
+    '/hist/next/',
     response_model= ImageHistResponse,
     summary= 'Get the next image of the database.',
     response_description= 'The Image data.',
@@ -141,7 +141,7 @@ async def get_next_hist_image(
     )
 
 @images_router.get(
-    '/extensions',
+    '/extensions/',
     response_model= list[str],
     summary= 'Get all extensions of the Images of the database.',
     response_description= 'The extensions list.',
@@ -155,7 +155,7 @@ async def get_image_extensions(
     )
 
 @images_router.put(
-    '/{uuid}',
+    '/{uuid}/',
     response_model= Image,
     summary= 'Update Image on the database.',
     response_description= 'The Image updated.',
@@ -182,7 +182,7 @@ async def update_image(
     )
 
 @images_router.put(
-    '/{uuid}/true-result',
+    '/{uuid}/true-result/',
     response_model= ImageStreamResponse,
     summary= 'Update Image.true_result on the database.',
     response_description= 'The Image updated.',
@@ -206,7 +206,7 @@ async def update_image_true_result(
     return ImageStreamResponse.from_image(image= image)
 
 @images_router.delete(
-    '/{uuid}',
+    '/{uuid}/',
     summary= 'Delete Image from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
@@ -220,7 +220,7 @@ async def delete_image(
     )
 
 @images_router.get(
-    '/{uuid}',
+    '/{uuid}/',
     response_model= list[Image],
     summary= 'Get an Image of the database.',
     response_description= 'The Image list.',

@@ -46,8 +46,26 @@ async def create_new_origin_result(
         origin_result= origin_result
     )
 
+@origin_results_router.get(
+    '/',
+    response_model= list[OriginResult],
+    summary= 'Get OriginResult\'s of the database.',
+    response_description= 'The OriginResult\'s list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_origin_results(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
+) -> Sequence[OriginResult]:
+    return await db_get_origin_results(
+        session= session,
+        limit= limit,
+        offset= offset
+    )
+
 @origin_results_router.put(
-    '/{origin}/{inspection_result}',
+    '/{origin}/{inspection_result}/',
     response_model= OriginResult,
     summary= 'Update OriginResult on the database.',
     response_description= 'The OriginResult updated.',
@@ -71,7 +89,7 @@ async def update_origin_result(
     )
 
 @origin_results_router.delete(
-    '/{origin}/{inspection_result}',
+    '/{origin}/{inspection_result}/',
     summary= 'Delete OriginResult from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
@@ -87,22 +105,4 @@ async def delete_origin_result(
     await db_delete_origin_result(
         session= session,
         origin_result= origin_result
-    )
-
-@origin_results_router.get(
-    '/',
-    response_model= list[OriginResult],
-    summary= 'Get OriginResult\'s of the database.',
-    response_description= 'The OriginResult\'s list.',
-    status_code= status.HTTP_200_OK
-)
-async def get_origin_results(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
-    offset: Annotated[int, Query()] = 0
-) -> Sequence[OriginResult]:
-    return await db_get_origin_results(
-        session= session,
-        limit= limit,
-        offset= offset
     )

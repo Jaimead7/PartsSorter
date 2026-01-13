@@ -46,67 +46,6 @@ async def create_new_inspection_result(
         name= name
     )
 
-@inspection_results_router.put(
-    '/{name}',
-    response_model= InspectionResult,
-    summary= 'Update InspectionResult on the database.',
-    response_description= 'The InspectionResult updated.',
-    status_code= status.HTTP_200_OK
-)
-async def update_inspection_result(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()]
-) -> InspectionResult:
-    return await db_update_inspection_result(
-        session= session,
-        inspection_result= InspectionResult(name= name)
-    )
-
-@inspection_results_router.delete(
-    '/{name}',
-    summary= 'Delete InspectionResult from the database.',
-    status_code= status.HTTP_204_NO_CONTENT
-)
-async def delete_inspection_result(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()]
-) -> None:
-    await db_delete_inspection_results(
-        session= session,
-        inspection_results= [InspectionResult(name= name)]
-    )
-
-@inspection_results_router.delete(
-    '/',
-    summary= 'Delete InspectionResult\'s from the database.',
-    status_code= status.HTTP_204_NO_CONTENT
-)
-async def delete_inspection_results(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    names: Annotated[list[str], Query()] = []
-) -> None:
-    inspection_result: list[InspectionResult] = [InspectionResult(name= name) for name in names]
-    await db_delete_inspection_results(
-        session= session,
-        inspection_results= inspection_result
-    )
-
-@inspection_results_router.get(
-    '/{name}',
-    response_model= list[InspectionResult],
-    summary= 'Get InspectionResult of the database.',
-    response_description= 'The InspectionResult list.',
-    status_code= status.HTTP_200_OK
-)
-async def get_inspection_result(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()]
-) -> InspectionResult:
-    return await db_get_inspection_result(
-        session= session,
-        inspection_result= InspectionResult(name= name)
-    )
-
 @inspection_results_router.get(
     '/',
     response_model= list[InspectionResult],
@@ -127,8 +66,69 @@ async def get_inspection_results(
         offset= offset
     )
 
+@inspection_results_router.delete(
+    '/',
+    summary= 'Delete InspectionResult\'s from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_inspection_results(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    names: Annotated[list[str], Query()] = []
+) -> None:
+    inspection_result: list[InspectionResult] = [InspectionResult(name= name) for name in names]
+    await db_delete_inspection_results(
+        session= session,
+        inspection_results= inspection_result
+    )
+
+@inspection_results_router.put(
+    '/{name}/',
+    response_model= InspectionResult,
+    summary= 'Update InspectionResult on the database.',
+    response_description= 'The InspectionResult updated.',
+    status_code= status.HTTP_200_OK
+)
+async def update_inspection_result(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> InspectionResult:
+    return await db_update_inspection_result(
+        session= session,
+        inspection_result= InspectionResult(name= name)
+    )
+
+@inspection_results_router.delete(
+    '/{name}/',
+    summary= 'Delete InspectionResult from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_inspection_result(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> None:
+    await db_delete_inspection_results(
+        session= session,
+        inspection_results= [InspectionResult(name= name)]
+    )
+
 @inspection_results_router.get(
-    '/{name}/images',
+    '/{name}/',
+    response_model= list[InspectionResult],
+    summary= 'Get InspectionResult of the database.',
+    response_description= 'The InspectionResult list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_inspection_result(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> InspectionResult:
+    return await db_get_inspection_result(
+        session= session,
+        inspection_result= InspectionResult(name= name)
+    )
+
+@inspection_results_router.get(
+    '/{name}/images/',
     response_model= list[Image],
     summary= 'Get the Image\'s of an InspectionResult of the database.',
     response_description= 'The Image\'s list.',
@@ -148,7 +148,7 @@ async def get_inspection_result_images(
     )
 
 @inspection_results_router.get(
-    '/{name}/model-classes',
+    '/{name}/model-classes/',
     response_model= list[ModelClass],
     summary= 'Get the ModelClass\'s of an InspectionResult of the database.',
     response_description= 'The ModelClass\'s list.',
@@ -168,7 +168,7 @@ async def get_inspection_result_model_classes(
     )
 
 @inspection_results_router.get(
-    '/{name}/origin-results',
+    '/{name}/origin-results/',
     response_model= list[OriginResult],
     summary= 'Get the OriginResult\'s of an InspectionResult of the database.',
     response_description= 'The OriginResult\'s list.',

@@ -22,7 +22,7 @@ from ..dependencies.web_sockets import ImageStreamSocketManager
 ws_router = APIRouter()
 
 @ws_router.websocket(
-    "/image-stream",
+    "/image-stream/",
     name= 'Image stream socket'
 )
 async def websocket_endpoint(websocket: WebSocket) -> None:

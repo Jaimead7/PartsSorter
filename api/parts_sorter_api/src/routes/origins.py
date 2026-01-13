@@ -48,42 +48,6 @@ async def create_new_origin(
         origin= origin
     )
 
-@origins_router.put(
-    '/{name}',
-    response_model= Origin,
-    summary= 'Update Origin on the database.',
-    response_description= 'The Origin updated.',
-    status_code= status.HTTP_200_OK
-)
-async def update_origin(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()],
-    model: Annotated[Optional[str], Body()] = None,
-    params: Annotated[Optional[dict[str, Any]], Body()] = None
-) -> Origin:
-    return await db_update_origin(
-        session= session,
-        origin= Origin(
-            name= name,
-            model= model,
-            params= params
-        )
-    )
-
-@origins_router.delete(
-    '/{name}',
-    summary= 'Delete Origin from the database.',
-    status_code= status.HTTP_204_NO_CONTENT
-)
-async def delete_origin(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()]
-) -> None:
-    await db_delete_origins(
-        session= session,
-        origins= [Origin(name= name)]
-    )
-
 @origins_router.delete(
     '/',
     summary= 'Delete Origin\'s from the database.',
@@ -97,22 +61,6 @@ async def delete_origins(
     await db_delete_origins(
         session= session,
         origins= origins
-    )
-
-@origins_router.get(
-    '/{name}',
-    response_model= list[Origin],
-    summary= 'Get Origin of the database.',
-    response_description= 'The Origin list.',
-    status_code= status.HTTP_200_OK
-)
-async def get_origin(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()]
-) -> Origin:
-    return await db_get_origin(
-        session= session,
-        origin= Origin(name= name)
     )
 
 @origins_router.get(
@@ -135,8 +83,60 @@ async def get_origins(
         offset= offset
     )
 
+@origins_router.put(
+    '/{name}/',
+    response_model= Origin,
+    summary= 'Update Origin on the database.',
+    response_description= 'The Origin updated.',
+    status_code= status.HTTP_200_OK
+)
+async def update_origin(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()],
+    model: Annotated[Optional[str], Body()] = None,
+    params: Annotated[Optional[dict[str, Any]], Body()] = None
+) -> Origin:
+    return await db_update_origin(
+        session= session,
+        origin= Origin(
+            name= name,
+            model= model,
+            params= params
+        )
+    )
+
+@origins_router.delete(
+    '/{name}/',
+    summary= 'Delete Origin from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_origin(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> None:
+    await db_delete_origins(
+        session= session,
+        origins= [Origin(name= name)]
+    )
+
 @origins_router.get(
-    '/{name}/images',
+    '/{name}/',
+    response_model= list[Origin],
+    summary= 'Get Origin of the database.',
+    response_description= 'The Origin list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_origin(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> Origin:
+    return await db_get_origin(
+        session= session,
+        origin= Origin(name= name)
+    )
+
+@origins_router.get(
+    '/{name}/images/',
     response_model= list[Image],
     summary= 'Get the Image\'s of an Origin of the database.',
     response_description= 'The Image\'s list.',
@@ -156,7 +156,7 @@ async def get_origin_images(
     )
 
 @origins_router.get(
-    '/{name}/origin-results',
+    '/{name}/origin-results/',
     response_model= list[OriginResult],
     summary= 'Get the OriginResult\'s of an Origin of the database.',
     response_description= 'The OriginResult\'s list.',
@@ -176,7 +176,7 @@ async def get_origin_origin_result(
     )
 
 @origins_router.get(
-    '/{name}/camera-params',
+    '/{name}/camera-params/',
     response_model= CameraParams,
     summary= 'Get the parameters of the camera from a origin.',
     response_description= 'The camera parameters.',
@@ -192,7 +192,7 @@ async def get_origin_camera_params(
     )
 
 @origins_router.get(
-    '/{name}/params',
+    '/{name}/params/',
     response_model= dict[str, Any],
     summary= 'Delete the params of the origin.',
     response_description= 'The origin params.',
@@ -208,7 +208,7 @@ async def get_origin_params(
     )
 
 @origins_router.put(
-    '/{name}/params',
+    '/{name}/params/',
     response_model= Origin,
     summary= 'Delete the params of the origin.',
     response_description= 'The origin params.',
@@ -226,7 +226,7 @@ async def put_origin_params(
     )
 
 @origins_router.delete(
-    '/{name}/params',
+    '/{name}/params/',
     response_model= Origin,
     summary= 'Delete the params of the origin.',
     response_description= 'The origin params.',

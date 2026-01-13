@@ -22,7 +22,7 @@ config_router = APIRouter()
 
 
 @config_router.get(
-    '/health',
+    '/health/',
     response_model= HealthResponse,
     summary= 'Health check.',
     response_description= 'Health check for the api.',

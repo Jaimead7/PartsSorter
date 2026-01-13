@@ -44,8 +44,26 @@ async def create_new_model_class(
         model_class= model_class
     )
 
+@model_classes_router.get(
+    '/',
+    response_model= list[ModelClass],
+    summary= 'Get ModelClass\'s of the database.',
+    response_description= 'The ModelClass\'s list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_model_classes(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
+    offset: Annotated[int, Query()] = 0
+) -> Sequence[ModelClass]:
+    return await db_get_model_classes(
+        session= session,
+        limit= limit,
+        offset= offset
+    )
+
 @model_classes_router.put(
-    '/{model}/{number}',
+    '/{model}/{number}/',
     response_model= ModelClass,
     summary= 'Update ModelClass on the database.',
     response_description= 'The ModelClass updated.',
@@ -67,7 +85,7 @@ async def update_model_class(
     )
 
 @model_classes_router.delete(
-    '/{model}/{number}',
+    '/{model}/{number}/',
     summary= 'Delete ModelClass from the database.',
     status_code= status.HTTP_204_NO_CONTENT
 )
@@ -80,22 +98,4 @@ async def delete_model_class(
     await db_delete_model_class(
         session= session,
         model_class= model_class
-    )
-
-@model_classes_router.get(
-    '/',
-    response_model= list[ModelClass],
-    summary= 'Get ModelClass\'s of the database.',
-    response_description= 'The ModelClass\'s list.',
-    status_code= status.HTTP_200_OK
-)
-async def get_model_classes(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
-    offset: Annotated[int, Query()] = 0
-) -> Sequence[ModelClass]:
-    return await db_get_model_classes(
-        session= session,
-        limit= limit,
-        offset= offset
     )
