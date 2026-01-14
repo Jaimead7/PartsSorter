@@ -33,7 +33,7 @@ RUN uv sync --extra postgres
 FROM python:3.12.11-slim AS production
 
 # Set metadata
-LABEL org.opencontainers.image.title="parts-sorter-web"
+LABEL org.opencontainers.image.title="parts-sorter-api"
 LABEL org.opencontainers.image.description="Microservice for API"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>"

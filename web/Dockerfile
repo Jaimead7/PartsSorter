@@ -59,4 +59,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 5000
 
 # Run the app
-CMD ["python3.13", "-m", "app.app"]
+CMD ["python3.13", "-m", "parts_sorter_web.src.app"]
