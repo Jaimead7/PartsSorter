@@ -26,6 +26,14 @@ const saveButton = form?.querySelector('button[type="submit"]');
 const resetButton = form?.querySelector('button[type="reset"]');
 const deleteButton = document.getElementById('deleteModelButton');
 
+function get_form_as_body() {
+    const description = document.getElementById('modelDescription')?.textContent;
+
+    return {
+        'description': description
+    };
+}
+
 deleteButton?.addEventListener('click', () => {
     const modelName = document.getElementById('modelName')?.textContent;
     const endpoint = `/api/model/${modelName}/`;
@@ -59,8 +67,8 @@ resetButton?.addEventListener('click', (event) => {
 saveButton?.addEventListener('click', async function(event) {
     event.preventDefault();
 
-    const endpoint = `/api/model/${modelName}/`;
     const modelName = document.getElementById('modelName')?.textContent;
+    const endpoint = `/api/model/${modelName}/`;
     const spinner = document.getElementById('submitSpinner');
     const label = document.getElementById('submitLabel');
 
@@ -74,7 +82,7 @@ saveButton?.addEventListener('click', async function(event) {
             'accept': 'application/json',
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify()
+        body: JSON.stringify(get_form_as_body())
     };
 
     fetch(endpoint, content)
