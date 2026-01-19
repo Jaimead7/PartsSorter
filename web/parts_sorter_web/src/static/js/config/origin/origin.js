@@ -38,12 +38,12 @@ async function initDeleteOrigin() {
     const deleteBtn = document.getElementById('deleteOriginButton');
 
     if (!deleteBtn) {
-        showAlert('Couldn\'t obtain the origin button', 'danger', 2);
-        return;
+        throw new Error('Couldn\'t obtain the origin delete button');
     }
 
     deleteBtn.addEventListener('click', () => {
         const originName = document.getElementById('originName')?.textContent;
+
         if (!originName) {
             showAlert('No name found', 'danger', 2);
             return;
@@ -76,7 +76,9 @@ async function initDeleteOrigin() {
 async function initFormEvents() {
     const form = document.getElementById('originForm');
 
-    if (!form) return;
+    if (!form) {
+        throw new Error('Couldn\'t obtain the origin form');
+    }
 
     form.querySelector('button[type="submit"]')?.addEventListener('click', async function(event) {
         event.preventDefault();
