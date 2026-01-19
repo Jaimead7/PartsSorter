@@ -19,62 +19,66 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from '../../utils.js';
+import {
+    showAlert
+} from '../../utils.js';
 
-const form = document.getElementById('modelLoadForm');
-const loadButton = form?.querySelector('button[type="submit"]');
-const resetButton = form?.querySelector('button[type="reset"]');
 
-resetButton?.addEventListener('click', (event) => {
-    event.preventDefault();
-    window.location.replace('/config/models/');
-});
+async function initFormEvents() {
+    const form = document.getElementById('modelForm');
 
-loadButton?.addEventListener('click', async function(event) {
-    event.preventDefault();
-
-    const endpoint = `/api/model/`;
-    const fileInput = document.getElementById('modelFile');
-    const file = fileInput.files[0];
-    const spinner = document.getElementById('submitSpinner');
-    const label = document.getElementById('submitLabel');
-
-    label.innerText = 'Loading...';
-    spinner.removeAttribute('hidden');
-    this.disabled = true;
-
-    if (!file) {
-        showAlert('Select a file', 'warning', 2);
-        return;
+    if (!form) {
+        throw new Error('Couldn\'t obtain the model form');
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    form.querySelector('button[type="submit"]')?.addEventListener('click', async function(event) {
+        event.preventDefault();
 
-    let content = {
-        method: 'POST',
-        headers: {
-            'accept': 'application/json',
-        },
-        body: formData
-    }
-
-    fetch(endpoint, content)
-    .then(response => {
-        if (response.ok) {
-            window.location.replace('/config/models/');
-        } else {
-            throw new Error(`Error on server response (${response.status}) ${response.statusText}`);
+        
+        const endpoint = `/api/model/`;
+        
+        const fileInput = document.getElementById('modelFile');
+        const file = fileInput.files[0];
+        if (!file) {
+            showAlert('Select a file', 'warning', 2);
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('Error creating model: ' + error.message, 'danger', 2);
-    })
-    .finally(() => {
-        label.innerText = 'Load';
-        spinner.setAttribute('hidden', true);
-        this.disabled = false;
+
+        disableSubmitButton(this, 'Loading...');
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        let content = {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+            },
+            body: formData
+        }
+
+        fetch(endpoint, content)
+        .then(response => {
+            if (response.ok) {
+                window.location.replace('/config/models/');
+            } else {
+                throw new Error(`Error on server response (${response.status}) ${response.statusText}`);
+            }
+        })
+        .catch(error => {
+            showAlert('Error creating model: ' + error.message, 'danger', 2);
+        })
+        .finally(() => {
+            enableSubmitButton(this, 'Load');
+        });
     });
 
+    form.querySelector('button[type="reset"]')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.location.replace('/config/models/');
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initFormEvents();
 });
