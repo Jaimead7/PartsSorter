@@ -59,6 +59,10 @@ function connectWebSocket(url) {
                 data.origin = data.origin ? data.origin : 'Unknown';
                 if (selectedOrigins.includes(data.origin) || noneChecked) {
                     transferImages();
+                    const nameElement = document.getElementById('img-0-name');
+                    if (nameElement) {
+                        nameElement.innerText = data.image_url.split('/').pop() || 'Unknown';
+                    }
                     const imgAlt = document.getElementById(`img-0-alt`);
                     if (imgAlt) {
                         imgAlt.hidden = true;
@@ -120,6 +124,7 @@ function transferImages() {
     for (let i = 4; i > 0; i--) {
         try {
             transferImage(i-1, i);
+            transferText(`img-${i-1}-name`, `img-${i}-name`);
             transferText(`img-${i-1}-origin`, `img-${i}-origin`);
             transferText(`img-${i-1}-type`, `img-${i}-type`);
             transferText(`img-${i-1}-trust`, `img-${i}-trust`);

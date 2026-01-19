@@ -8,13 +8,14 @@
         <section class="col-md-8 p-1">
             <div class="d-flex flex-column gap-1">
                 <article class="col-12 d-flex align-items-center border border-2 rounded p-1">
-                    <section class="col-8">
-                        <div class="ratio ratio-4x3 border border-2 rounded">
-                            <div class="d-flex align-items-center justify-content-center p-1 text-center">
+                    <section class="col-8 d-flex flex-column align-items-center border border-2 rounded text-center">
+                        <div class="ratio ratio-4x3">
+                            <div class="d-flex align-items-center justify-content-center p-1">
                                 <h1 class="mb-0" id="img-0-alt"><strong>No image to show</strong></h1>
                                 <img id="img-0-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
                             </div>
                         </div>
+                        <p class="mb-0" id="img-0-name" data-default-text="Unknown">Unknown</p>
                     </section>
                     <section class="col-4 ps-2 text-truncate">
                         <ul class="list-group">
@@ -44,14 +45,15 @@
         </section>
         <section class="col-4 h-100 overflow-auto p-1">
             {% for i in range(4) %}
-                <article class="col-12 d-flex align-items-center border border-2 rounded p-1 mb-2">
-                    <section class="col-8">
-                        <div class="ratio ratio-4x3 border border-2 rounded">
-                            <div class="d-flex align-items-center justify-content-center p-1 text-center">
+                <article class="col-12 d-flex align-items-center border border-2 rounded p-1 mb-2 text-center">
+                    <section class="col-8 d-flex flex-column align-items-center border border-2 rounded">
+                        <div class="ratio ratio-4x3">
+                            <div class="d-flex align-items-center justify-content-center p-1">
                                 <h5 class="mb-0" id="img-{{ i+1 }}-alt"><strong>No image to show</strong></h5>
                                 <img id="img-{{ i+1 }}-img" src="" alt="No image" class="h-100 w-100 mw-100 mh-100 rounded object-fit-contain" hidden>
                             </div>
                         </div>
+                        <p class="mb-0" id="img-{{ i+1 }}-name" data-default-text="Unknown">Unknown</p>
                     </section>
                     <section class="col-4 ps-1 text-truncate">
                         <ul class="list-group">
