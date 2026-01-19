@@ -20,6 +20,15 @@
 
 
 async function showAlert(message, type, seconds) {
+    switch (type) {
+        case 'warning':
+            console.warn(message);
+        case 'danger':
+            console.error(message);
+        default:
+            console.log(message);
+    };
+
     const alertBlock = document.createElement('div');
     alertBlock.className = `alert alert-${type} fade show position-fixed m-1 start-50 translate-middle-x text-truncate`;
     alertBlock.style.cssText = 'top:4rem; z-index: 9999;';
