@@ -20,6 +20,7 @@
 
 
 from datetime import datetime, timezone
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -49,4 +50,10 @@ class ActuatorParamsResponse(BaseModel):
 
 class ProcessImageResponse(BaseModel):
     date: datetime = Field(default_factory= now_utc_notz)
+    id: Optional[str] = None
     result: bool = False
+
+    def __str__(self) -> str:
+        formatted_date: str = self.date.strftime('%d/%m/%Y %H:%M:%S.%f')[:-3]
+        id_str: str = f'{self.id}' if self.id is not None else 'Unknown'
+        return f'Result(date: {formatted_date}, id: {id_str}, result: {self.result})'

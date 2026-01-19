@@ -144,7 +144,7 @@ class CameraManager:
                     date= date
                 )
                 await results_queue.put(result)
-                my_logger.debug(f'Image captured with Result({result}).')
+                my_logger.debug(f'Image captured with {result}.')
 
     async def cycle(
         self,

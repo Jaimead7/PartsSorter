@@ -59,13 +59,13 @@ class ActuatorManager:
         await asyncio.sleep(self.params.actuator_delay / 1000.)
         now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
         if now - self.last_push > timedelta(milliseconds= self.params.actuator_cycle_time):
-            my_logger.debug(f'Pushing new part with Result({part}).')
+            my_logger.debug(f'Pushing new part with {part}.')
             self.last_push = now
             write(ACTUATOR_PIN, True)
             await asyncio.sleep(0.2)
             write(ACTUATOR_PIN, False)
         else:
-            my_logger.error(f'Part skiped with Result({part}). Tried to push so early.')
+            my_logger.error(f'Part skiped with {part}. Tried to push so early.')
 
     async def get_next_result(
         self,
@@ -92,7 +92,7 @@ class ActuatorManager:
                 await results_queue.get()
                 continue
             result: ProcessImageResponse = await results_queue.get()
-            my_logger.debug(f'New part on the actuator with Result({result}).')
+            my_logger.debug(f'New part on the actuator with {result}.')
             return result
 
     async def cycle(
@@ -118,7 +118,7 @@ class ActuatorManager:
                         my_logger.error(f'New part on the actuator without clearing last part.')
                     next_part_to_push = await self.get_next_result(results_queue)
                 if edge_type == EdgeType.FALLING:
-                    my_logger.debug(f'Part to be pushed with Result({next_part_to_push}).')
+                    my_logger.debug(f'Part to be pushed with {next_part_to_push}.')
                     if next_part_to_push is not None:
                         if next_part_to_push.result:
                             asyncio.create_task(self.push(next_part_to_push))
