@@ -1,0 +1,114 @@
+{% extends "index.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <section class="d-flex h-100">
+        <aside class="col-2 p-1 h-100 overflow-auto user-select-none">
+            <article class="card p-2">
+                <section class="d-flex">
+                    <h3 class="text-truncate"><strong>Origins:</strong></h3>
+                </section>
+                <section class="card-body p-0">
+                    <ul class="list-group">
+                        {% for item in origins: %}
+                            <li class="list-group-item p-1 text-truncate">
+                                <a
+                                    href="/config/origins/{{ item.name }}/"
+                                    class="text-decoration-none text-reset d-block"
+                                >
+                                    {{ item.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </article>
+        </aside>
+        <section class="w-100 d-flex ms-3">
+            <form id="originForm" class="col-7">
+                <header class="d-flex align-items-center justify-content-between mb-3 pb-1 border-bottom border-2">
+                    <h1 class="h3 m-0" id="originName">{{ origin.name }}</h1>
+                    <button class="btn btn-md p-0" type="button" id="deleteOriginButton">
+                        <span class="bi bi-trash fs-3"></span>
+                    </button>
+                </header>
+                <section class="">
+                    <section class="mb-2">
+                        <label
+                            class="rounded-top border border-bottom-0 bg-body-tertiary p-2"
+                            for="originDescription"
+                            id="originDescriptionLabel"
+                        >
+                            Description:
+                        </label>
+                        <textarea
+                            class="form-control rounded-0 rounded-bottom rounded-end"
+                            rows="3"
+                            id="originDescription"
+                            aria-describedby="originDescriptionLabel"
+                        >{{ origin.description }}</textarea>
+                    </section>
+                    <section class="input-group mb-2">
+                        <label class="input-group-text" for="originModel">Model:</label>
+                        <select class="form-select" id="originModel">
+                            <option selected value="">Unknown</option>
+                            {% for item in models %}
+                                <option {% if item.name == origin.model %}selected{% endif %} value="{{ item.name }}">{{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </section>
+                    <section class="card gap-1" id="originParamsCard">
+                        <button class="bg-body-tertiary btn card-header p-0 ps-1 pe-1 d-flex justify-content-between align-items-center"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#originParamsCardData" 
+                                aria-expanded="true"
+                                aria-controls="originParamsCardData"
+                        >
+                            <span class="ps-2">Parameters:</span>
+                            <span class="bi bi-caret-up-square fs-4"></span>
+                        </button>
+                        <section class="p-2 collapse show" id="originParamsCardData">
+                            <ul class="ps-0 mb-2" id="originParamsList">
+                                {% if origin.params %}
+                                    {% for key, value in origin.params.items() %}
+                                        <li class="d-flex mb-1">
+                                            <div class="input-group">
+                                                <label name="paramName" class="input-group-text" for="{{ key }}-Value">{{ key }}</label>
+                                                <input name="paramValue" id="{{ key }}-Value" type="{% if value is integer or value is float %}number{% else %}text{% endif %}" class="form-control" value="{{ value }}">
+                                                <select name="paramType" class="input-group-text text-start">
+                                                    <option {% if value is string %}selected{% endif %} value="text">Text</option>
+                                                    <option {% if value is integer or value is float %}selected{% endif %} value="number">Number</option>
+                                                </select>
+                                            </div>
+                                            <button class="btn btn-outline-secondary border-0 pt-0 pb-0" type="button" data-action="delete">
+                                                <span class="bi bi-trash fs-3"></span>
+                                            </button>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                            <button type="button" class="btn btn-outline-secondary bi bi-plus fs-5" id="addOriginParam"></button>
+                        </section>
+                    </section>
+                </section>
+                <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
+                    <button type="reset" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm" role="status" name="submitSpinner" hidden></span>
+                        <span name="submitLabel">Save</span>
+                    </button>
+                </footer>
+            </form>
+        </section>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script
+        src="{{ url_for('static', filename='js/config/origin/origin.js') }}"
+        type="module">
+    </script>
+{% endblock %}

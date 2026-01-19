@@ -19,87 +19,62 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from '../utils.js';
+import { showAlert } from '../../utils.js';
 
-const form = document.getElementById('modelForm');
-const saveButton = form?.querySelector('button[type="submit"]');
+const form = document.getElementById('modelLoadForm');
+const loadButton = form?.querySelector('button[type="submit"]');
 const resetButton = form?.querySelector('button[type="reset"]');
-const deleteButton = document.getElementById('deleteModelButton');
-
-function get_form_as_body() {
-    const description = document.getElementById('modelDescription')?.textContent;
-
-    return {
-        'description': description
-    };
-}
-
-deleteButton?.addEventListener('click', () => {
-    const modelName = document.getElementById('modelName')?.textContent;
-    const endpoint = `/api/model/${modelName}/`;
-
-    let content = {
-        method: 'DELETE',
-        headers: {
-            'accept': '*/*'
-        }
-    };
-
-    fetch(endpoint, content)
-    .then((response) => {
-        if (response.ok) {
-            location.reload();
-        } else {
-            throw new Error(`Error on server response (${response.status})`);
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        showAlert('Error deleting model: ' + error.message, 'danger', 2);
-    });
-});
 
 resetButton?.addEventListener('click', (event) => {
     event.preventDefault();
-    location.reload();
+    window.location.replace('/config/models/');
 });
 
-saveButton?.addEventListener('click', async function(event) {
+loadButton?.addEventListener('click', async function(event) {
     event.preventDefault();
 
-    const modelName = document.getElementById('modelName')?.textContent;
-    const endpoint = `/api/model/${modelName}/`;
+    const endpoint = `/api/model/`;
+    const fileInput = document.getElementById('modelFile');
+    const file = fileInput.files[0];
     const spinner = document.getElementById('submitSpinner');
     const label = document.getElementById('submitLabel');
 
-    label.innerText = 'Saving...';
+    label.innerText = 'Loading...';
     spinner.removeAttribute('hidden');
     this.disabled = true;
 
+    if (!file) {
+        showAlert('Select a file', 'warning', 2);
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
     let content = {
-        method: 'PUT',
+        method: 'POST',
         headers: {
             'accept': 'application/json',
-            'Content-Type': 'application/json',
         },
-        body: JSON.stringify(get_form_as_body())
-    };
+        body: formData
+    }
 
     fetch(endpoint, content)
-    .then((response) => {
+    .then(response => {
         if (response.ok) {
-            location.reload();
+            window.location.replace('/config/models/');
         } else {
-            throw new Error(`Error on server response (${response.status})`);
+            throw new Error(`Error on server response (${response.status}) ${response.statusText}`);
         }
     })
-    .catch((error) => {
+    .catch(error => {
         console.error('Error:', error);
-        showAlert('Error saving model: ' + error.message, 'danger', 2);
+        showAlert('Error creating model: ' + error.message, 'danger', 2);
     })
     .finally(() => {
-        label.innerText = 'Save';
+        label.innerText = 'Load';
         spinner.setAttribute('hidden', true);
         this.disabled = false;
     });
+
 });

@@ -7,10 +7,14 @@
     <section class="d-flex h-100">
         <section class="w-100 d-flex ms-3">
             <form id="modelLoadForm" class="col-5">
-                <h1 class="h3 mb-3 pb-1 border-bottom border-2" id="modelName">Load model</h1>
-                <div class="input-group">
-                    <input type="file" accept=".zip" class="form-control" id="modelFile" aria-describedby="modelFileLabel">
-                </div>
+                <header class="d-flex align-items-center justify-content-between mb-3 pb-1 border-bottom border-2">
+                    <h1 class="h3 m-0">Load model</h1>
+                </header>
+                <section class="">
+                    <div class="input-group">
+                        <input type="file" accept=".zip" class="form-control" id="modelFile">
+                    </div>
+                </section>
                 <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
                     <button type="reset" class="btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn btn-success">
@@ -25,7 +29,7 @@
 
 {% block scripts %}
     <script
-        src="{{ url_for('static', filename='js/config/model-load.js') }}"
+        src="{{ url_for('static', filename='js/config/model/model-load.js') }}"
         type="module">
     </script>
 {% endblock %}

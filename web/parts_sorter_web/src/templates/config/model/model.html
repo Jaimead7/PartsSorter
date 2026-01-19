@@ -6,10 +6,9 @@
 {% block content %}
     <section class="d-flex h-100">
         <aside class="col-2 p-1 h-100 overflow-auto user-select-none">
-            <article class="card border border-1 rounded p-2">
+            <article class="card p-2">
                 <section class="d-flex">
                     <h3 class="text-truncate"><strong>Models:</strong></h3>
-                    
                 </section>
                 <section class="card-body p-0">
                     <ul class="list-group">
@@ -36,8 +35,10 @@
                     </button>
                 </header>
                 <section class="">
-                    <label class="form-label" for="modelDescription">Description:</label>
-                    <textarea class="form-control" rows="3" id="modelDescription">{{ model.description }}</textarea>
+                    <label class="rounded-top border border-bottom-0 bg-body-tertiary p-2" for="modelDescription">
+                        Description:
+                    </label>
+                    <textarea class="form-control rounded-0 rounded-bottom rounded-end" rows="3" id="modelDescription">{{ model.description }}</textarea>
                 </section>
                 <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
                     <button type="reset" class="btn btn-secondary">Cancel</button>
@@ -53,7 +54,7 @@
 
 {% block scripts %}
     <script
-        src="{{ url_for('static', filename='js/config/model.js') }}"
+        src="{{ url_for('static', filename='js/config/model/model.js') }}"
         type="module">
     </script>
 {% endblock %}

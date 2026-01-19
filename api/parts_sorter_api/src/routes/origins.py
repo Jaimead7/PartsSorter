@@ -121,7 +121,7 @@ async def delete_origin(
 
 @origins_router.get(
     '/{name}/',
-    response_model= list[Origin],
+    response_model= Origin,
     summary= 'Get Origin of the database.',
     response_description= 'The Origin list.',
     status_code= status.HTTP_200_OK

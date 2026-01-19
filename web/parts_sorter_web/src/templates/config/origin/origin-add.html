@@ -1,0 +1,76 @@
+{% extends "index.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <section class="d-flex h-100">
+        <section class="w-100 d-flex ms-3">
+            <form id="originForm" class="col-7">
+                <header class="d-flex align-items-center justify-content-between mb-3 pb-1 border-bottom border-2">
+                    <h1 class="h3 m-0">Add origin</h1>
+                </header>
+                <section class="">
+                    <section class="input-group mb-2">
+                        <label class="input-group-text" id="originNameLabel" for="originName">Name:</label>
+                        <input type="text" class="form-control" aria-describedby="originNameLabel" id="originName">
+                    </section>
+                    <section class="mb-2">
+                        <label
+                            class="rounded-top border border-bottom-0 bg-body-tertiary p-2"
+                            for="originDescription"
+                            id="originDescriptionLabel"
+                        >
+                            Description:
+                        </label>
+                        <textarea
+                            class="form-control rounded-0 rounded-bottom rounded-end"
+                            rows="3"
+                            id="originDescription"
+                            aria-describedby="originDescriptionLabel"
+                        ></textarea>
+                    </section>
+                    <section class="input-group mb-2">
+                        <label class="input-group-text" for="originModel">Model:</label>
+                        <select class="form-select" id="originModel">
+                            <option selected value="">Unknown</option>
+                            {% for item in models %}
+                                <option>{{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </section>
+                    <section class="card gap-1" id="originParamsCard">
+                        <button class="bg-body-tertiary btn card-header p-0 ps-1 pe-1 d-flex justify-content-between align-items-center"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#originParamsCardData" 
+                                aria-expanded="true"
+                                aria-controls="originParamsCardData"
+                        >
+                            <label class="ps-2">Parameters:</label>
+                            <span class="bi bi-caret-up-square fs-4"></span>
+                        </button>
+                        <section class="p-2 collapse show" id="originParamsCardData">
+                            <ul class="ps-0 mb-2" id="originParamsList"></ul>
+                            <button type="button" class="btn btn-outline-secondary bi bi-plus fs-5" id="addOriginParam"></button>
+                        </section>
+                    </section>
+                </section>
+                <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
+                    <button type="reset" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm" role="status" id="submitSpinner" hidden></span>
+                        <span id="submitLabel">Add</span>
+                    </button>
+                </footer>
+            </form>
+        </section>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script
+        src="{{ url_for('static', filename='js/config/origin/origin-add.js') }}"
+        type="module">
+    </script>
+{% endblock %}

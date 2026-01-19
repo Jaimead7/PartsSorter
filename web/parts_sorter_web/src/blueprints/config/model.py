@@ -25,42 +25,35 @@ import httpx
 from quart import Blueprint, redirect, render_template
 from werkzeug import Response
 
-from ..dependencies.api import api_get_model, api_get_models
-from ..models.api import ModelResponse
+from ...dependencies.api import api_get_model, api_get_models
+from ...models.api import ModelResponse
 
-config_bp = Blueprint(
-    'api',
+models_config_bp = Blueprint(
+    'config-models',
     __name__,
-    url_prefix='/config'
+    url_prefix='/models'
 )
 
-@config_bp.route('/')
-async def config() -> str:
-    return await render_template(
-        'config/config-menu.html',
-        page_title= 'Configuration'
-    )
-
-@config_bp.route('/models/')
+@models_config_bp.route('/')
 async def config_models() -> Response | str:
     try:
         models: list[ModelResponse] = await api_get_models()
     except httpx.ConnectError:
         return redirect('/config', 302)
     return await render_template(
-        'config/models-list.html',
+        'config/model/models-list.html',
         page_title= 'Configuration',
         models= models
     )
 
-@config_bp.route('/models/load/')
+@models_config_bp.route('/load/')
 async def load_model() -> Response | str:
     return await render_template(
-        'config/model-load.html',
+        'config/model/model-load.html',
         page_title= 'Configuration'
     )
 
-@config_bp.route(f'/models/<path:model_name>/')
+@models_config_bp.route(f'/<path:model_name>/')
 async def config_model(model_name: str) -> Response | str:
     try:
         model: Optional[ModelResponse] = await api_get_model(model_name)
@@ -70,7 +63,7 @@ async def config_model(model_name: str) -> Response | str:
     if model is None:
         return redirect('/config/models/', 302)
     return await render_template(
-        'config/model.html',
+        'config/model/model.html',
         page_title= 'Configuration',
         model= model,
         models= models
