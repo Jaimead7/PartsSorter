@@ -156,8 +156,8 @@ def extract_one_result(results: ResutlsType) -> tuple[Optional[int], Optional[fl
     # [x0, y0, x1, y1, conf, id] x n
     sort_array: np.ndarray = results_array[results_array[:, 4].argsort()[::-1]]
     best: np.ndarray = sort_array[0]
-    #CHECK: check for all cases
-    for result in sort_array:
-        if result[0] < best[0]:
-            best = result
+    #TODO: Extract the best compelte result
+    #for result in sort_array:
+    #    if result[0] < best[0]:
+    #        best = result
     return (int(best[-1]), float(best[-2]))
