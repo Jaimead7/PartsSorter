@@ -88,7 +88,9 @@ async def process_image(
             timeout= httpx.Timeout(timeout= 10.0)
         )
         my_logger.debug(f'Response from server: {response}')
+    response_json: dict = response.json()
     return ProcessImageResponse(
         date= date,
-        result= response.json()['result']
+        id= response_json['id'],
+        result= response_json['result']
     )
