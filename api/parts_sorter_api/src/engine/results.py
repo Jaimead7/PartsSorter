@@ -48,7 +48,7 @@ class MyBoxes:
     def __init__(
         self,
         boxes: np.ndarray,  # [x0, y0, x1, y1, conf, id] x n
-        orig_shape: tuple[int, int],
+        orig_shape: tuple[int, int]  # (h, w)
     ) -> None:
         self.data: np.ndarray = boxes
         self.orig_shape: tuple[int, int] = orig_shape[:2]
@@ -133,7 +133,7 @@ class MyResults:
         speed: SpeedDict
     ) -> None:
         self.orig_img: np.ndarray = orig_img
-        self.orig_shape: tuple[int, int] = orig_img.shape
+        self.orig_shape: tuple[int, int] = orig_img.shape  # (h, w)
         self.names: dict[int, str] = names
         self.speed: SpeedDict = speed
         if boxes is None:
