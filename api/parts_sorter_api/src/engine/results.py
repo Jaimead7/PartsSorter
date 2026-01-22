@@ -127,17 +127,20 @@ class MyResults:
         self,
         orig_img: np.ndarray,
         names: dict[int, str],
-        boxes: np.ndarray,  # [x1, y1, x2, y2, conf, id] x n
+        boxes: Optional[np.ndarray],  # [x1, y1, x2, y2, conf, id] x n
         speed: SpeedDict
     ) -> None:
         self.orig_img: np.ndarray = orig_img
         self.orig_shape: tuple[int, int] = orig_img.shape
         self.names: dict[int, str] = names
         self.speed: SpeedDict = speed
-        self.boxes: Optional[BoxesType] = MyBoxes(
-            boxes= boxes,
-            orig_shape= self.orig_shape,
-        )
+        if boxes is None:
+            self.boxes: Optional[BoxesType]  = None
+        else:
+            self.boxes = MyBoxes(
+                boxes= boxes,
+                orig_shape= self.orig_shape,
+            )
 
 
 def extract_one_result(results: ResutlsType) -> tuple[Optional[int], Optional[float]]:
