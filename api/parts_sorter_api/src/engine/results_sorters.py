@@ -16,6 +16,8 @@
 
 from typing import Protocol
 
+import numpy as np
+
 from .results import ResutlsType
 
 
@@ -27,9 +29,18 @@ class ResultsSorterFunction(Protocol):
 def no_sort(results: ResutlsType) -> ResutlsType:
     return results
 
+def by_conf(results: ResutlsType) -> ResutlsType:
+    if results.boxes is None or len(results.boxes.data) == 0:
+        return results
+    results_array: np.ndarray = results.boxes.data
+    sort_array: np.ndarray = results_array[results_array[:, 4].argsort()[::-1]]
+    results.boxes.data = sort_array
+    return results
+
 
 RESULTS_SORTERS: dict[str, ResultsSorterFunction] = {
-    'NONE': no_sort
+    'NONE': no_sort,
+    'CONF': by_conf
 }
 
 def results_sorter_factory(name: str) -> ResultsSorterFunction:
