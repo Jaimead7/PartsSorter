@@ -18,7 +18,7 @@ from typing import Protocol
 
 import numpy as np
 
-from .results import ResutlsType
+from .results import BoxesType, ResutlsType
 
 
 class ResultsSorterFunction(Protocol):
@@ -32,15 +32,34 @@ def no_sort(results: ResutlsType) -> ResutlsType:
 def by_conf(results: ResutlsType) -> ResutlsType:
     if results.boxes is None or len(results.boxes.data) == 0:
         return results
-    results_array: np.ndarray = results.boxes.data
-    sort_array: np.ndarray = results_array[results_array[:, 4].argsort()[::-1]]
-    results.boxes.data = sort_array
+    boxes_data: np.ndarray = results.boxes.data
+    sort_boxes: np.ndarray = boxes_data[boxes_data[:, 4].argsort()[::-1]]
+    results.boxes.data = sort_boxes
+    return results
+
+def dis_center(results: ResutlsType) -> ResutlsType:
+    def get_center_distances(boxes: BoxesType) -> np.ndarray:
+        x_centers: np.ndarray = (boxes.data[:, 0] + boxes.data[:, 2]) / 2
+        y_centers: np.ndarray = (boxes.data[:, 1] + boxes.data[:, 3]) / 2
+        centers: np.ndarray = np.column_stack((x_centers, y_centers))
+        img_center: np.ndarray = np.array(
+            [boxes.orig_shape[1] / 2,
+             boxes.orig_shape[0] / 2]
+        )
+        return np.linalg.norm(centers - img_center, axis= 1)
+    if results.boxes is None or len(results.boxes.data) == 0:
+        return results
+    distances: np.ndarray = get_center_distances(boxes= results.boxes)
+    boxes_data: np.ndarray = results.boxes.data
+    sort_boxes: np.ndarray = boxes_data[distances.argsort()]
+    results.boxes.data = sort_boxes
     return results
 
 
 RESULTS_SORTERS: dict[str, ResultsSorterFunction] = {
     'NONE': no_sort,
-    'CONF': by_conf
+    'CONF': by_conf,
+    'CENTER': dis_center
 }
 
 def results_sorter_factory(name: str) -> ResultsSorterFunction:
