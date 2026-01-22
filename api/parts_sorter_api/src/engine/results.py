@@ -14,7 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional, Protocol, Sequence
+from typing import Optional, Protocol, runtime_checkable
 
 import numpy as np
 from typing_extensions import TypedDict
@@ -26,6 +26,7 @@ class SpeedDict(TypedDict):
     postprocess: float
 
 
+@runtime_checkable
 class BoxesType(Protocol):
     data: np.ndarray
     orig_shape: tuple[int, int]
@@ -114,6 +115,7 @@ class MyBoxes:
         return coords / norm_array
 
 
+@runtime_checkable
 class ResutlsType(Protocol):
     orig_img: np.ndarray
     orig_shape: tuple[int, int]
