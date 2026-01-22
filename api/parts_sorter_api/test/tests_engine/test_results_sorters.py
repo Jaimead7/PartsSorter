@@ -22,9 +22,17 @@ import pytest
 from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
                                                  ResutlsType, SpeedDict)
 from parts_sorter_api.src.engine.results_sorters import (
-    RESULTS_SORTERS, ResultsSorterFunction, by_conf, no_sort,
+    RESULTS_SORTERS, ResultsSorterFunction, by_conf, dis_center, no_sort,
     results_sorter_factory)
 
+
+@pytest.fixture
+def speed() -> SpeedDict:
+    return SpeedDict(
+        preprocess= randint(0, 1000),
+        inference= randint(0, 1000),
+        postprocess= randint(0, 1000)
+    )
 
 @pytest.fixture
 def random_boxes() -> BoxesType:
@@ -48,7 +56,7 @@ def random_boxes() -> BoxesType:
     )
 
 @pytest.fixture
-def random_results(random_boxes: BoxesType) -> ResutlsType:
+def random_results(random_boxes: BoxesType, speed: SpeedDict) -> ResutlsType:
     n_classes: int = 10
     names: dict[int, str] = {i: f'Class_{i}' for i in range(n_classes)}
     return MyResults(
@@ -60,15 +68,11 @@ def random_results(random_boxes: BoxesType) -> ResutlsType:
         ),
         names= names,
         boxes= random_boxes.data,
-        speed= SpeedDict(
-            preprocess= randint(0, 1000),
-            inference= randint(0, 1000),
-            postprocess= randint(0, 1000)
-        )
+        speed= speed
     )
 
 @pytest.fixture
-def random_results_no_boxes() -> ResutlsType:
+def random_results_no_boxes(speed: SpeedDict) -> ResutlsType:
     n_classes: int = 10
     names: dict[int, str] = {i: f'Class_{i}' for i in range(n_classes)}
     return MyResults(
@@ -80,11 +84,7 @@ def random_results_no_boxes() -> ResutlsType:
         ),
         names= names,
         boxes= None,
-        speed= SpeedDict(
-            preprocess= randint(0, 1000),
-            inference= randint(0, 1000),
-            postprocess= randint(0, 1000)
-        )
+        speed= speed
     )
 
 
@@ -126,6 +126,54 @@ class TestByConf:
         assert conf_list == sorted(conf_list, reverse= True)
 
 
+class TestDisCenter:
+    def test_func(self, speed: SpeedDict) -> None:
+        orig_shape = (640, 640)  # (h, w)
+        boxes_data: np.ndarray = np.array([
+            [380, 300, 420, 340, 0.8, 2],  # Center (400, 320) - distance 80
+            [200, 200, 280, 280, 0.7, 3],  # Center (240, 240) - distance 113.14...
+            [300, 300, 340, 340, 0.9, 1],  # Center (320, 320) - distance 0
+        ])
+        boxes: MyBoxes = MyBoxes(
+            boxes=boxes_data,
+            orig_shape=orig_shape
+        )
+        results = MyResults(
+            orig_img= np.random.randint(0, 255, size=(*orig_shape, 3), dtype=np.uint8),
+            names= {1: 'Class_1', 2: 'Class_2', 3: 'Class_3'},
+            boxes= boxes.data,
+            speed= speed
+        )
+        sorted_results: ResutlsType = dis_center(results)
+        if sorted_results.boxes is not None:
+            expected_ids: list[int] = [1, 2, 3]
+            actual_ids: list[int] = sorted_results.boxes.data[:, 5].astype(int).tolist()
+            assert actual_ids == expected_ids
+
+    def test_inplace(self, speed: SpeedDict) -> None:
+        orig_shape = (640, 640)  # (h, w)
+        boxes_data: np.ndarray = np.array([
+            [380, 300, 420, 340, 0.8, 2],  # Center (400, 320) - distance 80
+            [200, 200, 280, 280, 0.7, 3],  # Center (240, 240) - distance 113.14...
+            [300, 300, 340, 340, 0.9, 1],  # Center (320, 320) - distance 0
+        ])
+        boxes: MyBoxes = MyBoxes(
+            boxes=boxes_data,
+            orig_shape=orig_shape
+        )
+        results = MyResults(
+            orig_img= np.random.randint(0, 255, size=(*orig_shape, 3), dtype=np.uint8),
+            names= {1: 'Class_1', 2: 'Class_2', 3: 'Class_3'},
+            boxes= boxes.data,
+            speed= speed
+        )
+        dis_center(results)
+        if results.boxes is not None:
+            expected_ids: list[int] = [1, 2, 3]
+            actual_ids: list[int] = results.boxes.data[:, 5].astype(int).tolist()
+            assert actual_ids == expected_ids
+
+
 class TestResultsSorterDictionary:
     def test_all_functions_callable(self, random_results: ResutlsType) -> None:
         for _, func in RESULTS_SORTERS.items():
@@ -142,7 +190,8 @@ class TestResultsSorterFactory:
         'name, expected_func',
         [
             ('NONE', no_sort),
-            ('CONF', by_conf)
+            ('CONF', by_conf),
+            ('CENTER', dis_center),
         ]
     )
     def test_valid_names_uppercase(self, name: str, expected_func: Callable) -> None:
@@ -153,7 +202,8 @@ class TestResultsSorterFactory:
         'name, expected_func',
         [
             ('none', no_sort),
-            ('conf', by_conf)
+            ('conf', by_conf),
+            ('center', dis_center)
         ]
     )
     def test_valid_names_lowercase(self, name: str, expected_func: Callable) -> None:
@@ -164,7 +214,8 @@ class TestResultsSorterFactory:
         'name, expected_func',
         [
             ('NonE', no_sort),
-            ('cOnF', by_conf)
+            ('cOnF', by_conf),
+            ('ceNTer', dis_center)
         ]
     )
     def test_valid_names_mixed_case(self, name: str, expected_func: Callable) -> None:
