@@ -145,17 +145,11 @@ class MyResults:
             )
 
 
-def extract_one_result(results: ResutlsType) -> tuple[Optional[int], Optional[float]]:
+def extract_first_result(results: ResutlsType) -> tuple[Optional[int], Optional[float]]:
     if results.boxes is None:
         return (None, None)
     results_array: np.ndarray = results.boxes.data
     if len(results_array) == 0:
         return (None, None)
     # [x0, y0, x1, y1, conf, id] x n
-    sort_array: np.ndarray = results_array[results_array[:, 4].argsort()[::-1]]
-    best: np.ndarray = sort_array[0]
-    #TODO: Extract the best compelte result
-    #for result in sort_array:
-    #    if result[0] < best[0]:
-    #        best = result
-    return (int(best[-1]), float(best[-2]))
+    return (int(results_array[-1]), float(results_array[-2]))
