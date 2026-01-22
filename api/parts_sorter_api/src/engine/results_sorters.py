@@ -14,7 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Protocol
+from typing import Generator, Protocol, Sequence
 
 import numpy as np
 
@@ -67,3 +67,15 @@ def results_sorter_factory(name: str) -> ResultsSorterFunction:
         return RESULTS_SORTERS[name.upper()]
     except KeyError:
         return no_sort
+
+def apply_results_sorters(
+    results: ResutlsType,
+    sorters: Sequence[str]
+) -> ResutlsType:
+    sorters_fnc: Generator[ResultsSorterFunction, None, None] = (
+        results_sorter_factory(name)
+        for name in sorters
+    )
+    for fnc in sorters_fnc:
+        results = fnc(results)
+    return results
