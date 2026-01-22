@@ -48,15 +48,13 @@ class MyBoxes:
         self,
         boxes: np.ndarray,  # [x0, y0, x1, y1, conf, id] x n
         orig_shape: tuple[int, int],
-        names: dict[int, str]
     ) -> None:
         self.data: np.ndarray = boxes
         self.orig_shape: tuple[int, int] = orig_shape[:2]
-        self.names: dict[int, str] = names
 
     def __repr__(self) -> str:
         result: str = 'MyBoxes object:\n'
-        result += f'cls: {self.cls_names}\n'
+        result += f'cls: {self.cls}\n'
         result += f'data: {self._parse_np_str(self.data)}\n'
         result += f'orig_shape: {self.orig_shape}\n'
         result += f'xywh: {self._parse_np_str(self.xywh)}\n'
@@ -85,10 +83,6 @@ class MyBoxes:
     @property
     def cls(self) -> np.ndarray:
         return self.data[:, -1]
-
-    @property
-    def cls_names(self) -> Sequence[str]:
-        return tuple(self.names[id] for id in self.cls)
 
     @property
     def xywh(self) -> np.ndarray:
@@ -143,7 +137,6 @@ class MyResults:
         self.boxes: Optional[BoxesType] = MyBoxes(
             boxes= boxes,
             orig_shape= self.orig_shape,
-            names= self.names
         )
 
 
