@@ -70,8 +70,10 @@ def results_sorter_factory(name: str) -> ResultsSorterFunction:
 
 def apply_results_sorters(
     results: ResutlsType,
-    sorters: Sequence[str]
+    sorters: str | Sequence[str]
 ) -> ResutlsType:
+    if isinstance(sorters, str):
+        sorters = (sorters,)
     sorters_fnc: Generator[ResultsSorterFunction, None, None] = (
         results_sorter_factory(name)
         for name in sorters

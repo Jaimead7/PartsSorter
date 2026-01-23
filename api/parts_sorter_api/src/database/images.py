@@ -257,7 +257,7 @@ async def db_process_image(
     results: ResutlsType = results_list[0]
     results = apply_results_sorters(
         results= results,
-        sorters= ('center')  #TODO: use sorters by origin
+        sorters= ('center',)  #TODO: use sorters by origin
     )
     result_id: Optional[int]
     trust: Optional[float]
