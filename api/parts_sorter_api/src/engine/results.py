@@ -201,13 +201,14 @@ class MyResults:
                     rect= rect,
                     line_width= line_width
                 )
-            if labels:
+            if labels or conf:
                 plot_label(
                     img= img,
                     rect= rect,
                     names= self.names,
+                    conf= conf,
+                    labels= labels,
                     font_size= font_size,
-                    probs= probs,
                     line_width= line_width
                 )
         return img

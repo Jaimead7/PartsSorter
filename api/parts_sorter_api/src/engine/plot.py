@@ -72,8 +72,9 @@ def plot_label(
     img: np.ndarray,
     rect: np.ndarray,
     names: dict[int, str],
+    conf: bool = True,
+    labels: bool = True,
     font_size: float | None = None,
-    probs: bool = True,
     line_width: float | None = None
 ) -> None:
     if font_size is None:
@@ -81,12 +82,15 @@ def plot_label(
     if line_width is None:
         line_width = 2
     color: tuple[int, int, int] = get_color(int(rect[-1]))
-    try:
-        text: str = f'{names[int(rect[-1])]}'
-    except Exception as e:
-        text: str = f'{int(rect[-1])}'
-    if probs:
-        text += f' {rect[-2]:.2f}'
+    text: str = ''
+    if labels:
+        try:
+            text: str = f'{names[int(rect[-1])]}'
+        except Exception as e:
+            text: str = f'{int(rect[-1])}'
+    if conf:
+        text += f'{rect[-2]:.2f}'
+    text = text.strip()
     font: int = cv2.FONT_HERSHEY_SIMPLEX
     font_color: tuple = get_font_color(color)
     (txt_w, txt_h), _ = cv2.getTextSize(
