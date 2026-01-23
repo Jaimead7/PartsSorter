@@ -14,10 +14,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional, Protocol, runtime_checkable
+from typing import Any, Optional, Protocol, runtime_checkable
 
 import numpy as np
 from typing_extensions import TypedDict
+
+from .plot import plot_label, plot_rect
 
 
 class SpeedDict(TypedDict):
@@ -123,6 +125,29 @@ class ResutlsType(Protocol):
     boxes: Optional[BoxesType]
     speed: SpeedDict
 
+    def plot(
+        self,
+        conf: bool = True,
+        line_width: float | None = None,
+        font_size: float | None = None,
+        font: str = "Arial.ttf",
+        pil: bool = False,
+        img: np.ndarray | None = None,
+        im_gpu: Any = None,
+        kpt_radius: int = 5,
+        kpt_line: bool = True,
+        labels: bool = True,
+        boxes: bool = True,
+        masks: bool = True,
+        probs: bool = True,
+        show: bool = False,
+        save: bool = False,
+        filename: str | None = None,
+        color_mode: str = "class",
+        txt_color: tuple[int, int, int] = (255, 255, 255),
+    ) -> np.ndarray:
+        ...
+
 
 class MyResults:
     def __init__(
@@ -143,6 +168,49 @@ class MyResults:
                 boxes= boxes,
                 orig_shape= self.orig_shape,
             )
+
+    def plot(
+        self,
+        conf: bool = True,
+        line_width: float | None = None,
+        font_size: float | None = None,
+        font: str = "Arial.ttf",
+        pil: bool = False,
+        img: np.ndarray | None = None,
+        im_gpu: Any = None,
+        kpt_radius: int = 5,
+        kpt_line: bool = True,
+        labels: bool = True,
+        boxes: bool = True,
+        masks: bool = True,
+        probs: bool = True,
+        show: bool = False,
+        save: bool = False,
+        filename: str | None = None,
+        color_mode: str = "class",
+        txt_color: tuple[int, int, int] = (255, 255, 255),
+    ) -> np.ndarray:
+        if img is None:
+            img = self.orig_img
+        if self.boxes is None:
+            return img
+        for rect in self.boxes.data:
+            if boxes:
+                plot_rect(
+                    img= img,
+                    rect= rect,
+                    line_width= line_width
+                )
+            if labels:
+                plot_label(
+                    img= img,
+                    rect= rect,
+                    names= self.names,
+                    font_size= font_size,
+                    probs= probs,
+                    line_width= line_width
+                )
+        return img
 
 
 def extract_first_result(results: ResutlsType) -> tuple[Optional[int], Optional[float]]:
