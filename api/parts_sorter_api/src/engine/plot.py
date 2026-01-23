@@ -118,8 +118,9 @@ def plot_label(
         img= img,
         text= text,
         org= text_p0,
-        fontFace= cv2.FONT_HERSHEY_SIMPLEX,
+        fontFace= font,
         fontScale= font_size,
         color= font_color,
         thickness= 1,
+        lineType= cv2.LINE_AA
     )
