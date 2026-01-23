@@ -89,7 +89,7 @@ def plot_label(
         except Exception as e:
             text: str = f'{int(rect[-1])}'
     if conf:
-        text += f'{rect[-2]:.2f}'
+        text += f' {rect[-2]:.2f}'
     text = text.strip()
     font: int = cv2.FONT_HERSHEY_SIMPLEX
     font_color: tuple = get_font_color(color)
