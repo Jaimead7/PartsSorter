@@ -47,7 +47,7 @@ def get_font_color(color: tuple[int, int, int]) -> tuple[int, int, int]:
     g: int
     r: int
     b, g, r = color
-    brightness = 0.299 * r + 0.587 * g + 0.114 * b
+    brightness: float = 0.299 * r + 0.587 * g + 0.114 * b
     return (0, 0, 0) if brightness > 127.5 else (255, 255, 255)
 
 def plot_rect(
