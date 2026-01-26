@@ -23,8 +23,7 @@ import {
     showAlert,
     initCollapseCard,
     enableSubmitButton,
-    disableSubmitButton,
-    convertInputValue
+    disableSubmitButton
 } from '../../utils.js';
 
 import {
@@ -38,17 +37,20 @@ import {
 async function initFormEvents() {
     const form = document.getElementById('originForm');
 
-    if (!form) return;
+    if (!form) {
+        throw new Error('Couldn\'t obtain the origin form');
+    }
 
     form.querySelector('button[type="submit"]')?.addEventListener('click', async function(event) {
         event.preventDefault();
+
+        const endpoint = '/api/origin/';
 
         const originName = document.getElementById('originName')?.value?.trim() || null;
         if (!originName) {
             showAlert('Name is mandatory', 'danger', 2);
             return;
         }
-        const endpoint = '/api/origin/';
 
         disableSubmitButton(this, 'Saving...');
 
@@ -82,7 +84,7 @@ async function initFormEvents() {
 
     form.querySelector('button[type="reset"]')?.addEventListener('click', (event) => {
         event.preventDefault();
-        location.reload();
+        window.location.replace('/config/origins/');
     });
 };
 

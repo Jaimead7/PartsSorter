@@ -19,87 +19,112 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from '../../utils.js';
+import {
+    disableSubmitButton,
+    enableSubmitButton,
+    showAlert
+} from '../../utils.js';
 
-const form = document.getElementById('modelForm');
-const saveButton = form?.querySelector('button[type="submit"]');
-const resetButton = form?.querySelector('button[type="reset"]');
-const deleteButton = document.getElementById('deleteModelButton');
 
-function get_form_as_body() {
+function getModelData() {
     const description = document.getElementById('modelDescription')?.textContent;
-
+    
     return {
         'description': description
     };
-}
+};
 
-deleteButton?.addEventListener('click', () => {
-    const modelName = document.getElementById('modelName')?.textContent;
-    const endpoint = `/api/model/${modelName}/`;
+async function initDeleteModel() {
+    const deleteBtn = document.getElementById('deleteModelButton');
 
-    let content = {
-        method: 'DELETE',
-        headers: {
-            'accept': '*/*'
+    if (!deleteBtn) {
+        throw new Error('Couldn\'t obtain the model delete button');
+    }
+
+    deleteBtn.addEventListener('click', () => {
+        const modelName = document.getElementById('modelName')?.textContent;
+
+        if (!modelName) {
+            showAlert('No model found', 'danger', 2);
+            return;
         }
-    };
 
-    fetch(endpoint, content)
-    .then((response) => {
-        if (response.ok) {
-            window.location.replace('/config/models/');
-        } else {
-            throw new Error(`Error on server response (${response.status})`);
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        showAlert('Error deleting model: ' + error.message, 'danger', 2);
+        const endpoint = `/api/model/${modelName}/`;
+
+        let content = {
+            method: 'DELETE',
+            headers: {
+                'accept': '*/*'
+            }
+        };
+    
+        fetch(endpoint, content)
+        .then((response) => {
+            if (response.ok) {
+                window.location.replace('/config/models/');
+            } else {
+                throw new Error(`Error on server response (${response.status})`);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            showAlert('Error deleting model: ' + error.message, 'danger', 2);
+        });
     });
-});
+};
 
-resetButton?.addEventListener('click', (event) => {
-    event.preventDefault();
-    location.reload();
-});
 
-saveButton?.addEventListener('click', async function(event) {
-    event.preventDefault();
+async function initFormEvents() {
+    const form = document.getElementById('modelForm');
 
-    const modelName = document.getElementById('modelName')?.textContent;
-    const endpoint = `/api/model/${modelName}/`;
-    const spinner = document.getElementById('submitSpinner');
-    const label = document.getElementById('submitLabel');
+    if (!form) {
+        throw new Error('Couldn\'t obtain the model form');
+    }
+    
+    form.querySelector('button[type="submit"]')?.addEventListener('click', async function(event) {
+        event.preventDefault();
 
-    label.innerText = 'Saving...';
-    spinner.removeAttribute('hidden');
-    this.disabled = true;
-
-    let content = {
-        method: 'PUT',
-        headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(get_form_as_body())
-    };
-
-    fetch(endpoint, content)
-    .then((response) => {
-        if (response.ok) {
-            location.reload();
-        } else {
-            throw new Error(`Error on server response (${response.status})`);
+        const modelName = document.getElementById('modelName')?.textContent;
+        if (!modelName) {
+            showAlert('No model found', 'danger', 2);
+            return;
         }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        showAlert('Error saving model: ' + error.message, 'danger', 2);
-    })
-    .finally(() => {
-        label.innerText = 'Save';
-        spinner.setAttribute('hidden', true);
-        this.disabled = false;
+        const endpoint = `/api/model/${modelName}/`;
+
+        disableSubmitButton(this, 'Saving...');
+        
+        let content = {
+            method: 'PUT',
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(getModelData())
+        };
+
+        fetch(endpoint, content)
+        .then((response) => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                throw new Error(`Error on server response (${response.status})`);
+            }
+        })
+        .catch((error) => {
+            showAlert('Error saving model: ' + error.message, 'danger', 2);
+        })
+        .finally(() => {
+            enableSubmitButton(this, 'Save');
+        });
     });
+
+    form.querySelector('button[type="reset"]')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        location.reload();
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initFormEvents();
+    initDeleteModel();
 });
