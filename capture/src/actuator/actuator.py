@@ -81,13 +81,13 @@ class ActuatorManager:
                     date= now,
                     result= True
                 )
-            if now - next_result.date < timedelta(milliseconds= self.sensors_interval_ms * 0.8):
+            if now - next_result.date < timedelta(milliseconds= self.sensors_interval_ms * 0.75):
                 my_logger.error('Result lost. The part doesn\'t have a result on the queue. The part will be pushed.')
                 return ProcessImageResponse(
                     date= now,
                     result= True
                 )
-            if now - next_result.date > timedelta(milliseconds= self.sensors_interval_ms * 1.2):
+            if now - next_result.date > timedelta(milliseconds= self.sensors_interval_ms * 1.25):
                 my_logger.error('Part lost. The part of this result didn\'t reach the actuator.')
                 await results_queue.get()
                 continue
