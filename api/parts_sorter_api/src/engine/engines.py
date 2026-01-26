@@ -48,7 +48,7 @@ class ModelEngine(Protocol):
 
 class NCCEngine:
     GLOBAL_CONF_THRESHOLD: float = 0.25
-    IOU_THRESHOLD: float = 0.5
+    IOU_THRESHOLD: float = 0.75
 
     def __init__(
         self,
@@ -223,7 +223,8 @@ class NCCEngine:
             w: np.ndarray = np.maximum(0.0, xx1 - xx0)
             h: np.ndarray = np.maximum(0.0, yy1 - yy0)
             intersection: np.ndarray = w * h
-            iou: np.ndarray = intersection / (areas[i] + areas[order[1:]] - intersection)
+            union: np.ndarray = areas[i] + areas[order[1:]] - intersection
+            iou: np.ndarray = intersection / union
             inds = np.where(iou <= self.IOU_THRESHOLD)[0]
             order = order[inds + 1]
         return boxes[keep]

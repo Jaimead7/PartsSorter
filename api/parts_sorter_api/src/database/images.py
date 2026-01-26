@@ -33,7 +33,8 @@ from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.managers import ModelManager, ModelsContainer
-from ..engine.results import ResutlsType, extract_one_result
+from ..engine.results import ResutlsType, extract_first_result
+from ..engine.results_sorters import apply_results_sorters
 from ..models.api import ImageFilters, ImageHistResponse, ProcessImageResult
 from ..models.database import (Image, ImageProcessed, InspectionResult,
                                OriginResult)
@@ -253,9 +254,14 @@ async def db_process_image(
             inpection_result_name= None,
             trust= None
         )
+    results: ResutlsType = results_list[0]
+    results = apply_results_sorters(
+        results= results,
+        sorters= ('center',)  #TODO: use sorters by origin
+    )
     result_id: Optional[int]
     trust: Optional[float]
-    result_id, trust = extract_one_result(results_list[0])
+    result_id, trust = extract_first_result(results)
     my_logger.info(f'Image "{db_image.file_name}" processed with Model "{model_name}".')
     if result_id is None or trust is None:
         return ProcessImageResult(

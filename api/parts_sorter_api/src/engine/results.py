@@ -14,10 +14,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Optional, Protocol, Sequence
+from typing import Any, Optional, Protocol, runtime_checkable
 
 import numpy as np
 from typing_extensions import TypedDict
+
+from .plot import plot_label, plot_rect
 
 
 class SpeedDict(TypedDict):
@@ -26,6 +28,7 @@ class SpeedDict(TypedDict):
     postprocess: float
 
 
+@runtime_checkable
 class BoxesType(Protocol):
     data: np.ndarray
     orig_shape: tuple[int, int]
@@ -47,16 +50,14 @@ class MyBoxes:
     def __init__(
         self,
         boxes: np.ndarray,  # [x0, y0, x1, y1, conf, id] x n
-        orig_shape: tuple[int, int],
-        names: dict[int, str]
+        orig_shape: tuple[int, int]  # (h, w)
     ) -> None:
         self.data: np.ndarray = boxes
         self.orig_shape: tuple[int, int] = orig_shape[:2]
-        self.names: dict[int, str] = names
 
     def __repr__(self) -> str:
         result: str = 'MyBoxes object:\n'
-        result += f'cls: {self.cls_names}\n'
+        result += f'cls: {self.cls}\n'
         result += f'data: {self._parse_np_str(self.data)}\n'
         result += f'orig_shape: {self.orig_shape}\n'
         result += f'xywh: {self._parse_np_str(self.xywh)}\n'
@@ -85,10 +86,6 @@ class MyBoxes:
     @property
     def cls(self) -> np.ndarray:
         return self.data[:, -1]
-
-    @property
-    def cls_names(self) -> Sequence[str]:
-        return tuple(self.names[id] for id in self.cls)
 
     @property
     def xywh(self) -> np.ndarray:
@@ -120,6 +117,7 @@ class MyBoxes:
         return coords / norm_array
 
 
+@runtime_checkable
 class ResutlsType(Protocol):
     orig_img: np.ndarray
     orig_shape: tuple[int, int]
@@ -127,37 +125,101 @@ class ResutlsType(Protocol):
     boxes: Optional[BoxesType]
     speed: SpeedDict
 
+    def plot(
+        self,
+        conf: bool = True,
+        line_width: float | None = None,
+        font_size: float | None = None,
+        font: str = "Arial.ttf",
+        pil: bool = False,
+        img: np.ndarray | None = None,
+        im_gpu: Any = None,
+        kpt_radius: int = 5,
+        kpt_line: bool = True,
+        labels: bool = True,
+        boxes: bool = True,
+        masks: bool = True,
+        probs: bool = True,
+        show: bool = False,
+        save: bool = False,
+        filename: str | None = None,
+        color_mode: str = "class",
+        txt_color: tuple[int, int, int] = (255, 255, 255),
+    ) -> np.ndarray:
+        ...
+
 
 class MyResults:
     def __init__(
         self,
         orig_img: np.ndarray,
         names: dict[int, str],
-        boxes: np.ndarray,  # [x1, y1, x2, y2, conf, id] x n
+        boxes: Optional[np.ndarray],  # [x1, y1, x2, y2, conf, id] x n
         speed: SpeedDict
     ) -> None:
         self.orig_img: np.ndarray = orig_img
-        self.orig_shape: tuple[int, int] = orig_img.shape
+        self.orig_shape: tuple[int, int] = orig_img.shape  # (h, w)
         self.names: dict[int, str] = names
         self.speed: SpeedDict = speed
-        self.boxes: Optional[BoxesType] = MyBoxes(
-            boxes= boxes,
-            orig_shape= self.orig_shape,
-            names= self.names
-        )
+        if boxes is None:
+            self.boxes: Optional[BoxesType]  = None
+        else:
+            self.boxes = MyBoxes(
+                boxes= boxes,
+                orig_shape= self.orig_shape,
+            )
+
+    def plot(
+        self,
+        conf: bool = True,
+        line_width: float | None = None,
+        font_size: float | None = None,
+        font: str = "Arial.ttf",
+        pil: bool = False,
+        img: np.ndarray | None = None,
+        im_gpu: Any = None,
+        kpt_radius: int = 5,
+        kpt_line: bool = True,
+        labels: bool = True,
+        boxes: bool = True,
+        masks: bool = True,
+        probs: bool = True,
+        show: bool = False,
+        save: bool = False,
+        filename: str | None = None,
+        color_mode: str = "class",
+        txt_color: tuple[int, int, int] = (255, 255, 255),
+    ) -> np.ndarray:
+        if img is None:
+            img = self.orig_img
+        if self.boxes is None:
+            return img
+        for rect in self.boxes.data:
+            if boxes:
+                plot_rect(
+                    img= img,
+                    rect= rect,
+                    line_width= line_width
+                )
+            if labels or conf:
+                plot_label(
+                    img= img,
+                    rect= rect,
+                    names= self.names,
+                    conf= conf,
+                    labels= labels,
+                    font_size= font_size,
+                    line_width= line_width
+                )
+        return img
 
 
-def extract_one_result(results: ResutlsType) -> tuple[Optional[int], Optional[float]]:
+def extract_first_result(results: ResutlsType) -> tuple[Optional[int], Optional[float]]:
     if results.boxes is None:
         return (None, None)
     results_array: np.ndarray = results.boxes.data
     if len(results_array) == 0:
         return (None, None)
+    first: np.ndarray = results_array[0]
     # [x0, y0, x1, y1, conf, id] x n
-    sort_array: np.ndarray = results_array[results_array[:, 4].argsort()[::-1]]
-    best: np.ndarray = sort_array[0]
-    #TODO: Extract the best compelte result
-    #for result in sort_array:
-    #    if result[0] < best[0]:
-    #        best = result
-    return (int(best[-1]), float(best[-2]))
+    return (int(first[-1]), float(first[-2]))
