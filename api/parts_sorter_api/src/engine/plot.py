@@ -99,6 +99,7 @@ def plot_label(
         font_size,
         1
     )
+    #TODO: Names out of border
     inf_left_corner: tuple[int, int] = (
         int(rect[0] - line_width),
         int(rect[1])
