@@ -111,6 +111,10 @@ class TestResultsSorterRegistry:
         with pytest.raises(SyntaxError):
             _ = ResultsSorterRegistry()
 
+    def test_null_factory(self) -> None:
+        func: ResultsSorterFunction = ResultsSorterRegistry.get_sorter('None')
+        assert func == ResultsSorterRegistry.no_sort
+
     def test_no_sort(self, random_results: ResutlsType) -> None:
         pre_result: ResutlsType = random_results
         random_results = ResultsSorterRegistry.no_sort(random_results)
