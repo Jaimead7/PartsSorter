@@ -23,7 +23,6 @@ from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
 from parts_sorter_api.src.engine.results_sorters import (ResultsSorterFunction,
                                                          ResultsSorterRegistry,
                                                          by_conf, dis_center)
-from pytest import raises
 
 
 @pytest.fixture
@@ -109,8 +108,12 @@ def known_results(speed: SpeedDict) -> ResutlsType:
 
 class TestResultsSorterRegistry:
     def test_no_instance(self) -> None:
-        with raises(SyntaxError):
+        with pytest.raises(SyntaxError):
             _ = ResultsSorterRegistry()
+
+    def test_null_factory(self) -> None:
+        func: ResultsSorterFunction = ResultsSorterRegistry.get_sorter('None')
+        assert func == ResultsSorterRegistry.no_sort
 
     def test_no_sort(self, random_results: ResutlsType) -> None:
         pre_result: ResutlsType = random_results
