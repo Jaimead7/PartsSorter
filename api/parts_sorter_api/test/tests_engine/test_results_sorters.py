@@ -112,7 +112,7 @@ class TestResultsSorterRegistry:
             _ = ResultsSorterRegistry()
 
     def test_null_factory(self) -> None:
-        func: ResultsSorterFunction = ResultsSorterRegistry.get_sorter('None')
+        func: ResultsSorterFunction = ResultsSorterRegistry.get('None')
         assert func == ResultsSorterRegistry.no_sort
 
     def test_no_sort(self, random_results: ResutlsType) -> None:
@@ -140,11 +140,11 @@ class TestResultsSorterRegistry:
             @ResultsSorterRegistry.register('test')
             def fnc(results: ResutlsType) -> ResutlsType:
                 return results
-            assert ResultsSorterRegistry.get_sorter('test') == fnc
-            assert 'TEST' in ResultsSorterRegistry.list_sorters()
+            assert ResultsSorterRegistry.get('test') == fnc
+            assert 'TEST' in ResultsSorterRegistry.list()
         finally:
             ResultsSorterRegistry.unregister('test')
-        assert 'TEST' not in ResultsSorterRegistry.list_sorters()
+        assert 'TEST' not in ResultsSorterRegistry.list()
 
     def test_clear_register(self) -> None:
         temp: dict[str, ResultsSorterFunction] = ResultsSorterRegistry._sorters.copy()
@@ -152,7 +152,7 @@ class TestResultsSorterRegistry:
             @ResultsSorterRegistry.register('test')
             def fnc(results: ResutlsType) -> ResutlsType:
                 return results
-            ResultsSorterRegistry.clear_registry()
+            ResultsSorterRegistry.clear()
             assert ResultsSorterRegistry._sorters == {}
         finally:
             ResultsSorterRegistry._sorters = temp
@@ -168,7 +168,7 @@ class TestByConf:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ResultsSorterFunction = ResultsSorterRegistry.get_sorter(name)
+        func: ResultsSorterFunction = ResultsSorterRegistry.get(name)
         assert func == by_conf
 
     def test_func(self, random_results: ResutlsType) -> None:
@@ -196,7 +196,7 @@ class TestDisCenter:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ResultsSorterFunction = ResultsSorterRegistry.get_sorter(name)
+        func: ResultsSorterFunction = ResultsSorterRegistry.get(name)
         assert func == dis_center
 
     def test_func(self, known_results: ResutlsType) -> None:

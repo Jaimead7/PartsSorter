@@ -51,15 +51,15 @@ class ResultsSorterRegistry(NoInstantiable):
         cls._sorters.pop(name.upper(), None)
 
     @classmethod
-    def get_sorter(cls, name: str) -> ResultsSorterFunction:
+    def get(cls, name: str) -> ResultsSorterFunction:
         return cls._sorters.get(name.upper(), cls.no_sort)
 
     @classmethod
-    def list_sorters(cls) -> list[str]:
+    def list(cls) -> list[str]:
         return sorted(cls._sorters.keys())
 
     @classmethod
-    def clear_registry(cls) -> None:
+    def clear(cls) -> None:
         cls._sorters.clear()
 
 
@@ -70,7 +70,7 @@ def apply_results_sorters(
     if isinstance(sorters, str):
         sorters = (sorters,)
     sorters_fnc: Generator[ResultsSorterFunction, None, None] = (
-        ResultsSorterRegistry.get_sorter(name)
+        ResultsSorterRegistry.get(name)
         for name in sorters
     )
     for fnc in sorters_fnc:

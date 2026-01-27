@@ -46,7 +46,7 @@ class TestImageFilterRegistry:
             _ = ImageFilterRegistry()
 
     def test_null_factory(self) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter('None')
+        func: ImageFilterFunction = ImageFilterRegistry.get('None')
         assert func == ImageFilterRegistry.no_filter
 
     @pytest.mark.parametrize(
@@ -70,11 +70,11 @@ class TestImageFilterRegistry:
             @ImageFilterRegistry.register('test')
             def fnc(img: np.ndarray) -> np.ndarray:
                 return img
-            assert ImageFilterRegistry.get_filter('test') == fnc
-            assert 'TEST' in ImageFilterRegistry.list_filters()
+            assert ImageFilterRegistry.get('test') == fnc
+            assert 'TEST' in ImageFilterRegistry.list()
         finally:
             ImageFilterRegistry.unregister('test')
-        assert 'TEST' not in ImageFilterRegistry.list_filters()
+        assert 'TEST' not in ImageFilterRegistry.list()
 
     def test_clear_register(self) -> None:
         temp: dict[str, ImageFilterFunction] = ImageFilterRegistry._filters.copy()
@@ -82,7 +82,7 @@ class TestImageFilterRegistry:
             @ImageFilterRegistry.register('test')
             def fnc(img: np.ndarray) -> np.ndarray:
                 return img
-            ImageFilterRegistry.clear_registry()
+            ImageFilterRegistry.clear()
             assert ImageFilterRegistry._filters == {}
         finally:
             ImageFilterRegistry._filters = temp
@@ -98,7 +98,7 @@ class TestResize:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        func: ImageFilterFunction = ImageFilterRegistry.get(name)
         assert func == resize
 
     @pytest.mark.parametrize(
@@ -154,7 +154,7 @@ class TestRedim:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        func: ImageFilterFunction = ImageFilterRegistry.get(name)
         assert func == redim
 
     def test_function_exists(self, bgr_image: np.ndarray) -> None:
@@ -175,7 +175,7 @@ class TestGray2Bgr:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        func: ImageFilterFunction = ImageFilterRegistry.get(name)
         assert func == gray2bgr
 
     def test_converts_to_bgr(self, gray_image: np.ndarray) -> None:
@@ -223,7 +223,7 @@ class TestBgr2Gray:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        func: ImageFilterFunction = ImageFilterRegistry.get(name)
         assert func == bgr2gray
 
     def test_converts_to_grayscale(self, bgr_image: np.ndarray) -> None:
@@ -270,7 +270,7 @@ class TestBgr2Rgb:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        func: ImageFilterFunction = ImageFilterRegistry.get(name)
         assert func == bgr2rgb
 
     def test_function_exists(self, bgr_image: np.ndarray) -> None:
@@ -291,7 +291,7 @@ class TestRgb2Bgr:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        func: ImageFilterFunction = ImageFilterRegistry.get(name)
         assert func == rgb2bgr
 
     def test_function_exists(self, bgr_image: np.ndarray) -> None:
@@ -312,7 +312,7 @@ class TestCut:
         ]
     )
     def test_factory(self, name: str) -> None:
-        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        func: ImageFilterFunction = ImageFilterRegistry.get(name)
         assert func == cut
 
     def test_function_exists(self, bgr_image: np.ndarray) -> None:

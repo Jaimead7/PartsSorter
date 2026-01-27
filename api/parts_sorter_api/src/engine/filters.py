@@ -48,15 +48,15 @@ class ImageFilterRegistry(NoInstantiable):
         cls._filters.pop(name.upper(), None)
 
     @classmethod
-    def get_filter(cls, name: str) -> ImageFilterFunction:
+    def get(cls, name: str) -> ImageFilterFunction:
         return cls._filters.get(name.upper(), cls.no_filter)
 
     @classmethod
-    def list_filters(cls) -> list[str]:
+    def list(cls) -> list[str]:
         return sorted(cls._filters.keys())
 
     @classmethod
-    def clear_registry(cls) -> None:
+    def clear(cls) -> None:
         cls._filters.clear()
 
 
