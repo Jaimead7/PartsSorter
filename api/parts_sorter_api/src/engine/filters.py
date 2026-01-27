@@ -14,15 +14,50 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
+from collections.abc import Callable
 from typing import Any, Protocol
 
 import cv2
 import numpy as np
+from pyUtils import NoInstantiable, my_logger
 
 
 class ImageFilterFunction(Protocol):
     def __call__(self, img: np.ndarray, *args: Any, **kwargs: Any) -> np.ndarray:
         ...
+
+
+class ImageFilterRegistry(NoInstantiable):
+    _filters: dict[str, ImageFilterFunction] = {}
+
+    @staticmethod
+    def no_filter(img: np.ndarray) -> np.ndarray:
+        return img
+
+    @classmethod
+    def register(cls, name: str) -> Callable[[ImageFilterFunction], ImageFilterFunction]:
+        def decorator(func: ImageFilterFunction) -> ImageFilterFunction:
+            if name.upper() in cls._filters:
+                my_logger.warning(f'ImageFilter "{name.upper()}" is already registered. It will be overwritten.')
+            cls._filters[name.upper()] = func
+            return func
+        return decorator
+
+    @classmethod
+    def unregister(cls, name: str) -> None:
+        cls._filters.pop(name.upper(), None)
+
+    @classmethod
+    def get_filter(cls, name: str) -> ImageFilterFunction:
+        return cls._filters.get(name.upper(), cls.no_filter)
+
+    @classmethod
+    def list_filters(cls) -> list[str]:
+        return sorted(cls._filters.keys())
+
+    @classmethod
+    def clear_registry(cls) -> None:
+        cls._filters.clear()
 
 
 def no_filter(
