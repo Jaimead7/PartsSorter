@@ -15,7 +15,7 @@
 
 
 from collections.abc import Callable
-from typing import Any, Protocol
+from typing import Any, ClassVar, Protocol
 
 import cv2
 import numpy as np
@@ -28,7 +28,7 @@ class ImageFilterFunction(Protocol):
 
 
 class ImageFilterRegistry(NoInstantiable):
-    _filters: dict[str, ImageFilterFunction] = {}
+    _filters: ClassVar[dict[str, ImageFilterFunction]] = {}
 
     @staticmethod
     def no_filter(img: np.ndarray) -> np.ndarray:

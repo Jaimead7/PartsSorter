@@ -15,7 +15,7 @@
 
 
 from collections.abc import Callable, Generator, Sequence
-from typing import Protocol, runtime_checkable
+from typing import ClassVar, Protocol
 
 import numpy as np
 from pyUtils import NoInstantiable
@@ -24,14 +24,13 @@ from ..dependencies.config import my_logger
 from .results import BoxesType, ResutlsType
 
 
-@runtime_checkable
 class ResultsSorterFunction(Protocol):
     def __call__(self, results: ResutlsType) -> ResutlsType:
         ...
 
 
 class ResultsSorterRegistry(NoInstantiable):
-    _sorters: dict[str, ResultsSorterFunction] = {}
+    _sorters: ClassVar[dict[str, ResultsSorterFunction]] = {}
 
     @staticmethod
     def no_sort(results: ResutlsType) -> ResutlsType:
