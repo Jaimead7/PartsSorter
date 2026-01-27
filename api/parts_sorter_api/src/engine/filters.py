@@ -60,11 +60,7 @@ class ImageFilterRegistry(NoInstantiable):
         cls._filters.clear()
 
 
-def no_filter(
-    img: np.ndarray
-) -> np.ndarray:
-    return img
-
+@ImageFilterRegistry.register('RESIZE')
 def resize(
     img: np.ndarray,
     width: int = 640,
@@ -76,6 +72,7 @@ def resize(
         interpolation= cv2.INTER_LINEAR
     )
 
+@ImageFilterRegistry.register('REDIM')
 def redim(
     img: np.ndarray,
     height: int = 640,
@@ -93,6 +90,7 @@ def redim(
     result[:new_h, :new_w] = img_resized
     return result
 
+@ImageFilterRegistry.register('GRAY')
 def bgr2gray(
     img: np.ndarray
 ) -> np.ndarray:
@@ -100,6 +98,7 @@ def bgr2gray(
         return img
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+@ImageFilterRegistry.register('COLOR')
 def gray2bgr(
     img: np.ndarray
 ) -> np.ndarray:
@@ -107,16 +106,19 @@ def gray2bgr(
         return img
     return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
+@ImageFilterRegistry.register('RGB')
 def bgr2rgb(
     img: np.ndarray
 ) -> np.ndarray:
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+@ImageFilterRegistry.register('BGR')
 def rgb2bgr(
     img: np.ndarray
 ) -> np.ndarray:
     return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
+@ImageFilterRegistry.register('CUT')
 def cut(
     img: np.ndarray,
     width: int = 640,
@@ -124,21 +126,3 @@ def cut(
 ) -> np.ndarray:
     ... #TODO: Do cut filter
     return img
-
-
-IMAGE_FILTERS: dict[str, ImageFilterFunction] = {
-    'NONE': no_filter,
-    'RESIZE': resize,
-    'REDIM': redim,
-    'COLOR': gray2bgr,
-    'GRAY': bgr2gray,
-    'RGB': bgr2rgb,
-    'BGR': rgb2bgr,
-    'CUT': cut
-}
-
-def image_filter_factory(name: str) -> ImageFilterFunction:
-    try:
-        return IMAGE_FILTERS[name.upper()]
-    except KeyError:
-        return no_filter

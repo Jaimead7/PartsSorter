@@ -28,7 +28,7 @@ from pyUtils import NoInstantiable
 from ..dependencies.config import my_logger
 from ..models.metadata_files import ModelMetadataDict
 from .engines import ModelEngine, NCCEngine
-from .filters import ImageFilterFunction, image_filter_factory
+from .filters import ImageFilterFunction, ImageFilterRegistry
 from .results import ResutlsType
 
 
@@ -79,7 +79,10 @@ class ModelManager(ABC):
         filters_names: tuple[str] = self.metadata.filters
         filters_attrs: dict[str, dict[str, Any]] = self.metadata.filters_attrs
         return tuple(
-            (image_filter_factory(filter_name), filters_attrs[filter_name])
+            (
+                ImageFilterRegistry.get_filter(filter_name),
+                filters_attrs[filter_name]
+            )
             for filter_name in filters_names
         )
 
