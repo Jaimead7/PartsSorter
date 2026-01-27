@@ -14,23 +14,18 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Callable
-
 import cv2
 import numpy as np
 import pytest
-from parts_sorter_api.src.engine.filters import (IMAGE_FILTERS,
-                                                 ImageFilterFunction, bgr2gray,
-                                                 bgr2rgb, cut, gray2bgr,
-                                                 image_filter_factory,
-                                                 no_filter, redim, resize,
-                                                 rgb2bgr)
+from parts_sorter_api.src.engine.filters import (ImageFilterFunction,
+                                                 ImageFilterRegistry, bgr2gray,
+                                                 bgr2rgb, cut, gray2bgr, redim,
+                                                 resize, rgb2bgr)
 
 
 @pytest.fixture
 def bgr_image() -> np.ndarray:
     return np.random.randint(0, 256, (100, 150, 3), dtype=np.uint8)
-
 
 @pytest.fixture
 def gray_image() -> np.ndarray:
@@ -45,21 +40,67 @@ def black_image() -> np.ndarray:
     return np.zeros(shape= (100, 150), dtype=np.uint8)
 
 
-class TestNoneFilter:
-    def test_returns_same_image_bgr(self, bgr_image: np.ndarray) -> None:
-        result: np.ndarray = no_filter(bgr_image)
-        assert np.array_equal(result, bgr_image)
-        assert result.shape == bgr_image.shape
-        assert result.dtype == bgr_image.dtype
+class TestImageFilterRegistry:
+    def test_no_instance(self) -> None:
+        with pytest.raises(SyntaxError):
+            _ = ImageFilterRegistry()
 
-    def test_returns_same_image_gray(self, gray_image: np.ndarray) -> None:
-        result: np.ndarray = no_filter(gray_image)
-        assert np.array_equal(result, gray_image)
-        assert result.shape == gray_image.shape
-        assert result.dtype == gray_image.dtype
+    def test_null_factory(self) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter('None')
+        assert func == ImageFilterRegistry.no_filter
+
+    @pytest.mark.parametrize(
+        'img_name',
+        [
+            'bgr_image',
+            'gray_image',
+            'black_bgr_image',
+            'black_image'
+        ]
+    )
+    def test_no_filter(self, request: pytest.FixtureRequest, img_name: str) -> None:
+        img: np.ndarray = request.getfixturevalue(img_name)
+        result: np.ndarray = ImageFilterRegistry.no_filter(img)
+        assert np.array_equal(result, img)
+        assert result.shape == img.shape
+        assert result.dtype == img.dtype
+
+    def test_register(self) -> None:
+        try:
+            @ImageFilterRegistry.register('test')
+            def fnc(img: np.ndarray) -> np.ndarray:
+                return img
+            assert ImageFilterRegistry.get_filter('test') == fnc
+            assert 'TEST' in ImageFilterRegistry.list_filters()
+        finally:
+            ImageFilterRegistry.unregister('test')
+        assert 'TEST' not in ImageFilterRegistry.list_filters()
+
+    def test_clear_register(self) -> None:
+        temp: dict[str, ImageFilterFunction] = ImageFilterRegistry._filters.copy()
+        try:
+            @ImageFilterRegistry.register('test')
+            def fnc(img: np.ndarray) -> np.ndarray:
+                return img
+            ImageFilterRegistry.clear_registry()
+            assert ImageFilterRegistry._filters == {}
+        finally:
+            ImageFilterRegistry._filters = temp
 
 
 class TestResize:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('RESIZE'),
+            ('resize'),
+            ('rEsIZe'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        assert func == resize
+
     @pytest.mark.parametrize(
         'width, height',
         [
@@ -104,6 +145,18 @@ class TestResize:
 
 
 class TestRedim:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('REDIM'),
+            ('redim'),
+            ('REdim'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        assert func == redim
+
     def test_function_exists(self, bgr_image: np.ndarray) -> None:
         result: np.ndarray = redim(bgr_image, width=50, height=50, gray= 100)
         assert result is not None
@@ -113,6 +166,18 @@ class TestRedim:
 
 
 class TestGray2Bgr:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('COLOR'),
+            ('color'),
+            ('cOLoR'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        assert func == gray2bgr
+
     def test_converts_to_bgr(self, gray_image: np.ndarray) -> None:
         result: np.ndarray = gray2bgr(gray_image)
         assert len(result.shape) == 3
@@ -149,6 +214,18 @@ class TestGray2Bgr:
 
 
 class TestBgr2Gray:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('GRAY'),
+            ('gray'),
+            ('grAY'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        assert func == bgr2gray
+
     def test_converts_to_grayscale(self, bgr_image: np.ndarray) -> None:
         result: np.ndarray = bgr2gray(bgr_image)
         assert len(result.shape) == 2
@@ -184,6 +261,18 @@ class TestBgr2Gray:
 
 
 class TestBgr2Rgb:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('RGB'),
+            ('rgb'),
+            ('RgB'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        assert func == bgr2rgb
+
     def test_function_exists(self, bgr_image: np.ndarray) -> None:
         result: np.ndarray = bgr2rgb(bgr_image)
         assert result is not None
@@ -193,6 +282,18 @@ class TestBgr2Rgb:
 
 
 class TestRgb2Bgr:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('BGR'),
+            ('bgr'),
+            ('bGr'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        assert func == rgb2bgr
+
     def test_function_exists(self, bgr_image: np.ndarray) -> None:
         result: np.ndarray = rgb2bgr(bgr_image)
         assert result is not None
@@ -202,89 +303,25 @@ class TestRgb2Bgr:
 
 
 class TestCut:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('CUT'),
+            ('cut'),
+            ('Cut'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ImageFilterFunction = ImageFilterRegistry.get_filter(name)
+        assert func == cut
+
     def test_function_exists(self, bgr_image: np.ndarray) -> None:
-        result = cut(bgr_image, width=50, height=50)
+        result: np.ndarray = cut(bgr_image, width=50, height=50)
         assert result is not None
         assert np.array_equal(result, bgr_image)
 
     #TODO: Complete tests
     ...
-
-
-class TestImageFiltersDictionary:
-    def test_all_functions_callable(self, bgr_image: np.ndarray) -> None:
-        for _, func in IMAGE_FILTERS.items():
-            assert callable(func)
-            try:
-                result: np.ndarray = func(bgr_image)
-                assert isinstance(result, np.ndarray)
-            except Exception:
-                assert False
-
-
-class TestImageFilterFactory:
-    @pytest.mark.parametrize(
-        'name, expected_func',
-        [
-            ('NONE', no_filter),
-            ('RESIZE', resize),
-            ('REDIM', redim),
-            ('COLOR', gray2bgr),
-            ('GRAY', bgr2gray),
-            ('RGB', bgr2rgb),
-            ('BGR', rgb2bgr),
-            ('CUT', cut),
-        ]
-    )
-    def test_valid_names_uppercase(self, name: str, expected_func: Callable) -> None:
-        func: ImageFilterFunction = image_filter_factory(name)
-        assert func == expected_func
-
-    @pytest.mark.parametrize(
-        'name',
-        [
-            'none',
-            'resize',
-            'redim',
-            'color',
-            'gray',
-            'rgb',
-            'bgr',
-            'cut'
-        ]
-    )
-    def test_valid_names_lowercase(self, name: str) -> None:
-        func_lower: ImageFilterFunction = image_filter_factory(name)
-        func_upper: ImageFilterFunction = image_filter_factory(name.upper())
-        assert func_lower == func_upper
-
-    @pytest.mark.parametrize(
-        'name',
-        [
-            'None',
-            'Resize',
-            'Gray',
-            'CoLoR'
-        ]
-    )
-    def test_valid_names_mixed_case(self, name: str) -> None:
-        func: ImageFilterFunction = image_filter_factory(name)
-        assert func is not None
-        assert callable(func)
-
-    @pytest.mark.parametrize(
-        'invalid_name',
-        [
-            'INVALID',
-            'RANDOM',
-            'FILTER',
-            '',
-            '123'
-        ]
-    )
-    def test_invalid_names(self, invalid_name: str) -> None:
-        func: ImageFilterFunction = image_filter_factory(invalid_name)
-        assert func == no_filter
 
 
 if __name__ == '__main__':
