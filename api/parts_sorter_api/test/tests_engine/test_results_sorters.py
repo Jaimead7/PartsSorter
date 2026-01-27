@@ -15,15 +15,15 @@
 
 
 from random import randint, random
-from typing import Callable
 
 import numpy as np
 import pytest
 from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
                                                  ResutlsType, SpeedDict)
-from parts_sorter_api.src.engine.results_sorters import (
-    RESULTS_SORTERS, ResultsSorterFunction, by_conf, dis_center, no_sort,
-    results_sorter_factory)
+from parts_sorter_api.src.engine.results_sorters import (ResultsSorterFunction,
+                                                         ResultsSorterRegistry,
+                                                         by_conf, dis_center)
+from pytest import raises
 
 
 @pytest.fixture
@@ -87,11 +87,34 @@ def random_results_no_boxes(speed: SpeedDict) -> ResutlsType:
         speed= speed
     )
 
+@pytest.fixture
+def known_results(speed: SpeedDict) -> ResutlsType:
+    orig_shape = (640, 640)  # (h, w)
+    boxes_data: np.ndarray = np.array([
+        [380, 300, 420, 340, 0.5, 2],  # Center (400, 320) - distance 80
+        [200, 200, 280, 280, 0.7, 3],  # Center (240, 240) - distance 113.14...
+        [300, 300, 340, 340, 0.9, 1],  # Center (320, 320) - distance 0
+    ])
+    boxes: MyBoxes = MyBoxes(
+        boxes=boxes_data,
+        orig_shape=orig_shape
+    )
+    return MyResults(
+        orig_img= np.random.randint(0, 255, size=(*orig_shape, 3), dtype=np.uint8),
+        names= {1: 'Class_1', 2: 'Class_2', 3: 'Class_3'},
+        boxes= boxes.data,
+        speed= speed
+    )
 
-class TestNoSort:
-    def test_func(self, random_results: ResutlsType) -> None:
+
+class TestResultsSorterRegistry:
+    def test_no_instance(self) -> None:
+        with raises(SyntaxError):
+            _ = ResultsSorterRegistry()
+
+    def test_no_sort(self, random_results: ResutlsType) -> None:
         pre_result: ResutlsType = random_results
-        random_results = no_sort(random_results)
+        random_results = ResultsSorterRegistry.no_sort(random_results)
         assert pre_result == random_results
         if pre_result.boxes is not None and random_results.boxes is not None:
             assert np.array_equal(
@@ -99,18 +122,52 @@ class TestNoSort:
                 random_results.boxes.data
             )
 
-    def test_inplace(self, random_results: ResutlsType) -> None:
+    def test_no_sort_inplace(self, random_results: ResutlsType) -> None:
         pre_result: ResutlsType = random_results
-        no_sort(random_results)
+        ResultsSorterRegistry.no_sort(random_results)
         assert pre_result == random_results
         if pre_result.boxes is not None and random_results.boxes is not None:
             assert np.array_equal(
                 pre_result.boxes.data,
                 random_results.boxes.data
             )
+
+    def test_register(self) -> None:
+        try:
+            @ResultsSorterRegistry.register('test')
+            def fnc(results: ResutlsType) -> ResutlsType:
+                return results
+            assert ResultsSorterRegistry.get_sorter('test') == fnc
+            assert 'TEST' in ResultsSorterRegistry.list_sorters()
+        finally:
+            ResultsSorterRegistry.unregister('test')
+        assert 'TEST' not in ResultsSorterRegistry.list_sorters()
+
+    def test_clear_register(self) -> None:
+        temp: dict[str, ResultsSorterFunction] = ResultsSorterRegistry._sorters.copy()
+        try:
+            @ResultsSorterRegistry.register('test')
+            def fnc(results: ResutlsType) -> ResutlsType:
+                return results
+            ResultsSorterRegistry.clear_registry()
+            assert ResultsSorterRegistry._sorters == {}
+        finally:
+            ResultsSorterRegistry._sorters = temp
 
 
 class TestByConf:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('CONF'),
+            ('conf'),
+            ('COnf'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ResultsSorterFunction = ResultsSorterRegistry.get_sorter(name)
+        assert func == by_conf
+
     def test_func(self, random_results: ResutlsType) -> None:
         random_results = by_conf(random_results)
         if random_results.boxes is None:
@@ -127,114 +184,32 @@ class TestByConf:
 
 
 class TestDisCenter:
-    def test_func(self, speed: SpeedDict) -> None:
-        orig_shape = (640, 640)  # (h, w)
-        boxes_data: np.ndarray = np.array([
-            [380, 300, 420, 340, 0.8, 2],  # Center (400, 320) - distance 80
-            [200, 200, 280, 280, 0.7, 3],  # Center (240, 240) - distance 113.14...
-            [300, 300, 340, 340, 0.9, 1],  # Center (320, 320) - distance 0
-        ])
-        boxes: MyBoxes = MyBoxes(
-            boxes=boxes_data,
-            orig_shape=orig_shape
-        )
-        results = MyResults(
-            orig_img= np.random.randint(0, 255, size=(*orig_shape, 3), dtype=np.uint8),
-            names= {1: 'Class_1', 2: 'Class_2', 3: 'Class_3'},
-            boxes= boxes.data,
-            speed= speed
-        )
-        sorted_results: ResutlsType = dis_center(results)
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('CENTER'),
+            ('center'),
+            ('ceNtEr'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ResultsSorterFunction = ResultsSorterRegistry.get_sorter(name)
+        assert func == dis_center
+
+    def test_func(self, known_results: ResutlsType) -> None:
+        sorted_results: ResutlsType = dis_center(known_results)
         if sorted_results.boxes is not None:
             expected_ids: list[int] = [1, 2, 3]
             actual_ids: list[int] = sorted_results.boxes.data[:, 5].astype(int).tolist()
             assert actual_ids == expected_ids
 
-    def test_inplace(self, speed: SpeedDict) -> None:
-        orig_shape = (640, 640)  # (h, w)
-        boxes_data: np.ndarray = np.array([
-            [380, 300, 420, 340, 0.8, 2],  # Center (400, 320) - distance 80
-            [200, 200, 280, 280, 0.7, 3],  # Center (240, 240) - distance 113.14...
-            [300, 300, 340, 340, 0.9, 1],  # Center (320, 320) - distance 0
-        ])
-        boxes: MyBoxes = MyBoxes(
-            boxes=boxes_data,
-            orig_shape=orig_shape
-        )
-        results = MyResults(
-            orig_img= np.random.randint(0, 255, size=(*orig_shape, 3), dtype=np.uint8),
-            names= {1: 'Class_1', 2: 'Class_2', 3: 'Class_3'},
-            boxes= boxes.data,
-            speed= speed
-        )
-        dis_center(results)
-        if results.boxes is not None:
+    def test_inplace(self, known_results: ResutlsType) -> None:
+        dis_center(known_results)
+        if known_results.boxes is not None:
             expected_ids: list[int] = [1, 2, 3]
-            actual_ids: list[int] = results.boxes.data[:, 5].astype(int).tolist()
+            actual_ids: list[int] = known_results.boxes.data[:, 5].astype(int).tolist()
             assert actual_ids == expected_ids
 
-
-class TestResultsSorterDictionary:
-    def test_all_functions_callable(self, random_results: ResutlsType) -> None:
-        for _, func in RESULTS_SORTERS.items():
-            assert callable(func)
-            try:
-                result: ResutlsType = func(random_results)
-                assert isinstance(result, ResutlsType)
-            except Exception:
-                assert False
-
-
-class TestResultsSorterFactory:
-    @pytest.mark.parametrize(
-        'name, expected_func',
-        [
-            ('NONE', no_sort),
-            ('CONF', by_conf),
-            ('CENTER', dis_center),
-        ]
-    )
-    def test_valid_names_uppercase(self, name: str, expected_func: Callable) -> None:
-        func: ResultsSorterFunction = results_sorter_factory(name)
-        assert func == expected_func
-
-    @pytest.mark.parametrize(
-        'name, expected_func',
-        [
-            ('none', no_sort),
-            ('conf', by_conf),
-            ('center', dis_center)
-        ]
-    )
-    def test_valid_names_lowercase(self, name: str, expected_func: Callable) -> None:
-        func: ResultsSorterFunction = results_sorter_factory(name)
-        assert func == expected_func
-
-    @pytest.mark.parametrize(
-        'name, expected_func',
-        [
-            ('NonE', no_sort),
-            ('cOnF', by_conf),
-            ('ceNTer', dis_center)
-        ]
-    )
-    def test_valid_names_mixed_case(self, name: str, expected_func: Callable) -> None:
-        func: ResultsSorterFunction = results_sorter_factory(name)
-        assert func == expected_func
-
-    @pytest.mark.parametrize(
-        'invalid_name',
-        [
-            'INVALID',
-            'RANDOM',
-            'FILTER',
-            '',
-            '123'
-        ]
-    )
-    def test_invalid_names(self, invalid_name: str) -> None:
-        func: ResultsSorterFunction = results_sorter_factory(invalid_name)
-        assert func == no_sort
 
 
 if __name__ == '__main__':

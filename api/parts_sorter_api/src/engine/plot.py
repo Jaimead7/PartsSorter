@@ -99,19 +99,29 @@ def plot_label(
         font_size,
         1
     )
-    #TODO: Names out of border
-    inf_left_corner: tuple[int, int] = (
-        int(rect[0] - line_width),
-        int(rect[1])
-    )
-    text_p0: tuple[int, int] = (
+    inf_left_corner: list[int] = [
         int(rect[0]),
         int(rect[1] - line_width)
-    )
-    sup_right_corner: tuple[int, int] = (
+    ]
+    text_p0: list[int] = [
+        int(rect[0] + line_width),
+        int(rect[1] - 2 * line_width)
+    ]
+    sup_right_corner: list[int] = [
         int(rect[0] + txt_w + line_width),
-        int(rect[1] - txt_h - 2*line_width)
-    )
+        int(rect[1] - txt_h - 3 * line_width)
+    ]
+    img_shape: tuple = img.shape
+    if sup_right_corner[0] > img_shape[1]:
+        shift: int = sup_right_corner[0] - img_shape[1]
+        inf_left_corner[0] -= shift
+        text_p0[0] -= shift
+        sup_right_corner[0] -= shift
+    if inf_left_corner[0] < 0:
+        shift: int = - sup_right_corner[0]
+        inf_left_corner[0] += shift
+        text_p0[0] += shift
+        sup_right_corner[0] += shift
     cv2.rectangle(
         img= img,
         pt1= inf_left_corner,

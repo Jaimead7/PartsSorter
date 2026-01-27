@@ -14,21 +14,70 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Generator, Protocol, Sequence
+from collections.abc import Callable, Generator, Sequence
+from typing import Protocol, runtime_checkable
 
 import numpy as np
+from pyUtils import NoInstantiable
 
+from ..dependencies.config import my_logger
 from .results import BoxesType, ResutlsType
 
 
+@runtime_checkable
 class ResultsSorterFunction(Protocol):
     def __call__(self, results: ResutlsType) -> ResutlsType:
         ...
 
 
-def no_sort(results: ResutlsType) -> ResutlsType:
+class ResultsSorterRegistry(NoInstantiable):
+    _sorters: dict[str, ResultsSorterFunction] = {}
+
+    @staticmethod
+    def no_sort(results: ResutlsType) -> ResutlsType:
+        return results
+
+    @classmethod
+    def register(cls, name: str) -> Callable[[ResultsSorterFunction], ResultsSorterFunction]:
+        def decorator(func: ResultsSorterFunction) -> ResultsSorterFunction:
+            if name.upper() in cls._sorters:
+               my_logger.warning(f'ResultsSorter "{name.upper()}" is already registered. It will be overwritten.')
+            cls._sorters[name.upper()] = func
+            return func
+        return decorator
+
+    @classmethod
+    def unregister(cls, name: str) -> None:
+        cls._sorters.pop(name.upper(), None)
+
+    @classmethod
+    def get_sorter(cls, name: str) -> ResultsSorterFunction:
+        return cls._sorters.get(name.upper(), cls.no_sort)
+
+    @classmethod
+    def list_sorters(cls) -> list[str]:
+        return sorted(cls._sorters.keys())
+
+    @classmethod
+    def clear_registry(cls) -> None:
+        cls._sorters.clear()
+
+
+def apply_results_sorters(
+    results: ResutlsType,
+    sorters: str | Sequence[str]
+) -> ResutlsType:
+    if isinstance(sorters, str):
+        sorters = (sorters,)
+    sorters_fnc: Generator[ResultsSorterFunction, None, None] = (
+        ResultsSorterRegistry.get_sorter(name)
+        for name in sorters
+    )
+    for fnc in sorters_fnc:
+        results = fnc(results)
     return results
 
+@ResultsSorterRegistry.register('CONF')
 def by_conf(results: ResutlsType) -> ResutlsType:
     if results.boxes is None or len(results.boxes.data) == 0:
         return results
@@ -37,6 +86,7 @@ def by_conf(results: ResutlsType) -> ResutlsType:
     results.boxes.data = sort_boxes
     return results
 
+@ResultsSorterRegistry.register('CENTER')
 def dis_center(results: ResutlsType) -> ResutlsType:
     def get_center_distances(boxes: BoxesType) -> np.ndarray:
         x_centers: np.ndarray = (boxes.data[:, 0] + boxes.data[:, 2]) / 2
@@ -53,31 +103,4 @@ def dis_center(results: ResutlsType) -> ResutlsType:
     boxes_data: np.ndarray = results.boxes.data
     sort_boxes: np.ndarray = boxes_data[distances.argsort()]
     results.boxes.data = sort_boxes
-    return results
-
-
-RESULTS_SORTERS: dict[str, ResultsSorterFunction] = {
-    'NONE': no_sort,
-    'CONF': by_conf,
-    'CENTER': dis_center
-}
-
-def results_sorter_factory(name: str) -> ResultsSorterFunction:
-    try:
-        return RESULTS_SORTERS[name.upper()]
-    except KeyError:
-        return no_sort
-
-def apply_results_sorters(
-    results: ResutlsType,
-    sorters: str | Sequence[str]
-) -> ResutlsType:
-    if isinstance(sorters, str):
-        sorters = (sorters,)
-    sorters_fnc: Generator[ResultsSorterFunction, None, None] = (
-        results_sorter_factory(name)
-        for name in sorters
-    )
-    for fnc in sorters_fnc:
-        results = fnc(results)
     return results
