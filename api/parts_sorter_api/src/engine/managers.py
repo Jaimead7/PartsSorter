@@ -15,10 +15,11 @@
 
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime, timezone
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Iterable, Optional, Self, Sequence, Type, cast
+from typing import Any, ClassVar, Optional, Self, cast
 
 import cv2
 import numpy as np
@@ -80,7 +81,7 @@ class ModelManager(ABC):
         filters_attrs: dict[str, dict[str, Any]] = self.metadata.filters_attrs
         return tuple(
             (
-                ImageFilterRegistry.get_filter(filter_name),
+                ImageFilterRegistry.get(filter_name),
                 filters_attrs[filter_name]
             )
             for filter_name in filters_names
@@ -163,40 +164,77 @@ class ModelManager(ABC):
     @abstractmethod
     def load(self, path: Path) -> Self: ...
 
-"""
-class PyTorchModelManager(ModelManager):
-    def __init__(self) -> None:
-        super().__init__()
 
-    @property
-    def model_engine(self) -> YOLO:
-        return cast(YOLO, super().model_engine)
+class ModelManagerRegistry(NoInstantiable):
+    _managers: ClassVar[dict[str, type[ModelManager]]] = {}
 
-    @cached_property
-    def pt_path(self) -> Path:
-        return self.path / f'{self.name}.pt'
+    @classmethod
+    def register(cls, name: str) -> Callable[[type[ModelManager]], type[ModelManager]]:
+        def decorator(manager_cls: type[ModelManager]) -> type[ModelManager]:
+            if name.upper() in cls._managers:
+                my_logger.warning(f'ModelManager "{name.upper()}" is already registered. It will be overwritten.')
+            cls._managers[name.upper()] = manager_cls
+            return manager_cls
+        return decorator
 
-    @cached_property
-    def files(self) -> Iterable[Path]:
-        return (
-            self.metadata_path,
-            self.pt_path
-        )
+    @classmethod
+    def unregister(cls, name: str) -> None:
+        cls._managers.pop(name.upper(), None)
 
-    @cached_property
-    def folders(self) -> Iterable[Path]:
-        return ()
+    @classmethod
+    def get(cls, name: str) -> Optional[type[ModelManager]]:
+        return cls._managers.get(name.upper(), None)
 
-    def load(self, path: Path) -> Self:
-        self._path = path
-        if not self.validate():
-            msg: str = 'Can\'t load a model. Folder not valid.'
+    @classmethod
+    def list(cls) -> list[str]:
+        return sorted(cls._managers.keys())
+
+    @classmethod
+    def clear(cls) -> None:
+        cls._managers.clear()
+
+
+class ModelsContainer(NoInstantiable):
+    models: dict[str, ModelManager] = {}
+    MAX_MODELS: int = 5
+
+    @classmethod
+    def get_model(
+        cls,
+        model_path: Path
+    ) -> ModelManager:
+        model_name: str = model_path.name
+        try:
+            return cls.models[model_name]
+        except KeyError:
+            pass
+        model_type_name: str = ModelManager.get_metadata(model_path).model_type
+        model_type: Optional[type[ModelManager]] = ModelManagerRegistry.get(model_type_name)
+        if model_type is None:
+            msg: str = f'No ModelManager for "{model_type_name}" is available.'
             my_logger.error(msg)
-            raise NotADirectoryError(msg)
-        self._model_engine = YOLO((self.path / (self.name + '_ncnn_model')), task= 'detect')
-        return self
-"""
+            raise KeyError(msg)
+        model: ModelManager = model_type().load(model_path)
+        cls.models[model_name] = model
+        my_logger.info(f'"{model_name}" added to loaded models.')
+        cls.clear_models()
+        return cls.models[model_name]
 
+    @classmethod
+    def clear_models(cls) -> None:
+        if len(cls.models) == 0:
+            return
+        if len(cls.models) <= cls.MAX_MODELS:
+            return
+        model_to_delete: str = list(cls.models.keys())[0]
+        for name, model in cls.models.items():
+            if model.last_use < cls.models[model_to_delete].last_use:
+                model_to_delete = name
+        cls.models.pop(model_to_delete)
+        my_logger.info(f'"{model_to_delete}" deleted from loaded models.')
+
+
+@ModelManagerRegistry.register('NCNN')
 class NCNNModelManager(ModelManager):
     def __init__(self) -> None:
         super().__init__()
@@ -245,58 +283,3 @@ class NCNNModelManager(ModelManager):
         self._model_engine = NCCEngine(self.ncnn_folder_path)
         self.last_use = datetime.now(timezone.utc)
         return self
-
-
-class ModelsContainer(NoInstantiable):
-    models: dict[str, ModelManager] = {}
-    MAX_MODELS: int = 5
-
-    @classmethod
-    def get_model(
-        cls,
-        model_path: Path
-    ) -> ModelManager:
-        model_name: str = model_path.name
-        try:
-            return cls.models[model_name]
-        except KeyError:
-            pass
-        model_type: str = ModelManager.get_metadata(model_path).model_type
-        model: ModelManager = model_manager_factory(model_type).load(model_path)
-        cls.models[model_name] = model
-        my_logger.info(f'"{model_name}" added to loaded models.')
-        cls.clear_models()
-        return cls.models[model_name]
-
-    @classmethod
-    def clear_models(cls) -> None:
-        if len(cls.models) == 0:
-            return
-        if len(cls.models) <= cls.MAX_MODELS:
-            return
-        model_to_delete: str = list(cls.models.keys())[0]
-        for name, model in cls.models.items():
-            if model.last_use < cls.models[model_to_delete].last_use:
-                model_to_delete = name
-        cls.models.pop(model_to_delete)
-        my_logger.info(f'"{model_to_delete}" deleted from loaded models.')
-
-
-MODEL_MANAGERS: dict[str, ModelManager] = {
-    #'PYTORCH': PyTorchModelManager(),
-    'NCNN': NCNNModelManager()
-}
-
-def model_manager_factory(model_manager: Type[ModelManager] | str) -> ModelManager:
-    if isinstance(model_manager, str):
-        try:
-            return MODEL_MANAGERS[model_manager.upper()]
-        except KeyError:
-            msg: str = f'Can\'t load "{model_manager}" from MODEL_MANAGERS.'
-            my_logger.error(msg)
-            raise KeyError(msg)
-    if issubclass(model_manager, ModelManager):
-        return model_manager()
-    msg: str = f'"{model_manager}" is not a valid type for a ModelManager.'
-    my_logger.error(msg)
-    raise TypeError(msg)

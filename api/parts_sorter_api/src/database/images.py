@@ -245,7 +245,15 @@ async def db_process_image(
                 trust= None
             )
         model_name = db_image.origin_of_image.model
-    model_manager: ModelManager = ModelsContainer.get_model(INTERNAL_MODELS_FOLDER / model_name)
+    try:
+        model_manager: ModelManager = ModelsContainer.get_model(INTERNAL_MODELS_FOLDER / model_name)
+    except KeyError:
+        my_logger.error(f'No model available to process image.')
+        return ProcessImageResult(
+            model_name= None,
+            inpection_result_name= None,
+            trust= None
+        )
     results_list: list[ResutlsType] = model_manager.inspect(db_image.internal_absolute_path)
     if len(results_list) < 1:
         my_logger.error(f'Error processing image.')
