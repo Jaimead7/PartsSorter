@@ -58,4 +58,4 @@ COPY . .
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Run the app
-CMD ["python3.13", "./src/main.py"]
+CMD ["python3.13", "./parts_sorter_capture/src/main.py"]
