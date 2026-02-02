@@ -38,12 +38,12 @@ RUN uv sync
 FROM python:3.13.8-slim AS production
 
 # Set metadata
-LABEL org.opencontainers.image.title="parts-sorter-web"
-LABEL org.opencontainers.image.description="Microservice for user interface"
+LABEL org.opencontainers.image.title="parts-sorter-capture"
+LABEL org.opencontainers.image.description="Microservice for image capture"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.authors="Jaime Álvarez Díaz <alvarez.diaz.jaime1@gmail.com>"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/tree/mainBranch/web"
+LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/tree/mainBranch/capture"
 
 # Set the working directory
 WORKDIR /app
@@ -58,4 +58,4 @@ COPY . .
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Run the app
-CMD ["python3.13", "./src/main.py"]
+CMD ["python3.13", "./parts_sorter_capture/src/main.py"]

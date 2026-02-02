@@ -25,8 +25,8 @@ from os import getenv
 from pathlib import Path
 from typing import Optional
 
-from pyUtils import (MyLogger, ProjectPathsDict, save_pyutils_logs,
-                     set_pyutils_logging_level, set_pyutils_logs_path)
+from pyUtils import (MyLogger, save_pyutils_logs, set_pyutils_logging_level,
+                     set_pyutils_logs_path)
 
 
 class EnvVars(Enum):
@@ -37,10 +37,6 @@ class EnvVars(Enum):
     CAMERA_SENSOR_PIN = 'CAMERA_SENSOR_PIN'
     ACTUATOR_SENSOR_PIN = 'ACTUATOR_SENSOR_PIN'
 
-
-# APP
-MY_APP: ProjectPathsDict = ProjectPathsDict().set_app_path(Path(__file__).parents[2])
-MY_APP[ProjectPathsDict.DIST_PATH] = MY_APP[ProjectPathsDict.APP_PATH] / 'dist'
 
 # LOGGING
 LOGGING_LVL: int = MyLogger.get_logging_lvl_from_env(EnvVars.LOGGING_LVL.value)
@@ -66,7 +62,6 @@ set_capture_app_logging_level(logging.WARNING)
 set_capture_app_logs_path('capture.log')
 set_capture_app_logging_level(LOGGING_LVL)
 save_capture_app_logs(True)
-
 
 # ENV VARS
 _env_aux: Optional[str] = getenv(EnvVars.ORIGIN_NAME.value, None)
