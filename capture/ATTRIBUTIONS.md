@@ -6,31 +6,31 @@ This software includes components from third-party libraries under the following
 **License:** MIT License  
 **Copyright:** (c) 2025 Jaime Álvarez Díaz  
 **Source:** https://github.com/Jaimead7/PyUtils  
-**Full License:** [MIT License](./licenses/MIT-jaimead7-pyutils.txt)  
+**Full License:** [MIT License](./licenses/jaimead7-pyutils.txt)  
 
 ## httpx  
 **License:** BSD 3-Clause "New" or "Revised" License  
 **Copyright:** (c) 2019-2023, Encode OSS Ltd.  
 **Source:** https://github.com/encode/httpx  
-**Full License:** [BSD-3-Clause](./licenses/BSD-3-Clause.md)  
+**Full License:** [BSD-3-Clause](./licenses/httpx.md)  
 
 ## opencv-python-headless  
 **License:** Apache License 2.0  
 **Copyright:** (c) 2020-2023, OpenCV team  
 **Source:** https://github.com/opencv/opencv-python  
-**Full License:** [Apache-2.0](./licenses/Apache-2.0.txt)  
+**Full License:** [Apache-2.0](./licenses/opencv-python-headless.txt)  
 
 ## gpiod  
 **License:** GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)  
 **Copyright:** (c) 2017-2023, Bartosz Golaszewski  
 **Source:** https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git  
-**Full License:** [LGPL-2.1](./licenses/LGPL-2.1.txt)  
+**Full License:** [LGPL-2.1](./licenses/gpiod.txt)  
 
 ## pydantic  
 **License:** MIT License  
 **Copyright:** (c) 2017 to present Pydantic Services Inc. and individual contributors.  
 **Source:** https://github.com/pydantic/pydantic  
-**Full License:** [MIT License](./licenses/MIT-pydantic.txt)  
+**Full License:** [MIT License](./licenses/pydantic.txt)  
 
 
 # Complete license texts
