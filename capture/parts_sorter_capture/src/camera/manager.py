@@ -37,28 +37,28 @@ from utils.models import AsyncList
 class CameraManager:
     def __init__(
         self,
-        index: int
+        device: str
     ) -> None:
         atexit.register(self.cleanup)
-        self.index = index
-        my_logger.debug(f'Camera {self.index} configured.')
+        self.device = device
+        my_logger.debug(f'Camera "{self.device}" configured.')
 
     @property
-    def index(self) -> int:
-        return self._index
+    def device(self) -> str:
+        return self._device
 
-    @index.setter
-    def index(self, value: int) -> None:
-        self._index: int = value
+    @device.setter
+    def device(self, value: str) -> None:
+        self._device: str = value
         with self.get_video_capture() as _:
             pass
 
     @contextmanager
     def get_video_capture(self) -> Generator[cv2.VideoCapture, Any, None]:
-        self._cap: cv2.VideoCapture = cv2.VideoCapture(self.index)
+        self._cap: cv2.VideoCapture = cv2.VideoCapture(self.device)
         if not self._cap.isOpened():
             msg: str = 'Can\'t connect to the camera.'
-            my_logger.error(f'ConnectionRefusedError: {msg}')
+            my_logger.critical(f'ConnectionRefusedError: {msg}')
             raise ConnectionRefusedError(msg)
         try:
             self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -69,7 +69,7 @@ class CameraManager:
     def cleanup(self) -> None:
         if self._cap is not None:
             self._cap.release()
-            my_logger.debug(f'Camera {self.index} cleared.')
+            my_logger.info(f'Camera "{self.device}" cleared.')
 
     async def load_camera_props(self, cap: cv2.VideoCapture) -> None:
         props: CameraParamsResponse = await get_camera_params()
@@ -82,7 +82,7 @@ class CameraManager:
         self.set_auto_exposure(cap, props.auto_exposure)
         self.set_wb(cap, props.wb)
         self.set_auto_wb(cap, props.auto_wb)
-        my_logger.debug(f'Loaded properties for Camera-{self.index}: {props}.')
+        my_logger.debug(f'Loaded properties for "{self.device}": {props}.')
 
     def set_width(self, cap: cv2.VideoCapture, value: int) -> None:
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, value)
@@ -153,7 +153,7 @@ class CameraManager:
         try:
             with self.get_video_capture() as cap:
                 await self.load_camera_props(cap)
-                my_logger.info(f'Camera-{self.index} cycle started.')
+                my_logger.info(f'"{self.device}" cycle started.')
                 await self.loop(cap= cap, results_queue= results_queue)
         except asyncio.CancelledError:
             my_logger.info('Camera cycle cancelled.')
