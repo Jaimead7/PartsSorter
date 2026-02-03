@@ -65,13 +65,9 @@ async def get_actuator_params() -> ActuatorParamsResponse:
         raise RuntimeError(msg)
 
 async def process_image(
-    image: Optional[np.ndarray],
+    image: np.ndarray,
     date: datetime
 ) -> ProcessImageResponse:
-    if image is None:
-        return ProcessImageResponse(
-            date= date
-        )
     img_bytes: bytes = cv2.imencode('.png', image)[1].tobytes()
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.post(
