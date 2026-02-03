@@ -78,6 +78,8 @@ cp ./proxy/nginx.conf /mnt/shared/nginx/
 chmod 644 /mnt/shared/nginx/nginx.conf
 
 sudo cp ./scripts/99-webcam.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger
 
 sudo -u production mkdir -p /home/production/.config/autostart
 sudo cp ./scripts/open-image-stream.desktop /home/production/.config/autostart/
