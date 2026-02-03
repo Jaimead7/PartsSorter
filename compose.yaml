@@ -154,7 +154,7 @@ services:
       - capture-network
     devices:
       - "${GPIO_DEVICE:-/dev/gpiochip4}:/dev/gpiochip4"
-      - "${CAMERA_DEVICE:-/dev/video0}:/dev/video0"
+      - "${CAMERA_DEVICE:-/dev/main-camera}:/dev/main-camera"
 
 
 volumes:

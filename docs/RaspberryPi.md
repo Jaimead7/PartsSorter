@@ -81,7 +81,6 @@ AllowUsers dev
   sudo nmcli con up <CON_NAME>
   ```
 
-
 ### Update packages
 ```bash
 sudo rpi-update
@@ -95,41 +94,6 @@ sudo apt upgrade
 sudo apt remove --purge geany
 sudo apt remove --purge thonny
 #sudo apt autoremove
-```
-
-### Createfolder structure  
-#### Structure
-```
-/
-|--- bin
-|--- ...
-|--- home
-|    |--- dev
-|    |    |--- Projects
-|    |    `--- ...
-|    `--- ...
-|--- ...
-|--- mnt
-|    |--- shared
-|    |    |--- images
-|    |    |--- models
-|    |    |--- datasets
-|    |    `--- ...
-|    `--- ...
-`--- ...
-```
-#### Shared folder  
-```bash
-mkdir /mnt/shared
-sudo chmod 777 /mnt/shared/
-sudo setfacl -R -d -m u::rwx,g::rwx,o::rwx /mnt/shared
-mkdir /mnt/shared/images
-mkdir /mnt/shared/models
-```
-#### Project
-```bash
-mkdir ~/Projects
-cd ~/Projects
 ```
 
 ### Share folders
@@ -171,11 +135,6 @@ sudo systemctl restart smbd
 git config --global user.name "<User Name>"
 git config --global user.email "<User e-mail>"
 git config --global core.editor "code"
-```
-
-## Install VSCode
-```bash
-sudo apt install code
 ```
 
 ## Install Python latest version

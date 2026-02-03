@@ -34,33 +34,32 @@ from utils.config import CAMERA_SENSOR_PIN, my_logger
 from utils.models import AsyncList
 
 
+class CameraReadError(Exception):
+    pass
+
+
 class CameraManager:
     def __init__(
         self,
-        index: int
+        device: str
     ) -> None:
         atexit.register(self.cleanup)
-        self.index = index
-        my_logger.debug(f'Camera {self.index} configured.')
-
-    @property
-    def index(self) -> int:
-        return self._index
-
-    @index.setter
-    def index(self, value: int) -> None:
-        self._index: int = value
-        with self.get_video_capture() as _:
-            pass
+        self.device: str = device
+        my_logger.debug(f'Camera "{self.device}" configured.')
 
     @contextmanager
     def get_video_capture(self) -> Generator[cv2.VideoCapture, Any, None]:
-        self._cap: cv2.VideoCapture = cv2.VideoCapture(self.index)
-        if not self._cap.isOpened():
-            msg: str = 'Can\'t connect to the camera.'
-            my_logger.error(f'ConnectionRefusedError: {msg}')
-            raise ConnectionRefusedError(msg)
         try:
+            self._cap: cv2.VideoCapture = cv2.VideoCapture(self.device)
+        except Exception as e:
+            msg: str = f'Can\'t connect to the camera. {e}'
+            my_logger.error(f'ConnectionError: {msg}.')
+            raise ConnectionError(msg)
+        try:
+            if not self._cap.isOpened():
+                msg: str = 'Can\'t connect to the camera. VideoCapture is not open.'
+                my_logger.error(f'ConnectionError: {msg}')
+                raise ConnectionError(msg)
             self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             yield self._cap
         finally:
@@ -69,7 +68,7 @@ class CameraManager:
     def cleanup(self) -> None:
         if self._cap is not None:
             self._cap.release()
-            my_logger.debug(f'Camera {self.index} cleared.')
+            my_logger.info(f'Camera "{self.device}" cleared.')
 
     async def load_camera_props(self, cap: cv2.VideoCapture) -> None:
         props: CameraParamsResponse = await get_camera_params()
@@ -82,7 +81,7 @@ class CameraManager:
         self.set_auto_exposure(cap, props.auto_exposure)
         self.set_wb(cap, props.wb)
         self.set_auto_wb(cap, props.auto_wb)
-        my_logger.debug(f'Loaded properties for Camera-{self.index}: {props}.')
+        my_logger.debug(f'Loaded properties for "{self.device}": {props}.')
 
     def set_width(self, cap: cv2.VideoCapture, value: int) -> None:
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, value)
@@ -111,16 +110,19 @@ class CameraManager:
     def set_auto_wb(self, cap: cv2.VideoCapture, value: int) -> None:
         cap.set(cv2.CAP_PROP_AUTO_WB, value)
 
-    def capture_image(self, cap: cv2.VideoCapture) -> Optional[np.ndarray]:
+    def capture_image(self, cap: cv2.VideoCapture) -> np.ndarray:
         ret: bool
         image: np.ndarray
         for _ in range(2):
-            cap.grab()
+            if not cap.grab():
+                msg: str = 'Can\'t grab frame.'
+                my_logger.error(f'CameraReadError: {msg}')
+                raise CameraReadError(msg)
         ret, image = cap.retrieve()
         if not ret:
-            msg: str = 'Can\'t read frame.'
-            my_logger.error(f'{msg}')
-            return None
+            msg: str = 'Can\'t retrieve frame.'
+            my_logger.error(f'CameraReadError: {msg}')
+            raise CameraReadError(msg)
         return image
 
     async def loop(
@@ -139,8 +141,9 @@ class CameraManager:
             if edge_type == EdgeType.RISING:
                 date: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
                 my_logger.info('Capturing new image...')
+                image: np.ndarray = self.capture_image(cap)
                 result: ProcessImageResponse = await process_image(
-                    image= self.capture_image(cap),
+                    image= image,
                     date= date
                 )
                 await results_queue.put(result)
@@ -151,10 +154,20 @@ class CameraManager:
         results_queue: AsyncList[ProcessImageResponse]
     ) -> NoReturn:
         try:
-            with self.get_video_capture() as cap:
-                await self.load_camera_props(cap)
-                my_logger.info(f'Camera-{self.index} cycle started.')
-                await self.loop(cap= cap, results_queue= results_queue)
+            while True:
+                try:
+                    with self.get_video_capture() as cap:
+                        await self.load_camera_props(cap)
+                        my_logger.info(f'"{self.device}" cycle started.')
+                        await self.loop(cap= cap, results_queue= results_queue)
+                except ConnectionError as e:
+                    my_logger.error(f'"{self.device}" ConnectionError. {e}')
+                    await asyncio.sleep(0.5)
+                    my_logger.info(f'Trying to reconnect "{self.device}".')
+                except CameraReadError as e:
+                    my_logger.error(f'"{self.device}" loop error. {e}')
+                    await asyncio.sleep(0.5)
+                    my_logger.info(f'Trying to reconnect "{self.device}".')
         except asyncio.CancelledError:
             my_logger.info('Camera cycle cancelled.')
             raise

@@ -79,7 +79,7 @@ API_URL: Optional[str] = getenv(EnvVars.API_URL.value, None)
 del(_env_aux)
 
 # CONFIG
-CAMERA_INDEX: int = 0
+CAMERA_DEVICE: str = '/dev/main-camera'
 GPIO_CHIP: str = '/dev/gpiochip4'
 _env_aux: Optional[str] = getenv(EnvVars.ACTUATOR_PIN.value, None)
 if _env_aux is None:

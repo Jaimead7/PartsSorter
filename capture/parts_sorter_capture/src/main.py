@@ -27,7 +27,7 @@ from typing import NoReturn
 from actuator import ActuatorManager
 from camera import CameraManager
 from remote.models import ProcessImageResponse
-from utils.config import CAMERA_INDEX, my_logger
+from utils.config import CAMERA_DEVICE, my_logger
 from utils.models import AsyncList
 
 results_queue: AsyncList[ProcessImageResponse] = AsyncList()
@@ -35,7 +35,7 @@ results_queue: AsyncList[ProcessImageResponse] = AsyncList()
 async def main() -> None:
     my_logger.info('Capture starting...')
     camera_task: asyncio.Task[NoReturn] = asyncio.create_task(
-        CameraManager(CAMERA_INDEX).cycle(results_queue)
+        CameraManager(CAMERA_DEVICE).cycle(results_queue)
     )
     actuator_task: asyncio.Task[NoReturn] = asyncio.create_task(
         ActuatorManager().cycle(results_queue)
