@@ -1,17 +1,31 @@
-.venv
-__pycache__
-
-build
-*.egg-info
-
-.env*
-!.env.example
-
+# Project files
 *.db
 *.log
-
-.passwords
-
-runs
-
 delete*
+
+# Python files
+__pycache__/
+build/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+Typings/
+
+# Tools
+.venv/
+venv/
+env/
+.env*
+!.env.example
+.pytest_cache/
+
+# Git
+.git/
+.gitignore
+
+# ide
+.vscode/
+.idea/
+*.swp
+*.swo
