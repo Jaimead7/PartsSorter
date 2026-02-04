@@ -32,7 +32,10 @@ COPY ./pyproject.toml ./pyproject.toml
 COPY --from=ghcr.io/astral-sh/uv:0.6.16 /uv /uvx /bin/
 
 # Install dependencies
+    # Use opencv-python-headless instead of full version
 RUN uv sync --extra postgres
+RUN uv pip uninstall opencv-python && \
+    uv pip install opencv-python-headless==4.12.0.88
 
 ## ---------------------------- Production Stage --------------------------- ##
 FROM python:3.12.11-slim AS production
@@ -49,13 +52,9 @@ LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/t
 WORKDIR /api
 
 # Instal opencv dependencies.
-    # libgl1, libglib2.0-0 for opencv
     # curl for healthcheck
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    libgl1 \
-    libglib2.0-0 \
-    curl \
+    && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
