@@ -27,7 +27,7 @@ from pydantic import BaseModel
 from pyUtils import NoInstantiable
 
 from ..dependencies.config import my_logger
-from .results import ResutlsType
+from .results import ResultsType
 
 
 class ClassResult(BaseModel):
@@ -36,7 +36,7 @@ class ClassResult(BaseModel):
 
 
 class ResultsExtractorFunction(Protocol):
-    def __call__(self, results: ResutlsType) -> ClassResult:
+    def __call__(self, results: ResultsType) -> ClassResult:
         ...
 
 
@@ -44,7 +44,7 @@ class ResultsExtractorRegistry(NoInstantiable):
     _extractors: ClassVar[dict[str, ResultsExtractorFunction]] = {}
 
     @staticmethod
-    def no_extract(results: ResutlsType) -> ClassResult:
+    def no_extract(results: ResultsType) -> ClassResult:
         return ClassResult()
 
     @classmethod
@@ -74,7 +74,7 @@ class ResultsExtractorRegistry(NoInstantiable):
 
 
 @ResultsExtractorRegistry.register('FIRST')
-def extract_first_result(results: ResutlsType) -> ClassResult:
+def extract_first_result(results: ResultsType) -> ClassResult:
     if results.boxes is None:
         return ClassResult()
     results_array: np.ndarray = results.boxes.data

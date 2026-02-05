@@ -35,7 +35,7 @@ from ..dependencies.config import my_logger
 from ..models.metadata_files import ModelMetadataDict
 from .engines import ModelEngine, NCCEngine
 from .filters import ImageFilterFunction, ImageFilterRegistry
-from .results import ResutlsType
+from .results import ResultsType
 
 
 class ModelManager(ABC):
@@ -142,7 +142,7 @@ class ModelManager(ABC):
     def inspect(
         self,
         source: np.ndarray | str | Path | list | tuple
-    ) -> list[ResutlsType]:
+    ) -> list[ResultsType]:
         source_iter: Iterable[np.ndarray | str | Path]
         if isinstance(source, tuple | list):
             source_iter = source
@@ -150,7 +150,7 @@ class ModelManager(ABC):
             source_iter = [source]
         sources_arrays: Sequence[np.ndarray] = self.get_sources_arrays(source_iter)
         in_imgs: Sequence[np.ndarray] = self.apply_img_filters(sources_arrays)
-        results: list[ResutlsType] = self.model_engine(tuple(in_imgs))
+        results: list[ResultsType] = self.model_engine(tuple(in_imgs))
         return results
 
     def apply_img_filters(

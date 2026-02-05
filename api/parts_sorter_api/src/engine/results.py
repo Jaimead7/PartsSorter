@@ -123,7 +123,7 @@ class MyBoxes:
 
 
 @runtime_checkable
-class ResutlsType(Protocol):
+class ResultsType(Protocol):
     orig_img: np.ndarray
     orig_shape: tuple[int, int]
     names: dict[int, str]
@@ -219,7 +219,7 @@ class MyResults:
         return img
 
 
-def extract_first_result(results: ResutlsType) -> tuple[Optional[int], Optional[float]]:
+def extract_first_result(results: ResultsType) -> tuple[Optional[int], Optional[float]]:
     if results.boxes is None:
         return (None, None)
     results_array: np.ndarray = results.boxes.data

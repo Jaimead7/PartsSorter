@@ -32,7 +32,7 @@ import yaml
 from ..dependencies.config import my_logger
 from ..models.metadata_files import NCNNMetadataDict
 from .filters import bgr2rgb, gray2bgr, redim
-from .results import MyBoxes, MyResults, ResutlsType, SpeedDict
+from .results import MyBoxes, MyResults, ResultsType, SpeedDict
 
 
 class ModelEngine(Protocol):
@@ -48,7 +48,7 @@ class ModelEngine(Protocol):
         source: np.ndarray | str | Path | list | tuple,
         *args: Any,
         **kwargs: Any
-    ) -> list[ResutlsType]: ...
+    ) -> list[ResultsType]: ...
 
 
 class NCCEngine:
@@ -65,14 +65,14 @@ class NCCEngine:
     def __call__(
         self,
         source: np.ndarray | str | Path | list | tuple
-    ) -> list[ResutlsType]:
+    ) -> list[ResultsType]:
         sources: Iterable[np.ndarray | str | Path]
         if not isinstance(source, tuple | list):
             sources = [source]
         else:
             sources = source
         sources_arrays: Generator[np.ndarray, None, None] = self.get_sources_arrays(sources)
-        results: list[ResutlsType] = []
+        results: list[ResultsType] = []
         for raw_img in sources_arrays:
             speed: SpeedDict = SpeedDict(
                 preprocess= 0,
@@ -93,7 +93,7 @@ class NCCEngine:
             out_array: np.ndarray = self.parse_ncnn_out(out0)
             boxes: np.ndarray = self.filter_boxes(out_array)
             speed['postprocess'] = (datetime.now(timezone.utc) - start_time).microseconds / 1000.
-            result: ResutlsType = MyResults(
+            result: ResultsType = MyResults(
                 orig_img= raw_img,
                 names= self.metadata.names,
                 boxes= boxes,

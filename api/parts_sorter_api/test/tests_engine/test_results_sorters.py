@@ -24,7 +24,7 @@ from random import randint, random
 import numpy as np
 import pytest
 from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
-                                                 ResutlsType, SpeedDict)
+                                                 ResultsType, SpeedDict)
 from parts_sorter_api.src.engine.results_sorters import (ResultsSorterFunction,
                                                          ResultsSorterRegistry,
                                                          by_conf, dis_center)
@@ -60,7 +60,7 @@ def random_boxes() -> BoxesType:
     )
 
 @pytest.fixture
-def random_results(random_boxes: BoxesType, speed: SpeedDict) -> ResutlsType:
+def random_results(random_boxes: BoxesType, speed: SpeedDict) -> ResultsType:
     n_classes: int = 10
     names: dict[int, str] = {i: f'Class_{i}' for i in range(n_classes)}
     return MyResults(
@@ -76,7 +76,7 @@ def random_results(random_boxes: BoxesType, speed: SpeedDict) -> ResutlsType:
     )
 
 @pytest.fixture
-def random_results_no_boxes(speed: SpeedDict) -> ResutlsType:
+def random_results_no_boxes(speed: SpeedDict) -> ResultsType:
     n_classes: int = 10
     names: dict[int, str] = {i: f'Class_{i}' for i in range(n_classes)}
     return MyResults(
@@ -92,7 +92,7 @@ def random_results_no_boxes(speed: SpeedDict) -> ResutlsType:
     )
 
 @pytest.fixture
-def known_results(speed: SpeedDict) -> ResutlsType:
+def known_results(speed: SpeedDict) -> ResultsType:
     orig_shape = (640, 640)  # (h, w)
     boxes_data: np.ndarray = np.array([
         [380, 300, 420, 340, 0.5, 2],  # Center (400, 320) - distance 80
@@ -120,8 +120,8 @@ class TestResultsSorterRegistry:
         func: ResultsSorterFunction = ResultsSorterRegistry.get('None')
         assert func == ResultsSorterRegistry.no_sort
 
-    def test_no_sort(self, random_results: ResutlsType) -> None:
-        pre_result: ResutlsType = random_results
+    def test_no_sort(self, random_results: ResultsType) -> None:
+        pre_result: ResultsType = random_results
         random_results = ResultsSorterRegistry.no_sort(random_results)
         assert pre_result == random_results
         if pre_result.boxes is not None and random_results.boxes is not None:
@@ -130,8 +130,8 @@ class TestResultsSorterRegistry:
                 random_results.boxes.data
             )
 
-    def test_no_sort_inplace(self, random_results: ResutlsType) -> None:
-        pre_result: ResutlsType = random_results
+    def test_no_sort_inplace(self, random_results: ResultsType) -> None:
+        pre_result: ResultsType = random_results
         ResultsSorterRegistry.no_sort(random_results)
         assert pre_result == random_results
         if pre_result.boxes is not None and random_results.boxes is not None:
@@ -143,7 +143,7 @@ class TestResultsSorterRegistry:
     def test_register(self) -> None:
         try:
             @ResultsSorterRegistry.register('test')
-            def fnc(results: ResutlsType) -> ResutlsType:
+            def fnc(results: ResultsType) -> ResultsType:
                 return results
             assert ResultsSorterRegistry.get('test') == fnc
             assert 'TEST' in ResultsSorterRegistry.list()
@@ -155,7 +155,7 @@ class TestResultsSorterRegistry:
         temp: dict[str, ResultsSorterFunction] = ResultsSorterRegistry._sorters.copy()
         try:
             @ResultsSorterRegistry.register('test')
-            def fnc(results: ResutlsType) -> ResutlsType:
+            def fnc(results: ResultsType) -> ResultsType:
                 return results
             ResultsSorterRegistry.clear()
             assert ResultsSorterRegistry._sorters == {}
@@ -176,14 +176,14 @@ class TestByConf:
         func: ResultsSorterFunction = ResultsSorterRegistry.get(name)
         assert func == by_conf
 
-    def test_func(self, random_results: ResutlsType) -> None:
+    def test_func(self, random_results: ResultsType) -> None:
         random_results = by_conf(random_results)
         if random_results.boxes is None:
             return
         conf_list: list = random_results.boxes.data[:, 4].tolist()
         assert conf_list == sorted(conf_list, reverse= True)
 
-    def test_inplace(self, random_results: ResutlsType) -> None:
+    def test_inplace(self, random_results: ResultsType) -> None:
         by_conf(random_results)
         if random_results.boxes is None:
             return
@@ -204,20 +204,19 @@ class TestDisCenter:
         func: ResultsSorterFunction = ResultsSorterRegistry.get(name)
         assert func == dis_center
 
-    def test_func(self, known_results: ResutlsType) -> None:
-        sorted_results: ResutlsType = dis_center(known_results)
+    def test_func(self, known_results: ResultsType) -> None:
+        sorted_results: ResultsType = dis_center(known_results)
         if sorted_results.boxes is not None:
             expected_ids: list[int] = [1, 2, 3]
             actual_ids: list[int] = sorted_results.boxes.data[:, 5].astype(int).tolist()
             assert actual_ids == expected_ids
 
-    def test_inplace(self, known_results: ResutlsType) -> None:
+    def test_inplace(self, known_results: ResultsType) -> None:
         dis_center(known_results)
         if known_results.boxes is not None:
             expected_ids: list[int] = [1, 2, 3]
             actual_ids: list[int] = known_results.boxes.data[:, 5].astype(int).tolist()
             assert actual_ids == expected_ids
-
 
 
 if __name__ == '__main__':

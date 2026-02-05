@@ -38,7 +38,7 @@ from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.managers import ModelManager, ModelsContainer
-from ..engine.results import ResutlsType, extract_first_result
+from ..engine.results import ResultsType, extract_first_result
 from ..engine.results_sorters import apply_results_sorters
 from ..models.api import ImageFilters, ImageHistResponse, ProcessImageResult
 from ..models.database import (Image, ImageProcessed, InspectionResult,
@@ -259,7 +259,7 @@ async def db_process_image(
             inpection_result_name= None,
             trust= None
         )
-    results_list: list[ResutlsType] = model_manager.inspect(db_image.internal_absolute_path)
+    results_list: list[ResultsType] = model_manager.inspect(db_image.internal_absolute_path)
     if len(results_list) < 1:
         my_logger.error(f'Error processing image.')
         return ProcessImageResult(
@@ -267,7 +267,7 @@ async def db_process_image(
             inpection_result_name= None,
             trust= None
         )
-    results: ResutlsType = results_list[0]
+    results: ResultsType = results_list[0]
     results = apply_results_sorters(
         results= results,
         sorters= ('center',)  #TODO: use sorters by origin

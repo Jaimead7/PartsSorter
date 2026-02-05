@@ -26,11 +26,11 @@ import numpy as np
 from pyUtils import NoInstantiable
 
 from ..dependencies.config import my_logger
-from .results import BoxesType, ResutlsType
+from .results import BoxesType, ResultsType
 
 
 class ResultsSorterFunction(Protocol):
-    def __call__(self, results: ResutlsType) -> ResutlsType:
+    def __call__(self, results: ResultsType) -> ResultsType:
         ...
 
 
@@ -38,7 +38,7 @@ class ResultsSorterRegistry(NoInstantiable):
     _sorters: ClassVar[dict[str, ResultsSorterFunction]] = {}
 
     @staticmethod
-    def no_sort(results: ResutlsType) -> ResutlsType:
+    def no_sort(results: ResultsType) -> ResultsType:
         return results
 
     @classmethod
@@ -68,9 +68,9 @@ class ResultsSorterRegistry(NoInstantiable):
 
 
 def apply_results_sorters(
-    results: ResutlsType,
+    results: ResultsType,
     sorters: str | Sequence[str]
-) -> ResutlsType:
+) -> ResultsType:
     if isinstance(sorters, str):
         sorters = (sorters,)
     sorters_fnc: Generator[ResultsSorterFunction, None, None] = (
@@ -82,7 +82,7 @@ def apply_results_sorters(
     return results
 
 @ResultsSorterRegistry.register('CONF')
-def by_conf(results: ResutlsType) -> ResutlsType:
+def by_conf(results: ResultsType) -> ResultsType:
     if results.boxes is None or len(results.boxes.data) == 0:
         return results
     boxes_data: np.ndarray = results.boxes.data
@@ -91,7 +91,7 @@ def by_conf(results: ResutlsType) -> ResutlsType:
     return results
 
 @ResultsSorterRegistry.register('CENTER')
-def dis_center(results: ResutlsType) -> ResutlsType:
+def dis_center(results: ResultsType) -> ResultsType:
     def get_center_distances(boxes: BoxesType) -> np.ndarray:
         x_centers: np.ndarray = (boxes.data[:, 0] + boxes.data[:, 2]) / 2
         y_centers: np.ndarray = (boxes.data[:, 1] + boxes.data[:, 3]) / 2
