@@ -20,6 +20,7 @@
 
 
 from random import randint, random
+from typing import Optional
 
 import numpy as np
 import pytest
@@ -102,6 +103,11 @@ class TestClassResult:
             _ = ClassResult(trust= 1.1)  #type: ignore
         with pytest.raises(ValueError):
             _ = ClassResult(trust= 'test')  #type: ignore
+
+    def test_unpack(self) -> None:
+        id: Optional[int]
+        trust: Optional[float]
+        id, trust = ClassResult(id= 1, trust= 0.5).unpack()
 
 
 class TestResultsSorterRegistry:

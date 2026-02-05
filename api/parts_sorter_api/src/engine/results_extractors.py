@@ -19,8 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from collections.abc import Callable
-from typing import ClassVar, Optional, Protocol
+from collections.abc import Callable, Generator
+from typing import Any, ClassVar, Optional, Protocol
 
 import numpy as np
 from pydantic import BaseModel, field_validator
@@ -47,6 +47,9 @@ class ClassResult(BaseModel):
         if v is not None and (v < 0. or v > 1.):
             raise ValueError(f'{cls.__name__}.trust must be [0, 1].')
         return v
+
+    def unpack(self) -> tuple[Optional[int], Optional[float]]:
+        return (self.id, self.trust)
 
 
 class ResultsExtractorFunction(Protocol):
