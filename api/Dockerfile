@@ -51,8 +51,7 @@ LABEL org.opencontainers.image.source="https://github.com/Jaimead7/PartsSorter/t
 # Set the working directory
 WORKDIR /api
 
-# Instal opencv dependencies.
-    # curl for healthcheck
+# Instal curl for healthcheck
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
