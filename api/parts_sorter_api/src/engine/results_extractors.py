@@ -23,7 +23,7 @@ from collections.abc import Callable
 from typing import ClassVar, Optional, Protocol
 
 import numpy as np
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from pyUtils import NoInstantiable
 
 from ..dependencies.config import my_logger
@@ -33,6 +33,20 @@ from .results import ResultsType
 class ClassResult(BaseModel):
     id: Optional[int] = None
     trust: Optional[float] = None
+
+    @field_validator('id')
+    @classmethod
+    def validate_id(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and v < 0:
+            raise ValueError(f'{cls.__name__}.id must be positive.')
+        return v
+
+    @field_validator('trust')
+    @classmethod
+    def validate_trust(cls, v: Optional[float]) -> Optional[float]:
+        if v is not None and (v < 0. or v > 1.):
+            raise ValueError(f'{cls.__name__}.trust must be [0, 1].')
+        return v
 
 
 class ResultsExtractorFunction(Protocol):
