@@ -31,8 +31,8 @@ from .results import ResutlsType
 
 
 class ClassResult(BaseModel):
-    id: Optional[int]
-    trust: Optional[float]
+    id: Optional[int] = None
+    trust: Optional[float] = None
 
 
 class ResultsExtractorFunction(Protocol):
@@ -45,7 +45,7 @@ class ResultsExtractorRegistry(NoInstantiable):
 
     @staticmethod
     def no_extract(results: ResutlsType) -> ClassResult:
-        return ClassResult(id = None, trust = None)
+        return ClassResult()
 
     @classmethod
     def register(cls, name: str) -> Callable[[ResultsExtractorFunction], ResultsExtractorFunction]:
@@ -76,10 +76,10 @@ class ResultsExtractorRegistry(NoInstantiable):
 @ResultsExtractorRegistry.register('FIRST')
 def extract_first_result(results: ResutlsType) -> ClassResult:
     if results.boxes is None:
-        return ClassResult(id = None, trust = None)
+        return ClassResult()
     results_array: np.ndarray = results.boxes.data
     if len(results_array) == 0:
-        return ClassResult(id= None, trust= None)
+        return ClassResult()
     first: np.ndarray = results_array[0]
     # [x0, y0, x1, y1, conf, id] x n
     return ClassResult(id = first[-1], trust = first[-2])
