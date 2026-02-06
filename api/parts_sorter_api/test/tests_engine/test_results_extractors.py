@@ -28,8 +28,16 @@ from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
                                                  ResultsType, SpeedDict)
 from parts_sorter_api.src.engine.results_extractors import (
     ClassResult, ResultsExtractorFunction, ResultsExtractorRegistry,
-    extract_first_result)
+    extract_first_result, extract_first_result_alone)
 
+
+@pytest.fixture
+def n_classes() -> int:
+    return 10
+
+@pytest.fixture
+def names(n_classes: int) -> dict[int, str]:
+    return {i: f'Class_{i}' for i in range(n_classes)}
 
 @pytest.fixture
 def speed() -> SpeedDict:
@@ -40,11 +48,21 @@ def speed() -> SpeedDict:
     )
 
 @pytest.fixture
-def random_boxes() -> BoxesType:
+def org_img() -> np.ndarray:
     orig_w: int = 640
     orig_h: int = 640
+    return np.random.randint(
+        0,
+        256,
+        size=(orig_h, orig_w, 3),
+        dtype=np.uint8
+    )
+
+@pytest.fixture
+def random_boxes(org_img: np.ndarray, n_classes: int) -> BoxesType:
+    orig_w: int = org_img.shape[1]
+    orig_h: int = org_img.shape[0]
     orig_shape: tuple[int, int] = (orig_w, orig_h)
-    n_classes: int = 10
     boxes_list: list = []
     for _ in range(5):
         x0: int = randint(0, int((orig_w * 0.9) // 1))
@@ -61,18 +79,43 @@ def random_boxes() -> BoxesType:
     )
 
 @pytest.fixture
-def random_results(random_boxes: BoxesType, speed: SpeedDict) -> ResultsType:
-    n_classes: int = 10
-    names: dict[int, str] = {i: f'Class_{i}' for i in range(n_classes)}
+def random_results(
+    random_boxes: BoxesType,
+    org_img: np.ndarray,
+    speed: SpeedDict,
+    names: dict[int, str]
+) -> ResultsType:
     return MyResults(
-        orig_img= np.random.randint(
-            0,
-            256,
-            size=(*random_boxes.orig_shape, 3),
-            dtype=np.uint8
-        ),
+        orig_img= org_img,
         names= names,
         boxes= random_boxes.data,
+        speed= speed
+    )
+
+@pytest.fixture
+def one_result(
+    random_boxes: BoxesType,
+    org_img: np.ndarray,
+    speed: SpeedDict,
+    names: dict[int, str]
+) -> ResultsType:
+    return MyResults(
+        orig_img= org_img,
+        names= names,
+        boxes= random_boxes.data[0:1],
+        speed= speed
+    )
+
+@pytest.fixture
+def empty_result(
+    org_img: np.ndarray,
+    speed: SpeedDict,
+    names: dict[int, str]
+) -> ResultsType:
+    return MyResults(
+        orig_img= org_img,
+        names= names,
+        boxes= None,
         speed= speed
     )
 
@@ -80,15 +123,16 @@ def random_results(random_boxes: BoxesType, speed: SpeedDict) -> ResultsType:
 class TestClassResult:
     def test_default(self) -> None:
         res: ClassResult = ClassResult()
-        assert res.id == None
-        assert res.trust == None
+        assert res.id is None
+        assert res.trust is None
 
     def test_validate_id(self) -> None:
         assert ClassResult(id= 0).id == 0
         assert ClassResult(id= 1).id == 1
         assert ClassResult(id= '1').id == 1  #type: ignore
+        assert ClassResult(id= -1).id == -1
         with pytest.raises(ValueError):
-            _ = ClassResult(id= -1)
+            _ = ClassResult(id= -2)
         with pytest.raises(ValueError):
             _ = ClassResult(id= 'test')  #type: ignore
 
@@ -108,6 +152,8 @@ class TestClassResult:
         id: Optional[int]
         trust: Optional[float]
         id, trust = ClassResult(id= 1, trust= 0.5).unpack()
+        assert id == 1
+        assert trust == 0.5
 
 
 class TestResultsSorterRegistry:
@@ -121,8 +167,8 @@ class TestResultsSorterRegistry:
 
     def test_no_extract(self, random_results: ResultsType) -> None:
         result: ClassResult = ResultsExtractorRegistry.no_extract(random_results)
-        assert result.id == None
-        assert result.trust == None
+        assert result.id is None
+        assert result.trust is None
 
     def test_register(self) -> None:
         try:
@@ -160,14 +206,185 @@ class TestExtractFirstResult:
         func: ResultsExtractorFunction = ResultsExtractorRegistry.get(name)
         assert func == extract_first_result
 
-    def test_func(self, random_results: ResultsType) -> None:
+    def test_empty(self, empty_result: ResultsType) -> None:
+        result: ClassResult = extract_first_result(empty_result)
+        assert result.id is None
+        assert result.trust is None
+
+    def test_one_result(self, one_result: ResultsType) -> None:
+        result: ClassResult = extract_first_result(one_result)
+        if one_result.boxes is None:
+            return
+        assert result.id == one_result.boxes.data[0, -1]
+        assert result.trust == one_result.boxes.data[0, -2]
+
+    def test_random_results(self, random_results: ResultsType) -> None:
         result: ClassResult = extract_first_result(random_results)
         if random_results.boxes is None:
             return
-        id: int = random_results.boxes.data[0, -1]
-        trust: int = random_results.boxes.data[0, -2]
-        assert result.id == id
-        assert result.trust == trust
+        assert result.id == random_results.boxes.data[0, -1]
+        assert result.trust == random_results.boxes.data[0, -2]
+
+
+class TestExtractFirsResultAlone:
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('ALONE'),
+            ('alone'),
+            ('aLOnE'),
+        ]
+    )
+    def test_factory(self, name: str) -> None:
+        func: ResultsExtractorFunction = ResultsExtractorRegistry.get(name)
+        assert func == extract_first_result_alone
+
+    def test_empty(self, empty_result: ResultsType) -> None:
+        result: ClassResult = extract_first_result_alone(empty_result)
+        assert result.id is None
+        assert result.trust is None
+
+    def test_one_result(self, one_result: ResultsType) -> None:
+        result: ClassResult = extract_first_result_alone(one_result)
+        if one_result.boxes is None:
+            return
+        assert result.id == one_result.boxes.data[0, -1]
+        assert result.trust == one_result.boxes.data[0, -2]
+
+    def test_random_results(self, random_results: ResultsType) -> None:
+        result: ClassResult = extract_first_result(random_results)
+        if random_results.boxes is None:
+            return
+        assert result.id == random_results.boxes.data[0, -1]
+        assert result.trust == random_results.boxes.data[0, -2]
+
+    def test_no_overlap_far_away(
+        self,
+        org_img: np.ndarray,
+        speed: SpeedDict,
+        n_classes: int,
+        names: dict[int, str]
+    ) -> None:
+        boxes: np.ndarray = np.array([
+            [100, 100, 150, 150, 0.9, 1],     # Base box
+            [200, 200, 250, 250, 0.8, 2],     # Far away
+            [300, 300, 350, 350, 0.7, 3]      # Far away
+        ])
+        results: ResultsType = MyResults(
+            orig_img= org_img,
+            names= names,
+            boxes= boxes,
+            speed= speed
+        )
+        output: ClassResult = extract_first_result_alone(results)
+        assert output.id == 1
+        assert output.trust == 0.9
+
+    def test_direct_overlap(
+        self,
+        org_img: np.ndarray,
+        speed: SpeedDict,
+        n_classes: int,
+        names: dict[int, str]
+    ) -> None:
+        boxes: np.ndarray = np.array([
+            [100, 100, 150, 150, 0.9, 1],     # Base box
+            [120, 120, 140, 140, 0.8, 2]      # Inside base box
+        ])
+        results: ResultsType = MyResults(
+            orig_img= org_img,
+            names= names,
+            boxes= boxes,
+            speed= speed
+        )
+        output: ClassResult = extract_first_result_alone(results)
+        assert output.id == -1
+        assert output.trust is None
+
+    def test_threshold_proximity_overlap(
+        self,
+        org_img: np.ndarray,
+        speed: SpeedDict,
+        n_classes: int,
+        names: dict[int, str]
+    ) -> None:
+        boxes: np.ndarray = np.array([
+            [100, 100, 150, 150, 0.9, 1],     # Base box
+            [160, 100, 170, 150, 0.8, 2]      # xmin = 160, base_xmax = 150 + 10 = 160
+        ])
+        results: ResultsType = MyResults(
+            orig_img= org_img,
+            names= names,
+            boxes= boxes,
+            speed= speed
+        )
+        output: ClassResult = extract_first_result_alone(results)
+        assert output.id == 1
+        assert output.trust == 0.9
+
+    def test_within_threshold_range(
+        self,
+        org_img: np.ndarray,
+        speed: SpeedDict,
+        n_classes: int,
+        names: dict[int, str]
+    ) -> None:
+        boxes: np.ndarray = np.array([
+            [100, 100, 150, 150, 0.9, 1],     # Base box
+            [155, 100, 165, 150, 0.8, 2]      # 5 pixels away (within threshold)
+        ])
+        results: ResultsType = MyResults(
+            orig_img= org_img,
+            names= names,
+            boxes= boxes,
+            speed= speed
+        )
+        output: ClassResult = extract_first_result_alone(results)
+        assert output.id == -1
+        assert output.trust is None
+
+    def test_reversed_coordinates(
+        self,
+        org_img: np.ndarray,
+        speed: SpeedDict,
+        n_classes: int,
+        names: dict[int, str]
+    ) -> None:
+        boxes: np.ndarray = np.array([
+            [150, 150, 100, 100, 0.9, 1],     # Reversed: x0 > x1, y0 > y1
+            [120, 120, 140, 140, 0.8, 2]      # Inside (should trigger overlap)
+        ])
+        results: ResultsType = MyResults(
+            orig_img= org_img,
+            names= names,
+            boxes= boxes,
+            speed= speed
+        )
+        output: ClassResult = extract_first_result_alone(results)
+        assert output.id == -1
+        assert output.trust is None
+
+    def test_multiple_overlaps(
+        self,
+        org_img: np.ndarray,
+        speed: SpeedDict,
+        n_classes: int,
+        names: dict[int, str]
+    ) -> None:
+        boxes: np.ndarray = np.array([
+            [100, 100, 150, 150, 0.9, 1],     # Base box
+            [200, 200, 250, 250, 0.8, 2],     # Far away (no overlap)
+            [120, 120, 140, 140, 0.7, 3]      # Overlap (should trigger failure)
+        ])
+        results: ResultsType = MyResults(
+            orig_img= org_img,
+            names= names,
+            boxes= boxes,
+            speed= speed
+        )
+        output: ClassResult = extract_first_result_alone(results)
+        assert output.id == -1
+        assert output.trust is None
 
 
 if __name__ == '__main__':
