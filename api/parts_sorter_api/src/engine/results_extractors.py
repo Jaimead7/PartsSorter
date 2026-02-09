@@ -38,14 +38,14 @@ class ClassResult(BaseModel):
     @classmethod
     def validate_id(cls, v: Optional[int]) -> Optional[int]:
         if v is not None and v < -1:
-            raise ValueError(f'{cls.__name__}.id must be positive or -1.')
+            raise ValueError(f'{cls.__name__}.id must be Optional[int].')
         return v
 
     @field_validator('trust')
     @classmethod
     def validate_trust(cls, v: Optional[float]) -> Optional[float]:
         if v is not None and (v < 0. or v > 1.):
-            raise ValueError(f'{cls.__name__}.trust must be [0, 1].')
+            raise ValueError(f'{cls.__name__}.trust must be [0, 1] or None.')
         return v
 
     def unpack(self) -> tuple[Optional[int], Optional[float]]:
