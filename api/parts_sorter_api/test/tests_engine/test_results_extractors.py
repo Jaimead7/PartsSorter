@@ -20,15 +20,15 @@
 
 
 from random import randint, random
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import pytest
 from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
                                                  ResultsType, SpeedDict)
 from parts_sorter_api.src.engine.results_extractors import (
-    ClassResult, ResultsExtractorFunction, ResultsExtractorRegistry,
-    extract_first_result, extract_first_result_alone)
+    ClassResult, ClassResultErros, ResultsExtractorFunction,
+    ResultsExtractorRegistry, extract_first_result, extract_first_result_alone)
 
 
 @pytest.fixture
@@ -120,6 +120,19 @@ def empty_result(
     )
 
 
+class TestClassResultErrors:
+    @pytest.mark.parametrize(
+        'value',
+        [
+            ('error'),
+            (0),
+            (1),
+        ]
+    )
+    def test_validate_errors(self, value: Any) -> None:
+        assert not ClassResultErros.validate(value)
+
+
 class TestClassResult:
     def test_default(self) -> None:
         res: ClassResult = ClassResult()
@@ -127,16 +140,16 @@ class TestClassResult:
         assert res.trust is None
 
     def test_validate_id(self) -> None:
+        assert ClassResult(id= None).id is None
         assert ClassResult(id= 0).id == 0
         assert ClassResult(id= 1).id == 1
         assert ClassResult(id= '1').id == 1  #type: ignore
         assert ClassResult(id= -1).id == -1
         with pytest.raises(ValueError):
-            _ = ClassResult(id= -2)
-        with pytest.raises(ValueError):
             _ = ClassResult(id= 'test')  #type: ignore
 
     def test_validate_trust(self) -> None:
+        assert ClassResult(trust= None).trust is None
         assert ClassResult(trust= 0.).trust == 0
         assert ClassResult(trust= 1.).trust == 1
         assert ClassResult(trust= 0.5).trust == 0.5
@@ -262,7 +275,6 @@ class TestExtractFirsResultAlone:
         self,
         org_img: np.ndarray,
         speed: SpeedDict,
-        n_classes: int,
         names: dict[int, str]
     ) -> None:
         boxes: np.ndarray = np.array([
@@ -284,7 +296,6 @@ class TestExtractFirsResultAlone:
         self,
         org_img: np.ndarray,
         speed: SpeedDict,
-        n_classes: int,
         names: dict[int, str]
     ) -> None:
         boxes: np.ndarray = np.array([
@@ -298,14 +309,13 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == -1
+        assert output.id == ClassResultErros.OVERLAP.value
         assert output.trust is None
 
     def test_threshold_proximity_overlap(
         self,
         org_img: np.ndarray,
         speed: SpeedDict,
-        n_classes: int,
         names: dict[int, str]
     ) -> None:
         boxes: np.ndarray = np.array([
@@ -326,7 +336,6 @@ class TestExtractFirsResultAlone:
         self,
         org_img: np.ndarray,
         speed: SpeedDict,
-        n_classes: int,
         names: dict[int, str]
     ) -> None:
         boxes: np.ndarray = np.array([
@@ -340,14 +349,13 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == -1
+        assert output.id == ClassResultErros.CLOSE.value
         assert output.trust is None
 
     def test_reversed_coordinates(
         self,
         org_img: np.ndarray,
         speed: SpeedDict,
-        n_classes: int,
         names: dict[int, str]
     ) -> None:
         boxes: np.ndarray = np.array([
@@ -361,14 +369,13 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == -1
+        assert output.id == ClassResultErros.OVERLAP.value
         assert output.trust is None
 
     def test_multiple_overlaps(
         self,
         org_img: np.ndarray,
         speed: SpeedDict,
-        n_classes: int,
         names: dict[int, str]
     ) -> None:
         boxes: np.ndarray = np.array([
@@ -383,7 +390,7 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == -1
+        assert output.id == ClassResultErros.OVERLAP.value
         assert output.trust is None
 
 

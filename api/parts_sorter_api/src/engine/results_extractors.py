@@ -20,7 +20,8 @@
 
 
 from collections.abc import Callable
-from typing import ClassVar, Optional, Protocol
+from enum import Enum, unique
+from typing import Any, ClassVar, Optional, Protocol
 
 import numpy as np
 from pydantic import BaseModel, field_validator
@@ -30,6 +31,20 @@ from ..dependencies.config import my_logger
 from .results import ResultsType
 
 
+@unique
+class ClassResultErros(Enum):
+    OVERLAP = -1
+    CLOSE = -2
+
+    @classmethod
+    def validate(cls, v: Any) -> bool:
+        try:
+            cls(v)
+            return True
+        except ValueError:
+            return False
+
+
 class ClassResult(BaseModel):
     id: Optional[int] = None
     trust: Optional[float] = None
@@ -37,9 +52,9 @@ class ClassResult(BaseModel):
     @field_validator('id')
     @classmethod
     def validate_id(cls, v: Optional[int]) -> Optional[int]:
-        if v is not None and v < -1:
-            raise ValueError(f'{cls.__name__}.id must be Optional[int].')
-        return v
+        if v is None or v >= 0 or ClassResultErros.validate(v):
+            return v
+        raise ValueError(f'{cls.__name__}.id must be Optional[int].')
 
     @field_validator('trust')
     @classmethod
@@ -53,8 +68,7 @@ class ClassResult(BaseModel):
 
 
 class ResultsExtractorFunction(Protocol):
-    def __call__(self, results: ResultsType) -> ClassResult:
-        ...
+    def __call__(self, results: ResultsType) -> ClassResult: ...
 
 
 class ResultsExtractorRegistry(NoInstantiable):
@@ -104,31 +118,29 @@ def extract_first_result(results: ResultsType) -> ClassResult:
 @ResultsExtractorRegistry.register('ALONE')
 def extract_first_result_alone(results: ResultsType) -> ClassResult:
     # [x0, y0, x1, y1, conf, id] x n
-    threshold: int = 10
+    threshold: int = 10  #TODO: use as param
     if results.boxes is None:
         return ClassResult()
     boxes: np.ndarray = results.boxes.data
     if boxes.shape[0] == 1:
         return ClassResult(id= boxes[0,-1], trust= boxes[0,-2])
-    x0: np.ndarray = boxes[:, 0]
-    y0: np.ndarray = boxes[:, 1]
-    x1: np.ndarray = boxes[:, 2]
-    y1: np.ndarray = boxes[:, 3]
-    xmin: np.ndarray = np.minimum(x0, x1)
-    ymin: np.ndarray = np.minimum(y0, y1)
-    xmax: np.ndarray = np.maximum(x0, x1)
-    ymax: np.ndarray = np.maximum(y0, y1)
-    base_xmin: int = xmin[0] - threshold
-    base_ymin: int = ymin[0] - threshold
-    base_xmax: int = xmax[0] + threshold
-    base_ymax: int = ymax[0] + threshold
-    other_xmin: np.ndarray = xmin[1:]
-    other_ymin: np.ndarray = ymin[1:]
-    other_xmax: np.ndarray = xmax[1:]
-    other_ymax: np.ndarray = ymax[1:]
-    overlap_x = np.maximum(base_xmin, other_xmin) < np.minimum(base_xmax, other_xmax)
-    overlap_y = np.maximum(base_ymin, other_ymin) < np.minimum(base_ymax, other_ymax)
-    overlap = overlap_x & overlap_y
-    if np.any(overlap):
-        return ClassResult(id= -1, trust= None)
+    boxes_norm: np.ndarray = np.column_stack([
+        np.minimum(boxes[:, 0], boxes[:, 2]),
+        np.minimum(boxes[:, 1], boxes[:, 3]),
+        np.maximum(boxes[:, 0], boxes[:, 2]),
+        np.maximum(boxes[:, 1], boxes[:, 3])
+    ])
+    base: np.ndarray = boxes_norm[0]
+    others: np.ndarray = boxes_norm[1:]
+    if squares_overlap(base, others):
+        return ClassResult(id= ClassResultErros.OVERLAP.value, trust= None)
+    scale_array: np.ndarray = np.array([-threshold, -threshold, threshold, threshold])
+    if squares_overlap(base + scale_array, others):
+        return ClassResult(id= ClassResultErros.CLOSE.value, trust= None)
     return ClassResult(id= boxes[0,-1], trust= boxes[0,-2])
+
+def squares_overlap(base: np.ndarray, others: np.ndarray) -> bool:
+    overlap_x: np.ndarray = np.maximum(base[0], others[:,0]) < np.minimum(base[2], others[:,2])
+    overlap_y: np.ndarray = np.maximum(base[1], others[:,1]) < np.minimum(base[3], others[:,3])
+    overlap: np.ndarray = overlap_x & overlap_y
+    return bool(np.any(overlap))
