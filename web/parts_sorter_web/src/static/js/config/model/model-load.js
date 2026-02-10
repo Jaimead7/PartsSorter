@@ -20,12 +20,14 @@
 
 
 import {
-    showAlert
+    showAlert,
+    disableSubmitButton,
+    enableSubmitButton
 } from '../../utils.js';
 
 
 async function initFormEvents() {
-    const form = document.getElementById('modelForm');
+    const form = document.getElementById('modelLoadForm');
 
     if (!form) {
         throw new Error('Couldn\'t obtain the model form');

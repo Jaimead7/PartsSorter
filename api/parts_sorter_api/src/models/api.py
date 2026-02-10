@@ -53,6 +53,7 @@ class ImageFilters(BaseModel):
     models: list[Optional[str]] = []
 
     @field_validator('inspection_results')
+    @classmethod
     def validate_inspection_results(
         cls,
         inspection_results: list[Optional[str]]
@@ -65,6 +66,7 @@ class ImageFilters(BaseModel):
         ]
 
     @field_validator('origins')
+    @classmethod
     def validate_origins(
         cls,
         origins: list[Optional[str]]
@@ -77,6 +79,7 @@ class ImageFilters(BaseModel):
         ]
 
     @field_validator('true_results')
+    @classmethod
     def validate_true_results(
         cls,
         true_results: list[Optional[str]]
@@ -89,6 +92,7 @@ class ImageFilters(BaseModel):
         ]
 
     @field_validator('models')
+    @classmethod
     def validate_models(
         cls,
         models: list[Optional[str]]
