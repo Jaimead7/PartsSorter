@@ -32,7 +32,7 @@ from .results import ResultsType
 
 
 @unique
-class ClassResultErros(Enum):
+class ClassResultErrors(Enum):
     OVERLAP = -1
     CLOSE = -2
 
@@ -52,7 +52,7 @@ class ClassResult(BaseModel):
     @field_validator('id')
     @classmethod
     def validate_id(cls, v: Optional[int]) -> Optional[int]:
-        if v is None or v >= 0 or ClassResultErros.validate(v):
+        if v is None or v >= 0 or ClassResultErrors.validate(v):
             return v
         raise ValueError(f'{cls.__name__}.id must be Optional[int].')
 
@@ -65,6 +65,15 @@ class ClassResult(BaseModel):
 
     def unpack(self) -> tuple[Optional[int], Optional[float]]:
         return (self.id, self.trust)
+
+    def is_error(self) -> bool:
+        return ClassResultErrors.validate(self.id)
+
+    def get_error_name(self) -> Optional[str]:
+        try:
+            return ClassResultErrors(self.id).name
+        except ValueError:
+            return None
 
 
 class ResultsExtractorFunction(Protocol):
@@ -103,6 +112,10 @@ class ResultsExtractorRegistry(NoInstantiable):
     def clear(cls) -> None:
         cls._extractors.clear()
 
+    @classmethod
+    def extract(cls, results: ResultsType, extractor: str) -> ClassResult:
+        return cls.get(extractor)(results)
+
 
 @ResultsExtractorRegistry.register('FIRST')
 def extract_first_result(results: ResultsType) -> ClassResult:
@@ -133,10 +146,10 @@ def extract_first_result_alone(results: ResultsType) -> ClassResult:
     base: np.ndarray = boxes_norm[0]
     others: np.ndarray = boxes_norm[1:]
     if squares_overlap(base, others):
-        return ClassResult(id= ClassResultErros.OVERLAP.value, trust= None)
+        return ClassResult(id= ClassResultErrors.OVERLAP.value, trust= None)
     scale_array: np.ndarray = np.array([-threshold, -threshold, threshold, threshold])
     if squares_overlap(base + scale_array, others):
-        return ClassResult(id= ClassResultErros.CLOSE.value, trust= None)
+        return ClassResult(id= ClassResultErrors.CLOSE.value, trust= None)
     return ClassResult(id= boxes[0,-1], trust= boxes[0,-2])
 
 def squares_overlap(base: np.ndarray, others: np.ndarray) -> bool:

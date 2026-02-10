@@ -38,7 +38,8 @@ from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.managers import ModelManager, ModelsContainer
-from ..engine.results import ResultsType, extract_first_result
+from ..engine.results import ResultsType
+from ..engine.results_extractors import ClassResult, ResultsExtractorRegistry
 from ..engine.results_sorters import apply_results_sorters
 from ..models.api import ImageFilters, ImageHistResponse, ProcessImageResult
 from ..models.database import (Image, ImageProcessed, InspectionResult,
@@ -272,11 +273,9 @@ async def db_process_image(
         results= results,
         sorters= ('center',)  #TODO: use sorters by origin
     )
-    result_id: Optional[int]
-    trust: Optional[float]
-    result_id, trust = extract_first_result(results)
+    result: ClassResult = ResultsExtractorRegistry.extract(results, 'alone')  #TODO: use extractor by origin
     my_logger.info(f'Image "{db_image.file_name}" processed with Model "{model_name}".')
-    if result_id is None or trust is None:
+    if result.id is None:
         return ProcessImageResult(
                 model_name= model_name,
                 inpection_result_name= None,
@@ -286,7 +285,7 @@ async def db_process_image(
         inpection_result: InspectionResult = await db_get_model_inspection_result(
             session= session,
             model_name= model_name,
-            result_id= result_id
+            result_id= result.id
         )
     except HTTPException:
         return ProcessImageResult(
@@ -297,7 +296,7 @@ async def db_process_image(
     return ProcessImageResult(
         model_name= model_name,
         inpection_result_name= inpection_result.name,
-        trust= trust
+        trust= result.trust
     )
 
 async def db_get_image_origin_result(

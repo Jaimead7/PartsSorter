@@ -27,7 +27,7 @@ import pytest
 from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
                                                  ResultsType, SpeedDict)
 from parts_sorter_api.src.engine.results_extractors import (
-    ClassResult, ClassResultErros, ResultsExtractorFunction,
+    ClassResult, ClassResultErrors, ResultsExtractorFunction,
     ResultsExtractorRegistry, extract_first_result, extract_first_result_alone)
 
 
@@ -130,7 +130,7 @@ class TestClassResultErrors:
         ]
     )
     def test_validate_errors(self, value: Any) -> None:
-        assert not ClassResultErros.validate(value)
+        assert not ClassResultErrors.validate(value)
 
 
 class TestClassResult:
@@ -309,7 +309,7 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == ClassResultErros.OVERLAP.value
+        assert output.id == ClassResultErrors.OVERLAP.value
         assert output.trust is None
 
     def test_threshold_proximity_overlap(
@@ -349,7 +349,7 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == ClassResultErros.CLOSE.value
+        assert output.id == ClassResultErrors.CLOSE.value
         assert output.trust is None
 
     def test_reversed_coordinates(
@@ -369,7 +369,7 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == ClassResultErros.OVERLAP.value
+        assert output.id == ClassResultErrors.OVERLAP.value
         assert output.trust is None
 
     def test_multiple_overlaps(
@@ -390,7 +390,7 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ClassResult = extract_first_result_alone(results)
-        assert output.id == ClassResultErros.OVERLAP.value
+        assert output.id == ClassResultErrors.OVERLAP.value
         assert output.trust is None
 
 

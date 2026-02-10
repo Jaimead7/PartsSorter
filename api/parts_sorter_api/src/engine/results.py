@@ -217,14 +217,3 @@ class MyResults:
                     line_width= line_width
                 )
         return img
-
-
-def extract_first_result(results: ResultsType) -> tuple[Optional[int], Optional[float]]:
-    if results.boxes is None:
-        return (None, None)
-    results_array: np.ndarray = results.boxes.data
-    if len(results_array) == 0:
-        return (None, None)
-    first: np.ndarray = results_array[0]
-    # [x0, y0, x1, y1, conf, id] x n
-    return (int(first[-1]), float(first[-2]))
