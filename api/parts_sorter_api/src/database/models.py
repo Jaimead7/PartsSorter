@@ -35,6 +35,7 @@ from sqlmodel import col, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import my_logger
+from ..engine.results_extractors import ClassResultErrors
 from ..models.database import InspectionResult, Model, ModelClass, Origin
 from ..models.metadata_files import ModelMetadataDict
 from .inspection_results import db_create_new_inspection_result
@@ -99,6 +100,19 @@ async def db_create_new_model(
                 model_class= ModelClass(
                     model= model.name,
                     number= number,
+                    inspection_result= inspection_result.name
+                )
+            )
+        for item in ClassResultErrors:
+            inspection_result: InspectionResult = await db_create_new_inspection_result(
+                session= session,
+                name= item.name
+            )
+            await db_create_new_model_class(
+                session= session,
+                model_class= ModelClass(
+                    model= model.name,
+                    number= item.value,
                     inspection_result= inspection_result.name
                 )
             )
