@@ -20,6 +20,7 @@
 
 
 from datetime import datetime, timezone
+from enum import Enum, unique
 from pathlib import Path
 from typing import Any, Optional
 from uuid import UUID, uuid4
@@ -144,6 +145,22 @@ class Model(SQLModel, table= True):
 
 
 #********** IMAGES **********
+@unique
+class ImageStatus(Enum):
+    CAPTURED = 0
+    PUSHED = 1
+    LEAVE = 2
+    LOST = 3
+
+    @classmethod
+    def validate(cls, v: int) -> int:
+        try:
+            cls(v)
+            return v
+        except ValueError:
+            return cls.CAPTURED.value
+
+
 class BaseImage(SQLModel):
     id: UUID = Field(
         default_factory= uuid4,
@@ -190,6 +207,10 @@ class BaseImage(SQLModel):
     trust: Optional[float] = Field(
         default= None,
         nullable= True
+    )
+    status: int = Field(
+        default= ImageStatus.CAPTURED.value,
+        nullable= False
     )
 
     @property
@@ -242,6 +263,7 @@ class ImageProcessed(BaseImage):
             true_result= image.true_result,
             trust= image.trust,
             model= image.model,
+            status= image.status,
             result= result if result is not None else False
         )
 
