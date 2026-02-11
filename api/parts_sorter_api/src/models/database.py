@@ -158,7 +158,7 @@ class ImageStatus:
     lost: int = _status['lost']
 
     @classmethod
-    def __getitem__(cls, name: str) -> int:
+    def get_value(cls, name: str) -> int:
         try:
             return cls._status[name.lower()]
         except Exception as _:

@@ -134,6 +134,7 @@ async def db_update_image(
         inspection_result_name= image.true_result
     )
     db_image.trust = image.trust
+    db_image.status = image.status
     if update_date:
         db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     db_image = await _db_add_image_and_commit(
