@@ -20,7 +20,6 @@
 
 
 from datetime import datetime, timezone
-from enum import Enum, unique
 from pathlib import Path
 from typing import Any, Optional
 from uuid import UUID, uuid4
@@ -145,20 +144,32 @@ class Model(SQLModel, table= True):
 
 
 #********** IMAGES **********
-@unique
-class ImageStatus(Enum):
-    CAPTURED = 0
-    PUSHED = 1
-    LEAVE = 2
-    LOST = 3
+class ImageStatus:
+    _status: dict[str, int] = {    
+        'captured': 0,
+        'pushed': 1,
+        'left': 2,
+        'lost': 3
+    }
+
+    captured: int = _status['captured']
+    pushed: int = _status['pushed']
+    left: int = _status['left']
+    lost: int = _status['lost']
 
     @classmethod
-    def validate(cls, v: int) -> int:
+    def __getitem__(cls, name: str) -> int:
         try:
-            cls(v)
-            return v
-        except ValueError:
-            return cls.CAPTURED.value
+            return cls._status[name.lower()]
+        except Exception as _:
+            return cls.captured
+
+    @classmethod
+    def get_name(cls, value: int) -> str:
+        for name, val in cls._status.items():
+            if val == value:
+                return name.capitalize()
+        return 'Not found'
 
 
 class BaseImage(SQLModel):
@@ -209,7 +220,7 @@ class BaseImage(SQLModel):
         nullable= True
     )
     status: int = Field(
-        default= ImageStatus.CAPTURED.value,
+        default= ImageStatus.captured,
         nullable= False
     )
 

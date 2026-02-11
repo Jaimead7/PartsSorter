@@ -34,7 +34,7 @@ from ..database.images import (db_create_and_process_new_image,
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.api import ImageFilters, ImageHistResponse, ImageStreamResponse
-from ..models.database import Image, ImageProcessed
+from ..models.database import Image, ImageProcessed, ImageStatus
 
 images_router: APIRouter = APIRouter()
 
@@ -172,14 +172,16 @@ async def update_image(
     inspection_result: Annotated[Optional[str], Body()] = None,
     origin: Annotated[Optional[str], Body()] = None,
     true_result: Annotated[Optional[str], Body()] = None,
-    trust: Annotated[Optional[float], Body()] = None
+    trust: Annotated[Optional[float], Body()] = None,
+    status: Annotated[int, Body()] = ImageStatus.captured
 ) -> Image:
     image = Image(
         id= uuid,
         inspection_result= inspection_result,
         origin= origin,
         true_result= true_result,
-        trust= trust
+        trust= trust,
+        status= status
     )
     return await db_update_image(
         session= session,
