@@ -19,8 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any, Optional, Sequence
+from datetime import datetime
+from typing import Annotated, Optional, Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, Path, Query, UploadFile, status
@@ -172,7 +172,7 @@ async def update_image(
     inspection_result: Annotated[Optional[str], Body()] = None,
     origin: Annotated[Optional[str], Body()] = None,
     true_result: Annotated[Optional[str], Body()] = None,
-    trust: Annotated[Optional[float], Body()] = None 
+    trust: Annotated[Optional[float], Body()] = None
 ) -> Image:
     image = Image(
         id= uuid,
