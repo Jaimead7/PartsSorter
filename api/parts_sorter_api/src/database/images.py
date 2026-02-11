@@ -304,21 +304,22 @@ async def db_get_image_origin_result(
     session: AsyncSession,
     image: Image
 ) -> bool:
-    if image.origin is not None and image.inspection_result is not None and image.trust is not None:
-        try:
-            db_origin_result: OriginResult = await db_get_origin_result(
-                session= session,
-                origin_result= OriginResult(
-                    origin= image.origin,
-                    inspection_result= image.inspection_result
-                )
+    if image.origin is None or image.inspection_result is None or image.trust is None:
+        return True
+    try:
+        db_origin_result: OriginResult = await db_get_origin_result(
+            session= session,
+            origin_result= OriginResult(
+                origin= image.origin,
+                inspection_result= image.inspection_result
             )
-            if db_origin_result.threshold >= image.trust:
-                return True
-            return db_origin_result.result
-        except HTTPException:
-            pass
-    return False
+        )
+        if db_origin_result.threshold >= image.trust:
+            return True
+        return db_origin_result.result
+    except HTTPException:
+        pass
+    return True
 
 async def db_create_and_process_new_image(
     session: AsyncSession,
