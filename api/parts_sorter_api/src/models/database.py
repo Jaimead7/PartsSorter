@@ -33,7 +33,7 @@ from typing_extensions import Self
 
 from ..dependencies.config import (INTERNAL_IMAGES_FOLDER,
                                    INTERNAL_MODELS_FOLDER,
-                                   STATIC_IMAGES_FOLDER)
+                                   STATIC_IMAGES_FOLDER, my_logger)
 from .metadata_files import ModelMetadataDict
 
 
@@ -159,17 +159,35 @@ class ImageStatus(NoInstantiable):
     lost: int = _status['lost']
 
     @classmethod
-    def get_value(cls, name: str) -> int:
-        try:
-            return cls._status[name.lower()]
-        except Exception as _:
-            return cls.captured
+    def validate_name(cls, name: str) -> bool:
+        if name.lower() in [key.lower() for key in cls._status.keys()]:
+            return True
+        return False
 
     @classmethod
-    def get_name(cls, value: int) -> str:
-        for name, val in cls._status.items():
-            if val == value:
-                return name.capitalize()
+    def validate_value(cls, value: int) -> bool:
+        if value in cls._status.values():
+            return True
+        return False
+
+    @classmethod
+    def get_value(cls, inp: str | int) -> int:
+        if isinstance(inp, int) and cls.validate_value(inp):
+            return inp
+        if isinstance(inp, str) and cls.validate_name(inp):
+            return cls._status[inp.lower()]
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
+        return cls.captured
+
+    @classmethod
+    def get_name(cls, inp: str | int) -> str:
+        if isinstance(inp, int) and cls.validate_value(inp):
+            for name, val in cls._status.items():
+                if val == inp:
+                    return name.capitalize()
+        if isinstance(inp, str) and cls.validate_name(inp):
+            return inp.capitalize()
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
         return 'Not found'
 
 
