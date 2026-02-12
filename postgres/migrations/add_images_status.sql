@@ -1,0 +1,2 @@
+ALTER TABLE public.images
+ADD COLUMN status INTEGER DEFAULT 0 NOT NULL;

@@ -27,7 +27,7 @@ from sqlmodel import col, or_
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from typing_extensions import Self
 
-from .database import Image
+from .database import Image, ImageStatus
 
 
 class HealthResponse(BaseModel):
@@ -51,6 +51,7 @@ class ImageFilters(BaseModel):
     min_trust: Optional[float] = 0.
     max_trust: Optional[float] = 1.
     models: list[Optional[str]] = []
+    status: list[str] = []
 
     @field_validator('inspection_results')
     @classmethod
@@ -102,6 +103,17 @@ class ImageFilters(BaseModel):
             if model == 'Unknown'
             else model
             for model in models
+        ]
+
+    @field_validator('models')
+    @classmethod
+    def validate_status(
+        cls,
+        status_names: list[str]
+    ) -> list[int]:
+        return [
+            ImageStatus.get_value(status_name)
+            for status_name in status_names
         ]
 
     def add_date_filter_to_statement(
@@ -217,6 +229,16 @@ class ImageFilters(BaseModel):
                 )
         return statement
 
+    def add_status_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        if len(self.status) > 0:
+            statement = statement.where(
+                col(Image.status).in_(self.status)
+            )
+        return statement
+
     def add_filters_to_statement(
         self,
         statement: SelectOfScalar[Any]
@@ -228,6 +250,7 @@ class ImageFilters(BaseModel):
         statement = self.add_origins_filter_to_statement(statement)
         statement = self.add_models_filter_to_statement(statement)
         statement = self.add_true_results_filter_to_statement(statement)
+        statement = self.add_status_filter_to_statement(statement)
         return statement
 
 
@@ -260,6 +283,7 @@ class ImageStreamResponse(BaseModel):
     model: str = 'Unknown'
     true_result: str = 'No result'
     trust: Optional[float] = None
+    status: str = 'Captured'
 
     @classmethod
     def factory(
@@ -269,7 +293,8 @@ class ImageStreamResponse(BaseModel):
         origin: Optional[str],
         model: Optional[str],
         true_result: Optional[str],
-        trust: Optional[float]
+        trust: Optional[float],
+        status: int
     ) -> Self:
         return cls(
             image_url= image_url,
@@ -277,7 +302,8 @@ class ImageStreamResponse(BaseModel):
             origin= origin if origin is not None else 'Unknown',
             model= model if model is not None else 'Unknown',
             true_result= true_result if true_result is not None else 'No result',
-            trust= trust
+            trust= trust,
+            status= ImageStatus.get_name(status)
         )
 
     @classmethod
@@ -291,7 +317,8 @@ class ImageStreamResponse(BaseModel):
             origin= image.origin,
             model= image.model,
             true_result= image.true_result,
-            trust= image.trust
+            trust= image.trust,
+            status= image.status
         )
 
 
@@ -308,6 +335,7 @@ class ImageHistResponse(ImageStreamResponse):
         model: Optional[str],
         true_result: Optional[str],
         trust: Optional[float],
+        status: int,
         index: Optional[int] = None,
         total: Optional[int] = None
     ) -> Self:
@@ -318,6 +346,7 @@ class ImageHistResponse(ImageStreamResponse):
             model= model if model is not None else 'Unknown',
             true_result= true_result if true_result is not None else 'No result',
             trust= trust,
+            status= ImageStatus.get_name(status),
             index= index if index is not None else 0,
             total= total if total is not None else 0
         )
@@ -336,6 +365,7 @@ class ImageHistResponse(ImageStreamResponse):
             model= image.model,
             true_result= image.true_result,
             trust= image.trust,
+            status= image.status,
             index= index,
             total= total
         )

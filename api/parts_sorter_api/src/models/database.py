@@ -25,6 +25,7 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 import yaml
+from pyUtils import NoInstantiable
 from sqlalchemy import JSON, Column
 from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
@@ -144,6 +145,34 @@ class Model(SQLModel, table= True):
 
 
 #********** IMAGES **********
+class ImageStatus(NoInstantiable):
+    _status: dict[str, int] = {    
+        'captured': 0,
+        'pushed': 1,
+        'left': 2,
+        'lost': 3
+    }
+
+    captured: int = _status['captured']
+    pushed: int = _status['pushed']
+    left: int = _status['left']
+    lost: int = _status['lost']
+
+    @classmethod
+    def get_value(cls, name: str) -> int:
+        try:
+            return cls._status[name.lower()]
+        except Exception as _:
+            return cls.captured
+
+    @classmethod
+    def get_name(cls, value: int) -> str:
+        for name, val in cls._status.items():
+            if val == value:
+                return name.capitalize()
+        return 'Not found'
+
+
 class BaseImage(SQLModel):
     id: UUID = Field(
         default_factory= uuid4,
@@ -190,6 +219,10 @@ class BaseImage(SQLModel):
     trust: Optional[float] = Field(
         default= None,
         nullable= True
+    )
+    status: int = Field(
+        default= ImageStatus.captured,
+        nullable= False
     )
 
     @property
@@ -242,6 +275,7 @@ class ImageProcessed(BaseImage):
             true_result= image.true_result,
             trust= image.trust,
             model= image.model,
+            status= image.status,
             result= result if result is not None else False
         )
 

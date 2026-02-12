@@ -135,6 +135,7 @@ async def db_update_image(
         inspection_result_name= image.true_result
     )
     db_image.trust = image.trust
+    db_image.status = image.status
     if update_date:
         db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     db_image = await _db_add_image_and_commit(
@@ -303,21 +304,22 @@ async def db_get_image_origin_result(
     session: AsyncSession,
     image: Image
 ) -> bool:
-    if image.origin is not None and image.inspection_result is not None and image.trust is not None:
-        try:
-            db_origin_result: OriginResult = await db_get_origin_result(
-                session= session,
-                origin_result= OriginResult(
-                    origin= image.origin,
-                    inspection_result= image.inspection_result
-                )
+    if image.origin is None or image.inspection_result is None or image.trust is None:
+        return True
+    try:
+        db_origin_result: OriginResult = await db_get_origin_result(
+            session= session,
+            origin_result= OriginResult(
+                origin= image.origin,
+                inspection_result= image.inspection_result
             )
-            if db_origin_result.threshold >= image.trust:
-                return True
-            return db_origin_result.result
-        except HTTPException:
-            pass
-    return False
+        )
+        if db_origin_result.threshold >= image.trust:
+            return True
+        return db_origin_result.result
+    except HTTPException:
+        pass
+    return True
 
 async def db_create_and_process_new_image(
     session: AsyncSession,

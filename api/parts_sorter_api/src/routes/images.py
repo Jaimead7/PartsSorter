@@ -19,8 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any, Optional, Sequence
+from datetime import datetime
+from typing import Annotated, Optional, Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, Path, Query, UploadFile, status
@@ -34,7 +34,7 @@ from ..database.images import (db_create_and_process_new_image,
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..models.api import ImageFilters, ImageHistResponse, ImageStreamResponse
-from ..models.database import Image, ImageProcessed
+from ..models.database import Image, ImageProcessed, ImageStatus
 
 images_router: APIRouter = APIRouter()
 
@@ -126,6 +126,7 @@ async def get_next_hist_image(
     true_result: Annotated[list[Optional[str]], Query()] = [],
     min_trust: Annotated[Optional[float], Query()] = None,
     max_trust: Annotated[Optional[float], Query()] = None,
+    status: Annotated[list[str], Query()] = [],
     index: Annotated[int, Query()] = 0
 )-> ImageHistResponse:
     filters: ImageFilters = ImageFilters(
@@ -138,6 +139,7 @@ async def get_next_hist_image(
         true_results= true_result,
         min_trust= min_trust,
         max_trust= max_trust,
+        status= status
     )
     return await db_get_next_hist_image(
         session= session,
@@ -172,14 +174,16 @@ async def update_image(
     inspection_result: Annotated[Optional[str], Body()] = None,
     origin: Annotated[Optional[str], Body()] = None,
     true_result: Annotated[Optional[str], Body()] = None,
-    trust: Annotated[Optional[float], Body()] = None 
+    trust: Annotated[Optional[float], Body()] = None,
+    status: Annotated[int, Body()] = ImageStatus.captured
 ) -> Image:
     image = Image(
         id= uuid,
         inspection_result= inspection_result,
         origin= origin,
         true_result= true_result,
-        trust= trust
+        trust= trust,
+        status= status
     )
     return await db_update_image(
         session= session,
@@ -198,17 +202,43 @@ async def update_image_true_result(
     uuid: Annotated[UUID, Path()],
     true_result: Annotated[Optional[str], Body()] = None,
 ) -> ImageStreamResponse:
-    image: Image = await db_get_image_by_id(
+    db_image: Image = await db_get_image_by_id(
         session= session,
         image= Image(id= uuid)
     )
-    image.true_result = true_result
-    image = await db_update_image(
+    db_image.true_result = true_result
+    db_image = await db_update_image(
         session= session,
-        image= image,
+        image= db_image,
         update_date= False
     )
-    return ImageStreamResponse.from_image(image= image)
+    return ImageStreamResponse.from_image(image= db_image)
+
+@images_router.put(
+    '/{uuid}/status/',
+    response_model= ImageStreamResponse,
+    summary= 'Update Image.status on the database.',
+    response_description= 'The Image updated.',
+    status_code= status.HTTP_200_OK
+)
+async def update_image_status(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    uuid: Annotated[UUID, Path()],
+    status: Annotated[str | int, Body()] = ImageStatus.captured,
+) -> ImageStreamResponse:
+    db_image: Image = await db_get_image_by_id(
+        session= session,
+        image= Image(id= uuid)
+    )
+    if isinstance(status, str):
+        status = ImageStatus.get_value(status)
+    db_image.status = status
+    db_image = await db_update_image(
+        session= session,
+        image= db_image,
+        update_date= False
+    )
+    return ImageStreamResponse.from_image(image= db_image)
 
 @images_router.delete(
     '/{uuid}/',
