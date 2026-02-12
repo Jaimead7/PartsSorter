@@ -25,6 +25,7 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 import yaml
+from pyUtils import NoInstantiable
 from sqlalchemy import JSON, Column
 from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
@@ -144,7 +145,7 @@ class Model(SQLModel, table= True):
 
 
 #********** IMAGES **********
-class ImageStatus:
+class ImageStatus(NoInstantiable):
     _status: dict[str, int] = {    
         'captured': 0,
         'pushed': 1,
