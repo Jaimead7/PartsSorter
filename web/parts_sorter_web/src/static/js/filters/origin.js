@@ -36,7 +36,7 @@ function initOriginFilter() {
 
     // SELECT ALL
     const selectAllCheckbox = document.getElementById('originFilterSelectAll');
-    const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
+    const originOptions = document.querySelectorAll('input[name="originFilterOption"]');
 
     function saveOriginsOptions() {
         const selectedOrigins = Array.from(originOptions)
@@ -89,7 +89,7 @@ function initOriginFilter() {
 };
 
 function getOriginQueryParameters() {
-    const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
+    const originOptions = document.querySelectorAll('input[name="originFilterOption"]');
     let originParams = [];
     originOptions.forEach((checkbox) => {
         if (checkbox.checked) {
@@ -100,4 +100,15 @@ function getOriginQueryParameters() {
 };
 
 
-export { initOriginFilter, getOriginQueryParameters };
+function getOriginFilterOptions() {
+    const originOptions = document.querySelectorAll('input[name="originFilterOption"]');
+
+    if (Array.from(originOptions).every(checkbox => !checkbox.checked)) {
+        return Array.from(originOptions).map(checkbox => checkbox.value)
+    }
+    return Array.from(originOptions)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+};
+
+export { initOriginFilter, getOriginQueryParameters, getOriginFilterOptions };

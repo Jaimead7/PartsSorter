@@ -23,8 +23,13 @@ async function showAlert(message, type, seconds) {
     switch (type) {
         case 'warning':
             console.warn(message);
+            break;
         case 'danger':
             console.error(message);
+            break;
+        case 'success':
+            console.info(message);
+            break;
         default:
             console.log(message);
     };

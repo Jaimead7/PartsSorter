@@ -20,12 +20,12 @@
 
 
 import { showAlert } from './utils.js';
+import { getOriginFilterOptions } from './filters/origin.js';
 
 
 let ws;
-let reconnectDelay = 10000;
+let reconnectSeconds = 10;
 let reconnectTimeout;
-let alertBlock;
 
 
 async function initWebSocket() {
@@ -34,55 +34,29 @@ async function initWebSocket() {
     } catch (error) {
         console.error('Error connecting to the web socket:', error);
     }
-}
+};
+
+async function scheduleReconnect() {
+    showAlert('Reconnecting to server...', 'warning', reconnectSeconds);
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = setTimeout(() => {
+        initWebSocket();
+    }, reconnectSeconds * 1000);
+};
 
 function connectWebSocket(url) {
     ws = new WebSocket(url);
 
     ws.onopen = () => {
-        try{
-            alertBlock.remove();
-        } catch {}
-        console.log('Websocket connected.');
+        showAlert('Connected to server.', 'success', 5);
     };
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log('New message received:', data);
-        const originOptions = document.querySelectorAll('input[name="origin-filter-option"]');
-        const noneChecked = Array.from(originOptions).every(checkbox => !checkbox.checked);
-        const selectedOrigins = Array.from(originOptions)
-            .filter(checkbox => checkbox.checked)
-            .map(checkbox => checkbox.value);
         switch (data.type) {
             case 'new-image':
-                data.origin = data.origin ? data.origin : 'Unknown';
-                if (selectedOrigins.includes(data.origin) || noneChecked) {
-                    transferImages();
-                    const nameElement = document.getElementById('img-0-name');
-                    if (nameElement) {
-                        nameElement.innerText = data.image_url.split('/').pop() || 'Unknown';
-                    }
-                    const imgAlt = document.getElementById(`img-0-alt`);
-                    if (imgAlt) {
-                        imgAlt.hidden = true;
-                    }
-                    const img = document.getElementById('img-0-img');
-                    if (img) {
-                        img.src = `/api/${data.image_url}`;
-                        img.hidden = false;
-                    }
-                    writeImageInfo(
-                        data.origin,
-                        'img-0-origin',
-                        data.insp_result,
-                        'img-0-type',
-                        (data.trust * 100).toFixed(2) + '%',
-                        'img-0-trust',
-                        data.model,
-                        'img-0-model'
-                    )
-                }
+                processNewImage(data);
         }
     };
 
@@ -95,114 +69,96 @@ function connectWebSocket(url) {
         console.warn('Websocket disconnected');
         scheduleReconnect();
     };
-}
+};
 
-function scheduleReconnect() {
-    showAlert('Reconnecting to server...', 'warning', 4);
-    clearTimeout(reconnectTimeout);
-    reconnectTimeout = setTimeout(() => {
-        initWebSocket();
-    }, reconnectDelay);
-}
+async function processNewImage(data) {
+    const originOptions = getOriginFilterOptions();
+    data.origin = data.origin ? data.origin : 'Unknown';
+    if (originOptions.includes(data.origin)) {
+        transferImages();
+        const imgData = {
+            src: `/api/${data.image_url}`,
+            name: data.image_url.split('/').pop() || 'Unknown',
+            origin: data.origin,
+            insp_result: data.insp_result,
+            trust: (data.trust * 100).toFixed(2) + '%',
+            model: data.model
+        };
+        setImgInfo('img0', imgData);
+    }
+};
 
 function clearImages() {
     for (let i = 4; i >= 0; i--) {
-        const img = document.getElementById(`img-${i}-img`);
-        if (img) {
-            img.src = '';
-            img.hidden = true;
-        }
-        const imgAlt = document.getElementById(`img-${i}-alt`);
-        if (imgAlt) {
-            imgAlt.hidden = false;
-        }
-        clearImageInfo(i);
+        const imgData = {
+            src: null,
+            name: 'Unknown',
+            origin: 'Unknown',
+            insp_result: 'No result',
+            trust: 'NULL',
+            model: 'Unknown'
+        };
+        setImgInfo(`img${i}`, imgData);
     }
-}
+};
 
 function transferImages() {
     for (let i = 4; i > 0; i--) {
         try {
-            transferImage(i-1, i);
-            transferText(`img-${i-1}-name`, `img-${i}-name`);
-            transferText(`img-${i-1}-origin`, `img-${i}-origin`);
-            transferText(`img-${i-1}-type`, `img-${i}-type`);
-            transferText(`img-${i-1}-trust`, `img-${i}-trust`);
-            transferText(`img-${i-1}-model`, `img-${i}-model`);
+            const imgData = getImgInfo(`img${i-1}`);
+            setImgInfo(`img${i}`, imgData);
         } catch (error) {}
     }
-}
+};
 
-function transferImage(idOrigin, idDestiny) {
-    const imgDestiny = document.getElementById(`img-${idDestiny}-img`)
-    const spanDestiny = document.getElementById(`img-${idDestiny}-alt`)
-    const imgOrigin = document.getElementById(`img-${idOrigin}-img`)
-    const spanOrigin = document.getElementById(`img-${idOrigin}-alt`)
+function getImgInfo(imgId) {
+    const article = document.getElementById(imgId);
+    const img = article?.querySelector('[name="img"]');
+    const name = article?.querySelector('[name="imgName"]');
+    const origin = article?.querySelector('[name="imgOrigin"]');
+    const insp_result = article?.querySelector('[name="imgType"]');
+    const trust = article?.querySelector('[name="imgTrust"]');
+    const model = article?.querySelector('[name="imgModel"]');
 
-    if (!imgDestiny || !spanDestiny || !imgOrigin || !spanOrigin) {
-        console.error('No Image Elements found.');
-        return;
+    return {
+        src: img && img.hasAttribute('src') ? img.getAttribute('src') : '',
+        name: name ? name.textContent : '',
+        origin: origin ? origin.textContent : '',
+        insp_result: insp_result ? insp_result.textContent : '',
+        trust: trust ? trust.textContent : '',
+        model: model ? model.textContent : ''
+    };
+};
+
+function setImgInfo(imgId, imgData) {
+    const article = document.getElementById(imgId);
+    if (!article) return;
+
+    const img = article.querySelector('[name="img"]');
+    const alt = article.querySelector('[name="imgAlt"]');
+    const name = article.querySelector('[name="imgName"]');
+    const origin = article.querySelector('[name="imgOrigin"]');
+    const insp_result = article.querySelector('[name="imgType"]');
+    const trust = article.querySelector('[name="imgTrust"]');
+    const model = article.querySelector('[name="imgModel"]');
+
+    if (img && alt) {
+        if (imgData.src) {
+            img.src = imgData.src;
+            img.hidden = false;
+            alt.hidden = true;
+        } else {
+            img.src = '';
+            img.hidden = true;
+            alt.hidden = false;
+        }
     }
 
-    imgDestiny.src = imgOrigin.getAttribute('src') === '' ? '' : imgOrigin.getAttribute('src');
-    imgDestiny.hidden = imgDestiny.getAttribute('src') === '';
-    spanDestiny.hidden = imgDestiny.getAttribute('src') !== '';
-}
-
-function transferText(idOrigin, idDestiny) {
-    const originElement = document.getElementById(idOrigin);
-    const destinyElement = document.getElementById(idDestiny)
-
-    if (!originElement || !destinyElement) {
-        console.error('No Text Elements found.');
-        return;
-    }
-
-    destinyElement.textContent = originElement.textContent;
-}
-
-function writeImageInfo(
-    origin,
-    originElementName,
-    type,
-    typeElementName,
-    trust,
-    trustElementName,
-    model,
-    modelElementName
-) {
-    let element = document.getElementById(originElementName);
-    if (element) {
-        element.innerText = origin;
-    }
-    element = document.getElementById(typeElementName);
-    if (element) {
-        element.innerText = type;
-    }
-    element = document.getElementById(trustElementName);
-    if (element) {
-        element.innerText = trust;
-    }
-    element = document.getElementById(modelElementName);
-    if (element) {
-        element.innerText = model;
-    }
-}
-
-function clearImageInfo(id) {
-    const originElement = document.getElementById(`img-${id}-origin`);
-    if (originElement) {
-        originElement.innerText = originElement.getAttribute('data-default-text')
-    }
-    const typeElement = document.getElementById(`img-${id}-type`);
-    if (typeElement) {
-        typeElement.innerText = typeElement.getAttribute('data-default-text')
-    }
-    const trustElement = document.getElementById(`img-${id}-trust`);
-    if (trustElement) {
-        trustElement.innerText = trustElement.getAttribute('data-default-text')
-    }
-}
-
+    if (name && 'name' in imgData) name.textContent = imgData.name;
+    if (origin && 'origin' in imgData) origin.textContent = imgData.origin;
+    if (insp_result && 'insp_result' in imgData) insp_result.textContent = imgData.insp_result;
+    if (trust && 'trust' in imgData) trust.textContent = imgData.trust;
+    if (model && 'model' in imgData) model.textContent = imgData.model;
+};
 
 export { initWebSocket };
