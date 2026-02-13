@@ -87,17 +87,9 @@ async function processNewImageStatus(data) {
 }
 
 function clearImages() {
-    for (let i = 4; i >= 0; i--) {
-        const imgData = {
-            src: null,
-            id: 'Unknown',
-            origin: 'Unknown',
-            insp_result: 'No result',
-            trust: '0.00%',
-            model: 'Unknown'
-        };
-        setImgData(`img${i}`, imgData);
-    }
+    document.querySelectorAll('article[id^="img"]').forEach(image => {
+        setImgData(article.id, {});
+    });
 };
 
 function transferImages() {
