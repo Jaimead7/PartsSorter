@@ -106,7 +106,7 @@ class ImageFilters(BaseModel):
             for model in models
         ]
 
-    @field_validator('models')
+    @field_validator('status')
     @classmethod
     def validate_status(
         cls,
