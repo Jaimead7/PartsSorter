@@ -29,7 +29,7 @@
                             </li>
                             <li class="list-item">
                                 <h5 class="fst-italic fw-normal m-0">Trust:</h5>
-                                <p class="h3 m-0 mb-3"><strong name="imgTrust" data-default-text="NULL">NULL</strong></p>
+                                <p class="h3 m-0 mb-3"><strong name="imgTrust" data-default-text="0.00%">0.00%</strong></p>
                             </li>
                             <li class="list-item">
                                 <h5 class="fst-italic fw-normal m-0">Model:</h5>
@@ -67,7 +67,7 @@
                             </li>
                             <li class="list-item">
                                 <p class="fs-10 fst-italic m-0">Trust:</p>
-                                <p class="fs-8 m-0 mb-1"><strong name="imgTrust" data-default-text="NULL">NULL</strong></p>
+                                <p class="fs-8 m-0 mb-1"><strong name="imgTrust" data-default-text="0.00%">0.00%</strong></p>
                             </li>
                             <li class="list-item">
                                 <p class="fs-10 fst-italic m-0">Model:</p>
@@ -84,10 +84,6 @@
 {% block scripts %}
     <script
         src="{{ url_for('static', filename='js/imageStream.js') }}"
-        type="module">
-    </script>
-    <script
-        src="{{ url_for('static', filename='js/webSocket.js') }}"
         type="module">
     </script>
 {% endblock %}

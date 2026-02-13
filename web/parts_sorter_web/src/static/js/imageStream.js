@@ -19,9 +19,95 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { initOriginFilter } from './filters/origin.js';
-import { initWebSocket } from './webSocket.js';
+import { showAlert } from './utils.js';
+import { getImgData, setImgData } from './components/images.js';
+import { initOriginFilter, getOriginFilterOptions } from './filters/origin.js';
 
+
+let ws;
+let reconnectSeconds = 10;
+let reconnectTimeout;
+
+
+async function initWebSocket() {
+    try {
+        connectWebSocket(`ws://${window.location.host}/api/ws/image-stream/`);
+    } catch (error) {
+        console.error('Error connecting to the web socket:', error);
+    }
+};
+
+async function scheduleReconnect(msg, type) {
+    showAlert(`${msg} Reconnecting to server...`, type, reconnectSeconds);
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = setTimeout(() => {
+        initWebSocket();
+    }, reconnectSeconds * 1000);
+};
+
+function connectWebSocket(url) {
+    ws = new WebSocket(url);
+
+    ws.onopen = () => {
+        showAlert('Connected to server.', 'success', 5);
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('New message received:', data);
+        switch (data.type) {
+            case 'img':
+                setNewImage(data);
+                break;
+            case 'imgStatus':
+                processNewImageStatus(data);
+                break;
+        }
+    };
+
+    ws.onerror = () => {
+        scheduleReconnect('Connection error.', 'danger');
+    };
+
+    ws.onclose = () => {
+        scheduleReconnect('Websocket disconnected.', 'warning');
+    };
+};
+
+async function setNewImage(data) {
+    const originOptions = getOriginFilterOptions();
+    if (originOptions.includes(data.origin)) {
+        transferImages();
+        setImgData('img0', data);
+    }
+};
+
+async function processNewImageStatus(data) {
+    //TODO
+}
+
+function clearImages() {
+    for (let i = 4; i >= 0; i--) {
+        const imgData = {
+            src: null,
+            id: 'Unknown',
+            origin: 'Unknown',
+            insp_result: 'No result',
+            trust: '0.00%',
+            model: 'Unknown'
+        };
+        setImgData(`img${i}`, imgData);
+    }
+};
+
+function transferImages() {
+    for (let i = 4; i > 0; i--) {
+        try {
+            const imgData = getImgData(`img${i-1}`);
+            setImgData(`img${i}`, imgData);
+        } catch (error) {}
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     initOriginFilter();
