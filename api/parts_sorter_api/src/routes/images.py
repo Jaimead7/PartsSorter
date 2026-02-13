@@ -19,11 +19,13 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Annotated, Optional, Sequence
+from typing import Annotated, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, Path, Query, UploadFile, status
+from fastapi import (APIRouter, BackgroundTasks, Body, Depends, Path, Query,
+                     UploadFile, status)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.images import (db_create_and_process_new_image,
@@ -33,14 +35,17 @@ from ..database.images import (db_create_and_process_new_image,
                                db_update_image)
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
-from ..models.api import ImageFilters, ImageHistResponse, ImageStreamResponse
-from ..models.database import Image, ImageProcessed, ImageStatus
+from ..dependencies.web_sockets import ImageStreamSocketManager
+from ..models.api import (ImageFilters, ImageHistResponse,
+                          ImageProcessedResponse, ImageResponse,
+                          ImageStatusResponse)
+from ..models.database import Image, ImageStatus
 
 images_router: APIRouter = APIRouter()
 
 @images_router.post(
     '/',
-    response_model= Image,
+    response_model= ImageResponse,
     summary= 'Create new Image on the database.',
     response_description= 'The new Image created.',
     status_code= status.HTTP_201_CREATED
@@ -49,16 +54,19 @@ async def create_new_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     file: UploadFile,
     origin: Annotated[Optional[str], Body()] = None
-) -> Image:
-    return await db_create_new_image(
+) -> ImageResponse:
+    db_image: Image = await db_create_new_image(
         session= session,
         file= file,
         origin_name= origin
     )
+    return ImageResponse.from_image(
+        image= db_image
+    )
 
 @images_router.get(
     '/',
-    response_model= list[Image],
+    response_model= Sequence[ImageResponse],
     summary= 'Get Image\'s of the database.',
     response_description= 'The Image\'s list.',
     status_code= status.HTTP_200_OK
@@ -68,13 +76,14 @@ async def get_images(
     uuids: Annotated[list[UUID], Query()] = [],
     limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
     offset: Annotated[int, Query()] = 0
-) -> Sequence[Image]:
-    return await db_get_images_by_ids(
+) -> Sequence[ImageResponse]:
+    db_images: Sequence[Image] = await db_get_images_by_ids(
         session= session,
         images_uuids= uuids,
         limit= limit,
         offset= offset
     )
+    return [ImageResponse.from_image(image= img) for img in db_images]
 
 @images_router.delete(
     '/',
@@ -92,21 +101,33 @@ async def delete_images(
 
 @images_router.post(
     '/process/',
-    response_model= ImageProcessed,
+    response_model= ImageProcessedResponse,
     summary= 'Process new Image and save it to the database.',
     response_description= 'The new Image created.',
     status_code= status.HTTP_201_CREATED
 )
 async def process_new_image(
     session: Annotated[AsyncSession, Depends(get_session)],
+    bg_tasks: BackgroundTasks,
     file: UploadFile,
     origin: Annotated[Optional[str], Body()] = None
-) -> ImageProcessed:
-    return await db_create_and_process_new_image(
+) -> ImageProcessedResponse:
+    db_image: Image
+    result: bool
+    db_image, result = await db_create_and_process_new_image(
         session= session,
         file= file,
         origin_name= origin
     )
+    response: ImageProcessedResponse = ImageProcessedResponse.from_image(
+        image= db_image,
+        result= result
+    )
+    bg_tasks.add_task(
+        ImageStreamSocketManager.broadcast,
+        response
+    )
+    return response
 
 @images_router.get(
     '/hist/next/',
@@ -141,10 +162,18 @@ async def get_next_hist_image(
         max_trust= max_trust,
         status= status
     )
-    return await db_get_next_hist_image(
+    db_image: Image
+    i: int
+    total: int
+    db_image, i, total = await db_get_next_hist_image(
         session= session,
         filters= filters,
         index= index
+    )
+    return ImageHistResponse.from_image(
+        image= db_image,
+        index= i,
+        total= total
     )
 
 @images_router.get(
@@ -161,84 +190,24 @@ async def get_image_extensions(
         session= session
     )
 
-@images_router.put(
+@images_router.get(
     '/{uuid}/',
-    response_model= Image,
-    summary= 'Update Image on the database.',
-    response_description= 'The Image updated.',
+    response_model= ImageResponse,
+    summary= 'Get an Image of the database.',
+    response_description= 'The Image list.',
     status_code= status.HTTP_200_OK
 )
-async def update_image(
+async def get_image(
     session: Annotated[AsyncSession, Depends(get_session)],
-    uuid: Annotated[UUID, Path()],
-    inspection_result: Annotated[Optional[str], Body()] = None,
-    origin: Annotated[Optional[str], Body()] = None,
-    true_result: Annotated[Optional[str], Body()] = None,
-    trust: Annotated[Optional[float], Body()] = None,
-    status: Annotated[int, Body()] = ImageStatus.captured
-) -> Image:
-    image = Image(
-        id= uuid,
-        inspection_result= inspection_result,
-        origin= origin,
-        true_result= true_result,
-        trust= trust,
-        status= status
-    )
-    return await db_update_image(
-        session= session,
-        image= image,
-    )
-
-@images_router.put(
-    '/{uuid}/true-result/',
-    response_model= ImageStreamResponse,
-    summary= 'Update Image.true_result on the database.',
-    response_description= 'The Image updated.',
-    status_code= status.HTTP_200_OK
-)
-async def update_image_true_result(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    uuid: Annotated[UUID, Path()],
-    true_result: Annotated[Optional[str], Body()] = None,
-) -> ImageStreamResponse:
+    uuid: Annotated[UUID, Path()]
+) -> ImageResponse:
     db_image: Image = await db_get_image_by_id(
         session= session,
         image= Image(id= uuid)
     )
-    db_image.true_result = true_result
-    db_image = await db_update_image(
-        session= session,
-        image= db_image,
-        update_date= False
+    return ImageResponse.from_image(
+        image= db_image
     )
-    return ImageStreamResponse.from_image(image= db_image)
-
-@images_router.put(
-    '/{uuid}/status/',
-    response_model= ImageStreamResponse,
-    summary= 'Update Image.status on the database.',
-    response_description= 'The Image updated.',
-    status_code= status.HTTP_200_OK
-)
-async def update_image_status(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    uuid: Annotated[UUID, Path()],
-    status: Annotated[str | int, Body()] = ImageStatus.captured,
-) -> ImageStreamResponse:
-    db_image: Image = await db_get_image_by_id(
-        session= session,
-        image= Image(id= uuid)
-    )
-    if isinstance(status, str):
-        status = ImageStatus.get_value(status)
-    db_image.status = status
-    db_image = await db_update_image(
-        session= session,
-        image= db_image,
-        update_date= False
-    )
-    return ImageStreamResponse.from_image(image= db_image)
 
 @images_router.delete(
     '/{uuid}/',
@@ -254,18 +223,92 @@ async def delete_image(
         images_uuids= [uuid]
     )
 
-@images_router.get(
+@images_router.put(
     '/{uuid}/',
-    response_model= list[Image],
-    summary= 'Get an Image of the database.',
-    response_description= 'The Image list.',
+    response_model= ImageResponse,
+    summary= 'Update Image on the database.',
+    response_description= 'The Image updated.',
     status_code= status.HTTP_200_OK
 )
-async def get_image(
+async def update_image(
     session: Annotated[AsyncSession, Depends(get_session)],
-    uuid: Annotated[UUID, Path()]
-) -> Image:
-    return await db_get_image_by_id(
+    uuid: Annotated[UUID, Path()],
+    inspection_result: Annotated[Optional[str], Body()] = None,
+    origin: Annotated[Optional[str], Body()] = None,
+    true_result: Annotated[Optional[str], Body()] = None,
+    trust: Annotated[Optional[float], Body()] = None,
+    status: Annotated[int, Body()] = ImageStatus.captured
+) -> ImageResponse:
+    image = Image(
+        id= uuid,
+        inspection_result= inspection_result,
+        origin= origin,
+        true_result= true_result,
+        trust= trust,
+        status= status
+    )
+    db_image: Image = await db_update_image(
+        session= session,
+        image= image,
+    )
+    return ImageResponse.from_image(
+        image= db_image
+    )
+
+@images_router.put(
+    '/{uuid}/true-result/',
+    response_model= ImageResponse,
+    summary= 'Update Image.true_result on the database.',
+    response_description= 'The Image updated.',
+    status_code= status.HTTP_200_OK
+)
+async def update_image_true_result(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    uuid: Annotated[UUID, Path()],
+    true_result: Annotated[Optional[str], Body()] = None,
+) -> ImageResponse:
+    db_image: Image = await db_get_image_by_id(
         session= session,
         image= Image(id= uuid)
     )
+    db_image.true_result = true_result
+    db_image = await db_update_image(
+        session= session,
+        image= db_image,
+        update_date= False
+    )
+    return ImageResponse.from_image(
+        image= db_image
+    )
+
+@images_router.put(
+    '/{uuid}/status/',
+    response_model= ImageStatusResponse,
+    summary= 'Update Image.status on the database.',
+    response_description= 'The Image updated.',
+    status_code= status.HTTP_200_OK
+)
+async def update_image_status(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    bg_tasks: BackgroundTasks,
+    uuid: Annotated[UUID, Path()],
+    status: Annotated[str | int, Body()] = ImageStatus.captured,
+) -> ImageStatusResponse:
+    db_image: Image = await db_get_image_by_id(
+        session= session,
+        image= Image(id= uuid)
+    )
+    db_image.status = ImageStatus.get_value(status)
+    db_image = await db_update_image(
+        session= session,
+        image= db_image,
+        update_date= False
+    )
+    image_status: ImageStatusResponse = ImageStatusResponse.from_image(
+        image= db_image
+    )
+    bg_tasks.add_task(
+        ImageStreamSocketManager.broadcast,
+        image_status
+    )
+    return image_status

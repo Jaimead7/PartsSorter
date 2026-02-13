@@ -20,7 +20,8 @@
 
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any, Literal, Optional, Protocol
+from uuid import UUID
 
 from pydantic import BaseModel, field_validator
 from sqlmodel import col, or_
@@ -275,44 +276,63 @@ class CameraParams(BaseModel):
         return cls(**params)
 
 
-class ImageStreamResponse(BaseModel):
-    type: str = 'new-image'
-    image_url: str
-    insp_result: str = 'No result'
-    origin: str = 'Unknown'
-    model: str = 'Unknown'
-    true_result: str = 'No result'
-    trust: Optional[float] = None
-    status: str = 'Captured'
+class ApiResponse(Protocol):
+    type: str
+    def model_dump(
+        self,
+        model: Literal['json', 'python'] | str = 'python',
+        *args,
+        **kwargs
+    ) -> dict[str, Any]: ...
 
+
+class ImageResponse(BaseModel):
+    type: str = 'img'
+    id: UUID
+    url: str
+    insp_result: Optional[str] = 'No result'
+    origin: Optional[str] = 'Unknown'
+    model: Optional[str] = 'Unknown'
+    true_result: Optional[str] = 'No result'
+    trust: Optional[float] = 0.
+    status: Optional[str | int] = 'Captured'
+
+    @field_validator('insp_result', 'true_result')
     @classmethod
-    def factory(
-        cls,
-        image_url: str,
-        insp_result: Optional[str],
-        origin: Optional[str],
-        model: Optional[str],
-        true_result: Optional[str],
-        trust: Optional[float],
-        status: int
-    ) -> Self:
-        return cls(
-            image_url= image_url,
-            insp_result= insp_result if insp_result is not None else 'No result',
-            origin= origin if origin is not None else 'Unknown',
-            model= model if model is not None else 'Unknown',
-            true_result= true_result if true_result is not None else 'No result',
-            trust= trust,
-            status= ImageStatus.get_name(status)
-        )
+    def validate_no_result(cls, v: Optional[str]) -> str:
+        if v is None:
+            return 'No result'
+        return v
+
+    @field_validator('origin', 'model')
+    @classmethod
+    def validate_unknown(cls, v: Optional[str]) -> str:
+        if v is None:
+            return 'Unknown'
+        return v
+
+    @field_validator('trust')
+    @classmethod
+    def validate_float(cls, v: Optional[float]) -> float:
+        if v is None:
+            return 0.
+        return v
+
+    @field_validator('status')
+    @classmethod
+    def validate_captured(cls, v: Optional[str | int]) -> str:
+        if v is None:
+            v = ImageStatus.captured
+        return ImageStatus.get_name(v)
 
     @classmethod
     def from_image(
         cls,
         image: Image
     ) -> Self:
-        return cls.factory(
-            image_url= image.external_relative_path,
+        return cls(
+            id = image.id,
+            url= image.external_relative_path,
             insp_result= image.inspection_result,
             origin= image.origin,
             model= image.model,
@@ -322,50 +342,64 @@ class ImageStreamResponse(BaseModel):
         )
 
 
-class ImageHistResponse(ImageStreamResponse):
-    index: int = 0
-    total: int = 0
+class ImageProcessedResponse(ImageResponse):
+    result: Optional[bool] = True
 
+    @field_validator('result')
     @classmethod
-    def factory(
-        cls,
-        image_url: str,
-        insp_result: Optional[str],
-        origin: Optional[str],
-        model: Optional[str],
-        true_result: Optional[str],
-        trust: Optional[float],
-        status: int,
-        index: Optional[int] = None,
-        total: Optional[int] = None
-    ) -> Self:
-        return cls(
-            image_url= image_url,
-            insp_result= insp_result if insp_result is not None else 'No result',
-            origin= origin if origin is not None else 'Unknown',
-            model= model if model is not None else 'Unknown',
-            true_result= true_result if true_result is not None else 'No result',
-            trust= trust,
-            status= ImageStatus.get_name(status),
-            index= index if index is not None else 0,
-            total= total if total is not None else 0
-        )
+    def validate_result(cls, v: Optional[bool]) -> bool:
+        if v is None:
+            return True
+        return v
 
     @classmethod
     def from_image(
         cls,
         image: Image,
-        index: Optional[int] = None,
-        total: Optional[int] = None
+        result: Optional[bool] = True
     ) -> Self:
-        return cls.factory(
+        img: Self = super().from_image(image)
+        img.result = result
+        return img
+
+
+class ImageHistResponse(ImageResponse):
+    index: Optional[int] = 0
+    total: Optional[int] = 0
+
+    @field_validator('index', 'total')
+    @classmethod
+    def validate_int(cls, v: Optional[int]) -> int:
+        if v is None:
+            return 0
+        return v
+
+    @classmethod
+    def from_image(
+        cls,
+        image: Image,
+        index: Optional[int] = 0,
+        total: Optional[int] = 0
+    ) -> Self:
+        img: Self = super().from_image(image)
+        img.index = index
+        img.total = total
+        return img
+
+
+class ImageStatusResponse(BaseModel):
+    type: str = 'imgStatus'
+    id: UUID
+    image_url: str
+    status: str = 'Captured'
+
+    @classmethod
+    def from_image(
+        cls,
+        image: Image
+    ) -> Self:
+        return cls(
             image_url= image.external_relative_path,
-            insp_result= image.inspection_result,
-            origin= image.origin,
-            model= image.model,
-            true_result= image.true_result,
-            trust= image.trust,
-            status= image.status,
-            index= index,
-            total= total
+            id= image.id,
+            status= ImageStatus.get_name(image.status)
         )

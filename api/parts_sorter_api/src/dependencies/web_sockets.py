@@ -22,8 +22,7 @@
 from fastapi import WebSocket
 from pyUtils import NoInstantiable
 
-from ..models.api import ImageStreamResponse
-from ..models.database import Image
+from ..models.api import ApiResponse
 from .config import my_logger
 
 
@@ -40,16 +39,10 @@ class ImageStreamSocketManager(NoInstantiable):
         cls._active_sockets.remove(websocket)
 
     @classmethod
-    async def broadcast_new_result(
-        cls,
-        image: Image
-    ) -> None:
-        response: ImageStreamResponse = ImageStreamResponse.from_image(
-            image= image
-        )
+    async def broadcast(cls, response: ApiResponse) -> None:
         for socket in cls._active_sockets:
             try:
-                await socket.send_json(response.model_dump())
+                await socket.send_json(response.model_dump(mode= 'json'))
             except Exception as e:
                 my_logger.error(f'Error sending message to client: {e}')
                 cls._active_sockets.remove(socket)

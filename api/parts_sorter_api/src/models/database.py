@@ -29,7 +29,6 @@ from pyUtils import NoInstantiable
 from sqlalchemy import JSON, Column
 from sqlalchemy.sql import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
-from typing_extensions import Self
 
 from ..dependencies.config import (INTERNAL_IMAGES_FOLDER,
                                    INTERNAL_MODELS_FOLDER,
@@ -273,29 +272,6 @@ class Image(BaseImage, table= True):
     model_of_image: Optional['Model'] = Relationship(
         back_populates= 'images_of_model'
     )
-
-
-class ImageProcessed(BaseImage):
-    result: bool = False
-
-    @classmethod
-    def factory(
-        cls,
-        image: Image,
-        result: Optional[bool] = None
-    ) -> Self:
-        return cls(
-            id= image.id,
-            extension= image.extension,
-            processed_date= image.processed_date,
-            inspection_result= image.inspection_result,
-            origin= image.origin,
-            true_result= image.true_result,
-            trust= image.trust,
-            model= image.model,
-            status= image.status,
-            result= result if result is not None else False
-        )
 
 
 #********** MODEL CLASS **********

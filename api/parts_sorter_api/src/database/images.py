@@ -20,6 +20,7 @@
 
 
 import asyncio
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from types import CoroutineType
@@ -36,14 +37,12 @@ from sqlmodel import col, delete, func, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
-from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..engine.managers import ModelManager, ModelsContainer
 from ..engine.results import ResultsType
 from ..engine.results_extractors import ClassResult, ResultsExtractorRegistry
 from ..engine.results_sorters import apply_results_sorters
-from ..models.api import ImageFilters, ImageHistResponse, ProcessImageResult
-from ..models.database import (Image, ImageProcessed, InspectionResult,
-                               OriginResult)
+from ..models.api import ImageFilters, ProcessImageResult
+from ..models.database import Image, InspectionResult, OriginResult
 from .inspection_results import db_inspection_result_name_exists
 from .models import db_get_model_inspection_result
 from .origin_results import db_get_origin_result
@@ -325,7 +324,7 @@ async def db_create_and_process_new_image(
     session: AsyncSession,
     file: UploadFile,
     origin_name: Optional[str]
-) -> ImageProcessed:
+) -> Tuple[Image, bool]:
     db_image: Image = await db_create_new_image(
         session= session,
         file= file,
@@ -343,19 +342,17 @@ async def db_create_and_process_new_image(
         session= session,
         image= db_image
     )
-    image_processed: ImageProcessed = ImageProcessed.factory(image= db_image)
-    image_processed.result = await db_get_image_origin_result(
+    result: bool = await db_get_image_origin_result(
         session= session,
         image= db_image
     )
-    await ImageStreamSocketManager.broadcast_new_result(db_image)
-    return image_processed
+    return db_image, result
 
 async def db_get_next_hist_image(
     session: AsyncSession,
     filters: ImageFilters,
     index: int
-) -> ImageHistResponse:
+) -> tuple[Image, int, int]:
     total_images: int = await db_get_count_images_with_filters(
         session= session,
         filters= filters
@@ -384,11 +381,7 @@ async def db_get_next_hist_image(
             status_code= status.HTTP_404_NOT_FOUND,
             detail= msg
         )
-    return ImageHistResponse.from_image(
-        image= db_images[0],
-        index= index,
-        total= total_images
-    )
+    return db_images[0], index, total_images
 
 async def db_get_count_images_with_filters(
     session: AsyncSession,
