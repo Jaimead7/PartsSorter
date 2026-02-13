@@ -35,7 +35,7 @@ function initClassSelector() {
     });
 
     // SELECT ONLY ONE
-    const optionCheckboxes = document.querySelectorAll('input[name="class-selector-option"]');
+    const optionCheckboxes = document.querySelectorAll('input[name="classSelectorOption"]');
 
     optionCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', function() {
@@ -50,7 +50,7 @@ function initClassSelector() {
 };
 
 function checkClassSelector(option) {
-    const optionCheckboxes = document.querySelectorAll('input[name="class-selector-option"]');
+    const optionCheckboxes = document.querySelectorAll('input[name="classSelectorOption"]');
     optionCheckboxes.forEach((checkbox) => {
         checkbox.checked = false;
         if (checkbox.value === option) {

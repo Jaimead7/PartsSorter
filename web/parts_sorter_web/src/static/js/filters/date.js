@@ -49,9 +49,17 @@ function initDateFilter() {
             endDateFieldElement.value = savedDateOptions[3];
             endDateFieldElement.disabled = endDateCheckElement.checked;
         } catch (error) {
-            startDateFieldElement.valueAsDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
-            endDateFieldElement.valueAsDate = new Date(new Date().setDate(new Date().getDate() + 1));
             console.warn('Unable to load dates from local storage.')
+            const now = new Date();
+            let year = now.getFullYear();
+            let month = String(now.getMonth() + 1).padStart(2, '0');
+            let day = String(now.getDate()).padStart(2, '0');
+            startDateFieldElement.value = `${year}-${month}-${day}T00:00`;
+            const tomorrow = new Date(now.getTime()  + (24 * 60 * 60 * 1000));
+            year = tomorrow.getFullYear();
+            month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            day = String(tomorrow.getDate()).padStart(2, '0');
+            endDateFieldElement.value =  `${year}-${month}-${day}T00:00`;
         }
         startDateFieldElement.disabled = !startDateCheckElement.checked;
         endDateFieldElement.disabled = !endDateCheckElement.checked;
@@ -99,12 +107,14 @@ function initDateFilter() {
 
 function getDateQueryParameters() {
     if (!startDateFieldElement || !endDateFieldElement) {
-        console.error('No Date Elements found.');
+        console.error('No date elements found.');
         return;
     }
 
-    const start = startDateCheckElement.checked ? `start_date=${encodeURIComponent(startDateFieldElement.value)}` : '';
-    const end = endDateCheckElement.checked ? `end_date=${encodeURIComponent(endDateFieldElement.value)}` : '';
+    const startDateUTC = new Date(startDateFieldElement.value).toISOString().substring(0, 16);;
+    const start = startDateCheckElement.checked ? `start_date=${encodeURIComponent(startDateUTC)}` : '';
+    const endDateUTC = new Date(endDateFieldElement.value).toISOString().substring(0, 16);;
+    const end = endDateCheckElement.checked ? `end_date=${encodeURIComponent(endDateUTC)}` : '';
 
     return [start, end].filter(part => part !== '').join('&');
 };

@@ -26,8 +26,168 @@ import { initOriginFilter, getOriginQueryParameters } from './filters/origin.js'
 import { initModelFilter, getModelQueryParameters } from './filters/model.js';
 import { initTrustFilter, getTrustQueryParameters } from './filters/image/trust.js';
 import { initClassFilter, getClassQueryParameters } from './filters/class.js';
+import { setImgData } from './components/images.js';
 import { showAlert } from './utils.js';
 
+
+function getQueryParameters(index) {
+    let params = [];
+    params.push(getDateQueryParameters());
+    params.push(getExtensionQueryParameters());
+    params.push(getOriginQueryParameters());
+    params.push(getModelQueryParameters());
+    params.push(getTrustQueryParameters());
+    params.push(getClassQueryParameters());
+    // TODO: add true result filter
+    // TODO: add status filter
+    params.push(`index=${index}`);
+    return params.filter(item => item !== '').join('&');
+};
+
+function setPaginationNumber(id, value) {
+    const element = document.getElementById(id);
+    if (element) {
+        const defaultText = element.dataset.defaultText || '-';
+        element.textContent = value || defaultText;
+    }
+};
+
+function setImageInspection(data) {
+    if (data.type === 'img') {
+        setImgData('img0', data);
+        setPaginationNumber('currentHistImgIndex', data.index + 1);
+        setPaginationNumber('totalHistImgIndex', data.total);
+        checkClassSelector(data.true_result);
+    }
+};
+
+function clearImageInspection() {
+    setImgData('img0', {});
+    setPaginationNumber('currentHistImgIndex', null);
+    setPaginationNumber('totalHistImgIndex', null);
+    checkClassSelector(null);
+};
+
+async function getNewImageFromHist(index) {
+    const endpoint = `/api/image/hist/next/?${getQueryParameters(index)}`;
+    try {
+        const response = await fetch(endpoint);
+        if (response.status === 404) {
+            showAlert('No images found.', 'warning', 2);
+            clearImageInspection();
+            return;
+        }
+        const data = await response.json();
+        setImageInspection(data);
+    } catch (error) {
+        showAlert(`Error fetching image: ${error}`, 'danger', 2);
+        clearImageInspection();
+    }
+};
+
+async function initButtons() {
+    document.getElementById('nextHistImgButton')?.addEventListener('click', () => {
+        const indexElement = document.getElementById('currentHistImgIndex');
+        let currentIndex = parseInt(indexElement.textContent) || 0;
+        getNewImageFromHist(currentIndex);
+    });
+
+    document.getElementById('prevHistImgButton')?.addEventListener('click', () => {
+        const indexElement = document.getElementById('currentHistImgIndex');
+        let currentIndex = parseInt(indexElement.textContent) - 2 || 0;
+        if (currentIndex < 0) currentIndex = 0;
+        getNewImageFromHist(currentIndex);
+    });
+
+    const imageArticle = document.getElementById('img0');
+    imageArticle?.querySelector('[name="deleteImgBtn"]')?.addEventListener('click', () => {
+        const uuid = imageArticle.querySelector('[name="imgName"]')?.textContent;
+        if (!uuid) {
+            showAlert('Error getting image name', 'danger', 2);
+            return;
+        }
+
+        const endpoint = `/api/image/${uuid}/`;
+        let content = {
+            method: 'DELETE',
+            headers: {
+                'accept': '*/*',
+            }
+        };
+
+        fetch(endpoint, content)
+        .then((response) => {
+            if (response.ok) {
+                showAlert('Success', 'success', 2);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const indexElement = document.getElementById('currentHistImgIndex');
+            const totalIndexElement = document.getElementById('totalHistImgIndex');
+            let currentIndex = parseInt(indexElement.textContent) || 1;
+            let totalIndex = parseInt(totalIndexElement.textContent) || 1;
+            if (currentIndex >= totalIndex) {
+                currentIndex = totalIndex - 1;
+            }
+            if (currentIndex < 1) {
+                currentIndex = 1;
+            }
+            getNewImageFromHist(currentIndex - 1);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            showAlert('Error', 'danger', 2);
+        });
+    });
+
+    document.getElementById('trueResultForm')?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const uuid = imageArticle.querySelector('[name="imgName"]')?.textContent;
+        if (!uuid) {
+            showAlert('Error getting image name', 'danger', 2);
+            return;
+        }
+
+        const selectedCheckbox = Array.from(
+            document.querySelectorAll('input[name="classSelectorOption"]')
+        ).find(checkbox => checkbox.checked);
+
+        if (!selectedCheckbox) {
+            showAlert('Select a true result', 'warning', 2);
+            return;
+        }
+
+        const endpoint = `/api/image/${uuid}/true-result/`;
+        let content = {
+            method: 'PUT',
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(selectedCheckbox.value)
+        };
+        if (selectedCheckbox.value === 'No result') {
+            content = {
+                method: 'PUT',
+                headers: {
+                    'accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            }
+        }
+        fetch(endpoint, content)
+        .then((response) => {
+            if (response.ok) {
+                showAlert('Success', 'success', 2);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        })
+        .catch((error) => {
+            showAlert(`Error: ${error}`, 'danger', 2);
+        });
+    });
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     initClassSelector();
@@ -37,214 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initModelFilter();
     initTrustFilter();
     initClassFilter();
-
+    
+    initButtons();
     getNewImageFromHist(0);
-});
-
-// BUTTONS
-document.getElementById('nextHistImgButton')?.addEventListener('click', () => {
-    const indexElement = document.getElementById('currentHistImgIndex');
-    const totalIndexElement = document.getElementById('totalHistImgIndex');
-    let currentIndex = parseInt(indexElement.textContent) || 1;
-    let totalIndex = parseInt(totalIndexElement.textContent) || 1;
-    if (currentIndex >= totalIndex - 1) {
-        currentIndex = totalIndex - 1;
-    }
-    getNewImageFromHist(currentIndex);
-});
-
-document.getElementById('prevHistImgButton')?.addEventListener('click', () => {
-    const indexElement = document.getElementById('currentHistImgIndex');
-    let currentIndex = parseInt(indexElement.textContent) || 2;
-    if (currentIndex <= 2) {
-        currentIndex = 2;
-    }
-    getNewImageFromHist(currentIndex - 2);
-});
-
-document.getElementById('delete-img-btn-0')?.addEventListener('click', () => {
-    const imageUUID = document.getElementById('img-0-name').innerText.split('.')[0]
-    const endpoint = `/api/image/${imageUUID}/`;
-    let content = {
-        method: 'DELETE',
-        headers: {
-            'accept': '*/*',
-        }
-    }
-    fetch(endpoint, content)
-    .then((response) => {
-        if (response.ok) {
-            showAlert('Success', 'success', 2);
-        } else {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const indexElement = document.getElementById('currentHistImgIndex');
-        let currentIndex = parseInt(indexElement.textContent) || 2;
-        if (currentIndex <= 2) {
-            currentIndex = 2;
-        }
-        getNewImageFromHist(currentIndex - 1);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        showAlert('Error', 'danger', 2);
-    });
-});
-
-
-// FILTERS
-function getQueryParameters(index) {
-    let params = [];
-    params.push(getExtensionQueryParameters());
-    params.push(getDateQueryParameters());
-    params.push(getClassQueryParameters());
-    params.push(getOriginQueryParameters());
-    params.push(getModelQueryParameters());
-    params.push(getTrustQueryParameters());
-    params.push(`index=${index}`);
-    return params.filter(item => item !== '').join('&');
-};
-
-// REFRESH IMAGE DATA
-function setImageData(data) {
-    if (data.type === 'new-image') {
-        let element = document.getElementById('img-0-name');
-        if (element) {
-            element.innerText = data.image_url.split('/').pop();
-        }
-        element = document.getElementById('img-0-origin');
-        if (element) {
-            element.innerText = data.origin;
-        }
-        element = document.getElementById('img-0-type');
-        if (element) {
-            element.innerText = data.insp_result;
-        }
-        element = document.getElementById('img-0-trust');
-        if (element) {
-            element.innerText = (data.trust * 100).toFixed(2) + '%';
-        }
-        element = document.getElementById('img-0-model');
-        if (element) {
-            element.innerText = data.model;
-        }
-        element = document.getElementById('currentHistImgIndex');
-        if (element) {
-            element.innerText = parseInt(data.index) + 1;
-        }
-        element = document.getElementById('totalHistImgIndex');
-        if (element) {
-            element.innerText = data.total;
-        }
-        element = document.getElementById('img-0-alt');
-        if (element) {
-            element.hidden = true;
-        }
-        element = document.getElementById('img-0-img');
-        if (element) {
-            element.src = `/api/${data.image_url}`;
-            element.hidden = false;
-        }
-        checkClassSelector(data.true_result);
-    }
-}
-
-function clearImageData() {
-    let element = document.getElementById('img-0-name');
-    if (element) {
-        element.innerText = element.getAttribute('data-default-text');
-    }
-    element = document.getElementById('img-0-origin');
-    if (element) {
-        element.innerText = element.getAttribute('data-default-text');
-    }
-    element = document.getElementById('img-0-type');
-    if (element) {
-        element.innerText = element.getAttribute('data-default-text');
-    }
-    element = document.getElementById('img-0-trust');
-    if (element) {
-        element.innerText = element.getAttribute('data-default-text');
-    }
-    element = document.getElementById('img-0-model');
-    if (element) {
-        element.innerText = element.getAttribute('data-default-text');
-    }
-    element = document.getElementById('currentHistImgIndex');
-    if (element) {
-        element.innerText = element.getAttribute('data-default-text');
-    }
-    element = document.getElementById('totalHistImgIndex');
-    if (element) {
-        element.innerText = element.getAttribute('data-default-text');
-    }
-    element = document.getElementById('img-0-alt');
-    if (element) {
-        element.hidden = false;
-    }
-    element = document.getElementById('img-0-img');
-    if (element) {
-        element.src = '';
-        element.hidden = true;
-    }
-}
-
-// GET DATA
-async function getNewImageFromHist(index) {
-    const endpoint = `/api/image/hist/next/?${getQueryParameters(index)}`;
-    try {
-        const response = await fetch(endpoint);
-        if (response.status === 404) {
-            clearImageData();
-            return;
-        }
-        const data = await response.json();
-        setImageData(data);
-    } catch (error) {
-        console.error('Error fetching image:', error);
-        clearImageData();
-    }
-}
-
-// TRUE RESULT FORM
-document.getElementById('trueResultForm')?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const imageUUID = document.getElementById('img-0-name').innerText.split('.')[0]
-    const selectedCheckbox = Array.from(
-        document.querySelectorAll('input[name="class-selector-option"]')
-    ).find(checkbox => checkbox.checked);
-    if (!selectedCheckbox) {
-        showAlert('Select a true result', 'warning', 2);
-        return;
-    }
-    const endpoint = `/api/image/${imageUUID}/true-result/`;
-    let content = {
-        method: 'PUT',
-        headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(selectedCheckbox.value)
-    }
-    if (selectedCheckbox.value === 'No result') {
-        content = {
-            method: 'PUT',
-            headers: {
-                'accept': 'application/json',
-                'Content-Type': 'application/json',
-            }
-        }
-    }
-    fetch(endpoint, content)
-    .then((response) => {
-        if (response.ok) {
-            showAlert('Success', 'success', 2);
-        } else {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        showAlert('Error', 'danger', 2);
-    });
 });
