@@ -280,9 +280,9 @@ class ApiResponse(Protocol):
     type: str
     def model_dump(
         self,
-        model: Literal['json', 'python'] | str = 'python',
-        *args,
-        **kwargs
+        *args: Any,
+        mode: Literal['json', 'python'] | str = 'python',
+        **kwargs: Any
     ) -> dict[str, Any]: ...
 
 
