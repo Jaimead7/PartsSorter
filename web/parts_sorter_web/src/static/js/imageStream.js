@@ -109,7 +109,30 @@ function transferImages() {
     }
 };
 
+async function initBtns() {
+    document.querySelectorAll('article[id^="img"]').forEach(article => {
+        const button = article.querySelector('button[name="copyBtn"]');
+        const pElement = article.querySelector('p[name="imgName"]');
+
+        if (button && pElement) {
+            button.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(pElement.textContent);
+                    const icon = article.querySelector('.bi-copy');
+                    if (icon) {
+                        icon.classList.replace('bi-copy', 'bi-check2');
+                        setTimeout(() => icon.classList.replace('bi-check2', 'bi-copy'), 1000);
+                    }
+                } catch (err) {
+                    showAlert('Copy error.', 'warning', 2);
+                }
+            });
+        }
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     initOriginFilter();
+    initBtns();
     initWebSocket();
 });
