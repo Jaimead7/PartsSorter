@@ -20,7 +20,7 @@
 
 
 from datetime import datetime
-from uuid import UUID
+from typing import Optional
 
 import cv2
 import httpx
@@ -92,7 +92,7 @@ async def process_image(
     )
 
 async def update_status(
-    uuid: UUID,
+    uuid: Optional[str],
     status: int
 ) -> bool:
     async with httpx.AsyncClient() as client:
