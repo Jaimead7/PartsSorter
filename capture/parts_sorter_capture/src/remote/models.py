@@ -20,6 +20,7 @@
 
 
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -57,3 +58,10 @@ class ProcessImageResponse(BaseModel):
         formatted_date: str = self.date.strftime('%d/%m/%Y %H:%M:%S.%f')[:-3]
         id_str: str = f'{self.id}' if self.id is not None else 'Unknown'
         return f'Result(date: {formatted_date}, id: {id_str}, result: {self.result})'
+
+
+class ImageStatus(Enum):
+    CAPTURED = 0
+    PUSHED = 1
+    LEFT = 2
+    LOST = 3
