@@ -69,30 +69,6 @@ async def get_origin_results(
         offset= offset
     )
 
-@origin_results_router.put(
-    '/{origin}/{inspection_result}/',
-    response_model= OriginResult,
-    summary= 'Update OriginResult on the database.',
-    response_description= 'The OriginResult updated.',
-    status_code= status.HTTP_200_OK
-)
-async def update_origin_result(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    origin: Annotated[str, Path()],
-    inspection_result: Annotated[str, Path()],
-    result: Annotated[bool, Body()],
-    threshold: Annotated[float, Body()]
-) -> OriginResult:
-    return await db_update_origin_result(
-        session= session,
-        origin_result= OriginResult(
-            origin= origin,
-            inspection_result= inspection_result,
-            result= result,
-            threshold= threshold
-        )
-    )
-
 @origin_results_router.delete(
     '/{origin}/{inspection_result}/',
     summary= 'Delete OriginResult from the database.',
@@ -110,4 +86,28 @@ async def delete_origin_result(
     await db_delete_origin_result(
         session= session,
         origin_result= origin_result
+    )
+
+@origin_results_router.put(
+    '/{origin}/{inspection_result}/',
+    response_model= OriginResult,
+    summary= 'Update OriginResult on the database.',
+    response_description= 'The OriginResult updated.',
+    status_code= status.HTTP_200_OK
+)
+async def update_origin_result(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    origin: Annotated[str, Path()],
+    inspection_result: Annotated[str, Path()],
+    result: Annotated[bool, Body(embed= True)],
+    threshold: Annotated[float, Body(embed= True)]
+) -> OriginResult:
+    return await db_update_origin_result(
+        session= session,
+        origin_result= OriginResult(
+            origin= origin,
+            inspection_result= inspection_result,
+            result= result,
+            threshold= threshold
+        )
     )
