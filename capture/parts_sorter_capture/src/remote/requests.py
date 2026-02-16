@@ -90,3 +90,21 @@ async def process_image(
         id= response_json['id'],
         result= response_json['result']
     )
+
+async def update_status(
+    uuid: Optional[str],
+    status: int
+) -> bool:
+    async with httpx.AsyncClient() as client:
+        response: httpx.Response = await client.post(
+            url= f'{API_URL}/image/{uuid}/',
+            headers= {
+                'accept': 'application/json'
+            },
+            data= {
+                'status': status
+            },
+            timeout= httpx.Timeout(timeout= 10.0)
+        )
+        my_logger.debug(f'Response from server: {response}')
+    return response.is_success

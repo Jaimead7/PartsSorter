@@ -52,21 +52,6 @@ async def create_new_model(
         file= file
     )
 
-@models_router.delete(
-    '/',
-    summary= 'Delete Model\'s from the database.',
-    status_code= status.HTTP_204_NO_CONTENT
-)
-async def delete_models(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    names: Annotated[list[str], Body()]
-) -> None:
-    models: list[Model] = [Model(name= name) for name in names]
-    await db_delete_models(
-        session= session,
-        models= models
-    )
-
 @models_router.get(
     '/',
     response_model= list[Model],
@@ -87,6 +72,21 @@ async def get_models(
         offset= offset
     )
 
+@models_router.delete(
+    '/',
+    summary= 'Delete Model\'s from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_models(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    names: Annotated[list[str], Body(embed= True)]
+) -> None:
+    models: list[Model] = [Model(name= name) for name in names]
+    await db_delete_models(
+        session= session,
+        models= models
+    )
+
 @models_router.get(
     '/{name}/',
     response_model= Model,
@@ -103,6 +103,20 @@ async def get_model(
         model= Model(name= name)
     )
 
+@models_router.delete(
+    '/{name}/',
+    summary= 'Delete Model from the database.',
+    status_code= status.HTTP_204_NO_CONTENT
+)
+async def delete_model(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    name: Annotated[str, Path()]
+) -> None:
+    await db_delete_models(
+        session= session,
+        models= [Model(name= name)]
+    )
+
 @models_router.put(
     '/{name}/',
     response_model= Model,
@@ -117,20 +131,6 @@ async def update_model(
     return await db_update_model(
         session= session,
         model= Model(name= name)
-    )
-
-@models_router.delete(
-    '/{name}/',
-    summary= 'Delete Model from the database.',
-    status_code= status.HTTP_204_NO_CONTENT
-)
-async def delete_model(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()]
-) -> None:
-    await db_delete_models(
-        session= session,
-        models= [Model(name= name)]
     )
 
 @models_router.get(

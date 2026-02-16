@@ -53,7 +53,7 @@ images_router: APIRouter = APIRouter()
 async def create_new_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     file: UploadFile,
-    origin: Annotated[Optional[str], Body()] = None
+    origin: Annotated[Optional[str], Body(embed= True)] = None
 ) -> ImageResponse:
     db_image: Image = await db_create_new_image(
         session= session,
@@ -92,7 +92,7 @@ async def get_images(
 )
 async def delete_images(
     session: Annotated[AsyncSession, Depends(get_session)],
-    uuids: Annotated[list[UUID], Body()]
+    uuids: Annotated[list[UUID], Body(embed= True)]
 ) -> None:
     await db_delete_images_by_id(
         session= session,
@@ -110,7 +110,7 @@ async def process_new_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     bg_tasks: BackgroundTasks,
     file: UploadFile,
-    origin: Annotated[Optional[str], Body()] = None
+    origin: Annotated[Optional[str], Body(embed= True)] = None
 ) -> ImageProcessedResponse:
     db_image: Image
     result: bool
@@ -233,11 +233,11 @@ async def delete_image(
 async def update_image(
     session: Annotated[AsyncSession, Depends(get_session)],
     uuid: Annotated[UUID, Path()],
-    inspection_result: Annotated[Optional[str], Body()] = None,
-    origin: Annotated[Optional[str], Body()] = None,
-    true_result: Annotated[Optional[str], Body()] = None,
-    trust: Annotated[Optional[float], Body()] = None,
-    status: Annotated[int, Body()] = ImageStatus.captured
+    inspection_result: Annotated[Optional[str], Body(embed= True)] = None,
+    origin: Annotated[Optional[str], Body(embed= True)] = None,
+    true_result: Annotated[Optional[str], Body(embed= True)] = None,
+    trust: Annotated[Optional[float], Body(embed= True)] = None,
+    status: Annotated[int, Body(embed= True)] = ImageStatus.captured
 ) -> ImageResponse:
     image = Image(
         id= uuid,
@@ -265,7 +265,7 @@ async def update_image(
 async def update_image_true_result(
     session: Annotated[AsyncSession, Depends(get_session)],
     uuid: Annotated[UUID, Path()],
-    true_result: Annotated[Optional[str], Body()] = None,
+    true_result: Annotated[Optional[str], Body(embed= True)] = None,
 ) -> ImageResponse:
     db_image: Image = await db_get_image_by_id(
         session= session,
@@ -292,7 +292,7 @@ async def update_image_status(
     session: Annotated[AsyncSession, Depends(get_session)],
     bg_tasks: BackgroundTasks,
     uuid: Annotated[UUID, Path()],
-    status: Annotated[str | int, Body()] = ImageStatus.captured,
+    status: Annotated[str | int, Body(embed= True)] = ImageStatus.captured,
 ) -> ImageStatusResponse:
     db_image: Image = await db_get_image_by_id(
         session= session,
