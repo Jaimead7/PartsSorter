@@ -83,8 +83,14 @@ async function setNewImage(data) {
 };
 
 async function processNewImageStatus(data) {
-    //TODO
-}
+    document.querySelectorAll('article[id^="img"]').forEach(image => {
+        const imgData = getImgData(image.id);
+        if (imgData.id === data.id) {
+            imgData.status = data.status;
+            setImgData(image.id, imgData);
+        }
+    });
+};
 
 function clearImages() {
     document.querySelectorAll('article[id^="img"]').forEach(image => {
