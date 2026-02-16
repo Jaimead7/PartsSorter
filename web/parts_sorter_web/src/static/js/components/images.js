@@ -76,6 +76,29 @@ function getStatusBorderClass(imgData) {
 
 };
 
+function getBorderClasses(element) {
+    if (!element) return ['border-2'];
+
+    const classList = Array.from(element.classList);
+    const borderClasses = classList.filter(className =>
+        className.startsWith('border-')
+    );
+
+    return borderClasses;
+};
+
+function setBorderClasses(element, borderClasses) {
+    if (!element || !Array.isArray(borderClasses)) return;
+
+    Array.from(element.classList)
+        .filter(c => c.startsWith('border-'))
+        .forEach(c => element.classList.remove(c));
+
+    borderClasses
+        .filter(c => c.startsWith('border-'))
+        .forEach(c => element.classList.add(c));
+};
+
 function setImgData(imgId, imgData) {
     const article = document.getElementById(imgId);
     if (!article) return;
