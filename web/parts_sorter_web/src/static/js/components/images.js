@@ -35,27 +35,8 @@ function resolveURL(url) {
     return '/api/' + url;
 };
 
-function getImgData(imgId) {
-    const article = document.getElementById(imgId);
-    const img = article?.querySelector('[name="img"]');
-    const id = article?.querySelector('[name="imgName"]');
-    const origin = article?.querySelector('[name="imgOrigin"]');
-    const insp_result = article?.querySelector('[name="imgType"]');
-    const trust = article?.querySelector('[name="imgTrust"]');
-    const model = article?.querySelector('[name="imgModel"]');
-
-    return {
-        url: img && img.hasAttribute('src') ? img.getAttribute('src') : '',
-        id: id ? id.textContent : 'Unknown',
-        origin: origin ? origin.textContent : 'Unknown',
-        insp_result: insp_result ? insp_result.textContent : 'No result',
-        trust: trust ? trust.textContent : '0.00%',
-        model: model ? model.textContent : 'Unknown'
-    };
-};
-
-function getBorderClassesFromStatus(imgData) {
-    if (!imgData || !imgData.status || ! imgData.result) return ['border-2'];
+function getBorderClassesFromData(imgData) {
+    if (!imgData || !imgData.status) return ['border-2'];
 
     const status = imgData.status.toLowerCase();
     switch (status) {
@@ -123,10 +104,36 @@ function setBorderClasses(element, borderClasses) {
         .forEach(c => element.classList.add(c));
 };
 
+function getImgData(imgId) {
+    const article = document.getElementById(imgId);
+
+    const imgSection = article.querySelector('[name="imgSection"]');
+    const img = article?.querySelector('[name="img"]');
+    const id = article?.querySelector('[name="imgName"]');
+    const origin = article?.querySelector('[name="imgOrigin"]');
+    const insp_result = article?.querySelector('[name="imgType"]');
+    const trust = article?.querySelector('[name="imgTrust"]');
+    const model = article?.querySelector('[name="imgModel"]');
+
+    const result = getStatusFromElement(imgSection);
+
+    return {
+        url: img && img.hasAttribute('src') ? img.getAttribute('src') : '',
+        id: id ? id.textContent : 'Unknown',
+        origin: origin ? origin.textContent : 'Unknown',
+        insp_result: insp_result ? insp_result.textContent : 'No result',
+        trust: trust ? trust.textContent : '0.00%',
+        model: model ? model.textContent : 'Unknown',
+        status: result ? result.status : null,
+        result: result ? result.result : null
+    };
+};
+
 function setImgData(imgId, imgData) {
     const article = document.getElementById(imgId);
     if (!article) return;
 
+    const imgSection = article.querySelector('[name="imgSection"]');
     const img = article.querySelector('[name="img"]');
     const alt = article.querySelector('[name="imgAlt"]');
     const id = article.querySelector('[name="imgName"]');
@@ -134,6 +141,11 @@ function setImgData(imgId, imgData) {
     const insp_result = article.querySelector('[name="imgType"]');
     const trust = article.querySelector('[name="imgTrust"]');
     const model = article.querySelector('[name="imgModel"]');
+
+    if (imgSection) {
+        const borderClasses = getBorderClassesFromData(imgData);
+        setBorderClasses(imgSection, borderClasses);
+    }
 
     if (img && alt) {
         if (imgData.url) {
