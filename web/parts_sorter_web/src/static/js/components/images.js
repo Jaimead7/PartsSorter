@@ -54,6 +54,28 @@ function getImgData(imgId) {
     };
 };
 
+function getStatusBorderClass(imgData) {
+    if (!imgData.status || ! imgData.result) return 'border border-2';
+    switch (imgData.status.toLowerCase()) {
+        case 'captured':
+            if (imgData.result) {
+                return 'border border-2 border-warning';
+            } else {
+                return 'border border-2 border-info-subtle';
+            }
+
+        case 'pushed':
+            return 'border border-2 border-success';
+        case 'left':
+            return 'border border-2 border-info';
+        case 'lost':
+            return 'border border-2 border-danger';
+        default:
+            return 'border border-2';
+    }
+
+};
+
 function setImgData(imgId, imgData) {
     const article = document.getElementById(imgId);
     if (!article) return;
