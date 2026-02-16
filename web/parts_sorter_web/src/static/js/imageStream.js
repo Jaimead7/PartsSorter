@@ -99,7 +99,13 @@ function clearImages() {
 };
 
 function transferImages() {
-    for (let i = 4; i > 0; i--) {
+    const imgElements = document.querySelectorAll('article[id^="img"]');
+    const sortedElements = Array.from(imgElements).sort((a, b) => {
+        const numA = parseInt(a.id.replace('img', ''));
+        const numB = parseInt(b.id.replace('img', ''));
+        return numA - numB;
+    });
+    for (let i = sortedElements.length - 1; i > 0; i--) {
         try {
             const imgData = getImgData(`img${i-1}`);
             setImgData(`img${i}`, imgData);
