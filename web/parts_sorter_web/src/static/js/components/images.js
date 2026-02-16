@@ -54,26 +54,50 @@ function getImgData(imgId) {
     };
 };
 
-function getStatusBorderClass(imgData) {
-    if (!imgData.status || ! imgData.result) return 'border border-2';
-    switch (imgData.status.toLowerCase()) {
+function getBorderClassesFromStatus(imgData) {
+    if (!imgData || !imgData.status || ! imgData.result) return ['border-2'];
+
+    const status = imgData.status.toLowerCase();
+    switch (status) {
         case 'captured':
             if (imgData.result) {
-                return 'border border-2 border-warning';
+                return ['border-2', 'border-warning'];
             } else {
-                return 'border border-2 border-info-subtle';
+                return ['border-2', 'border-info-subtle'];
             }
-
         case 'pushed':
-            return 'border border-2 border-success';
+            return ['border-2', 'border-success'];
         case 'left':
-            return 'border border-2 border-info';
+            return ['border-2', 'border-info'];
         case 'lost':
-            return 'border border-2 border-danger';
+            return ['border-2', 'border-danger'];
         default:
-            return 'border border-2';
+            return ['border-2'];
+    }
+};
+
+function getStatusFromElement (element) {
+    if (!element) return {status: 'captured', result: null};
+
+    const borderClasses = getBorderClasses(element);
+
+    if (borderClasses.includes('border-success')) {
+        return {status: 'pushed', result: null};
+    }
+    if (borderClasses.includes('border-info')) {
+        return {status: 'left', result: null};
+    }
+    if (borderClasses.includes('border-danger')) {
+        return {status: 'lost', result: null};
+    }
+    if (borderClasses.includes('border-warning')) {
+        return {status: 'captured', result: true};
+    }
+    if (borderClasses.includes('border-info-subtle')) {
+        return {status: 'captured', result: false};
     }
 
+    return {status: 'captured', result: null};
 };
 
 function getBorderClasses(element) {
