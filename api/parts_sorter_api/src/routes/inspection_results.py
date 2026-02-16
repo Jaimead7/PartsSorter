@@ -44,7 +44,7 @@ inspection_results_router = APIRouter()
 )
 async def create_new_inspection_result(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Body()]
+    name: Annotated[str, Body(embed= True)]
 ) -> InspectionResult:
     return await db_create_new_inspection_result(
         session= session,
@@ -78,7 +78,7 @@ async def get_inspection_results(
 )
 async def delete_inspection_results(
     session: Annotated[AsyncSession, Depends(get_session)],
-    names: Annotated[list[str], Query()] = []
+    names: Annotated[list[str], Body(embed= True)] = []
 ) -> None:
     inspection_result: list[InspectionResult] = [InspectionResult(name= name) for name in names]
     await db_delete_inspection_results(
