@@ -78,7 +78,7 @@ async def update_model_class(
     session: Annotated[AsyncSession, Depends(get_session)],
     model: Annotated[str, Path()],
     number: Annotated[int, Path()],
-    inspection_result: Annotated[str, Body()]
+    inspection_result: Annotated[str, Body(embed= True)]
 ) -> ModelClass:
     return await db_update_model_class(
         session= session,
