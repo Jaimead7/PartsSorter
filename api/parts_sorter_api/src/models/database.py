@@ -171,10 +171,14 @@ class ImageStatus(NoInstantiable):
 
     @classmethod
     def get_value(cls, inp: str | int) -> int:
+        if isinstance(inp, str):
+            try:
+                inp = int(inp)
+            except ValueError:
+                if cls.validate_name(inp):
+                    return cls._status[inp.lower()]
         if isinstance(inp, int) and cls.validate_value(inp):
             return inp
-        if isinstance(inp, str) and cls.validate_name(inp):
-            return cls._status[inp.lower()]
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
         return cls.captured
 
