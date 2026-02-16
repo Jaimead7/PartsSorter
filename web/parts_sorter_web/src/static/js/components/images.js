@@ -57,8 +57,8 @@ function getBorderClassesFromData(imgData) {
     }
 };
 
-function getStatusFromElement (element) {
-    if (!element) return {status: 'captured', result: null};
+function getStatusFromElement(element) {
+    if (!element) return {};
 
     const borderClasses = getBorderClasses(element);
 
@@ -78,11 +78,11 @@ function getStatusFromElement (element) {
         return {status: 'captured', result: false};
     }
 
-    return {status: 'captured', result: null};
+    return {};
 };
 
 function getBorderClasses(element) {
-    if (!element) return ['border-2'];
+    if (!element) return [];
 
     const classList = Array.from(element.classList);
     const borderClasses = classList.filter(className =>
