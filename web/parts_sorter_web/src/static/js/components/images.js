@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { toSnakeCase } from '../utils';
+import { toSnakeCase } from '../utils.js';
 
 
 function formatTrust(value) {
@@ -42,7 +42,7 @@ function resolveURL(url) {
 function getBorderClassesFromData(imgData) {
     if (!imgData || !imgData.status) return ['border-4'];
 
-    const status = imgData.status.toSnakeCase();
+    const status = toSnakeCase(imgData.status);
     switch (status) {
         case 'captured':
             return ['border-4'];
@@ -69,41 +69,6 @@ function getBorderClassesFromData(imgData) {
     }
 };
 
-function getStatusFromElement(element) {
-    if (!element) return {};
-
-    const borderClasses = getBorderClasses(element);
-
-    if (borderClasses.includes('border-success')) {
-        return {status: 'pushed', result: null};
-    }
-    if (borderClasses.includes('border-info')) {
-        return {status: 'left', result: null};
-    }
-    if (borderClasses.includes('border-danger')) {
-        return {status: 'lost', result: null};
-    }
-    if (borderClasses.includes('border-warning')) {
-        return {status: 'captured', result: true};
-    }
-    if (borderClasses.includes('border-info-subtle')) {
-        return {status: 'captured', result: false};
-    }
-
-    return {};
-};
-
-function getBorderClasses(element) {
-    if (!element) return [];
-
-    const classList = Array.from(element.classList);
-    const borderClasses = classList.filter(className =>
-        className.startsWith('border-')
-    );
-
-    return borderClasses;
-};
-
 function setBorderClasses(element, borderClasses) {
     if (!element || !Array.isArray(borderClasses)) return;
 
@@ -119,15 +84,13 @@ function setBorderClasses(element, borderClasses) {
 function getImgData(imgId) {
     const article = document.getElementById(imgId);
 
-    const imgSection = article.querySelector('[name="imgSection"]');
     const img = article?.querySelector('[name="img"]');
     const id = article?.querySelector('[name="imgName"]');
     const origin = article?.querySelector('[name="imgOrigin"]');
     const insp_result = article?.querySelector('[name="imgType"]');
     const trust = article?.querySelector('[name="imgTrust"]');
     const model = article?.querySelector('[name="imgModel"]');
-
-    const result = getStatusFromElement(imgSection);
+    const status = article?.querySelector('[name="imgStatus"]');
 
     return {
         url: img && img.hasAttribute('src') ? img.getAttribute('src') : '',
@@ -136,8 +99,7 @@ function getImgData(imgId) {
         insp_result: insp_result ? insp_result.textContent : 'No result',
         trust: trust ? trust.textContent : '0.00%',
         model: model ? model.textContent : 'Unknown',
-        status: result ? result.status : null,
-        result: result ? result.result : null
+        status: status ? status.textContent : 'Unknown'
     };
 };
 
@@ -153,11 +115,7 @@ function setImgData(imgId, imgData) {
     const insp_result = article.querySelector('[name="imgType"]');
     const trust = article.querySelector('[name="imgTrust"]');
     const model = article.querySelector('[name="imgModel"]');
-
-    if (imgSection) {
-        const borderClasses = getBorderClassesFromData(imgData);
-        setBorderClasses(imgSection, borderClasses);
-    }
+    const status = article.querySelector('[name="imgStatus"]');
 
     if (img && alt) {
         if (imgData.url) {
@@ -190,6 +148,12 @@ function setImgData(imgId, imgData) {
     if (model) {
         const defaultText = model.dataset.defaultText || 'Unknown';
         model.textContent = imgData.model || defaultText;
+    }
+    if (status) {
+        const borderClasses = getBorderClassesFromData(imgData);
+        setBorderClasses(imgSection, borderClasses);
+        const defaultText = status.dataset.defaultText || 'Unknown';
+        status.textContent = imgData.status || defaultText;
     }
 };
 
