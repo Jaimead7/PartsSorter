@@ -28,7 +28,7 @@ import numpy as np
 from pydantic import ValidationError
 from utils.config import API_URL, ORIGIN_NAME, my_logger
 
-from .models import (ActuatorParamsResponse, CameraParamsResponse,
+from .models import (ActuatorParamsResponse, CameraParamsResponse, ImageStatus,
                      ProcessImageResponse)
 
 
@@ -93,7 +93,7 @@ async def process_image(
 
 async def update_status(
     uuid: Optional[str],
-    status: int
+    status: ImageStatus
 ) -> bool:
     async with httpx.AsyncClient() as client:
         response: httpx.Response = await client.post(
@@ -102,7 +102,7 @@ async def update_status(
                 'accept': 'application/json'
             },
             data= {
-                'status': status
+                'status': status.value
             },
             timeout= httpx.Timeout(timeout= 10.0)
         )
