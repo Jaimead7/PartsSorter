@@ -237,15 +237,16 @@ async def update_image(
     origin: Annotated[Optional[str], Body(embed= True)] = None,
     true_result: Annotated[Optional[str], Body(embed= True)] = None,
     trust: Annotated[Optional[float], Body(embed= True)] = None,
-    status: Annotated[int, Body(embed= True)] = ImageStatus.captured
+    status: Annotated[Optional[str | int], Body(embed= True)] = ImageStatus.captured
 ) -> ImageResponse:
+    
     image = Image(
         id= uuid,
         inspection_result= inspection_result,
         origin= origin,
         true_result= true_result,
         trust= trust,
-        status= status
+        status= ImageStatus.get_value(status)
     )
     db_image: Image = await db_update_image(
         session= session,
@@ -292,7 +293,7 @@ async def update_image_status(
     session: Annotated[AsyncSession, Depends(get_session)],
     bg_tasks: BackgroundTasks,
     uuid: Annotated[UUID, Path()],
-    status: Annotated[str | int, Body(embed= True)] = ImageStatus.captured,
+    status: Annotated[Optional[str | int], Body(embed= True)] = ImageStatus.captured,
 ) -> ImageStatusResponse:
     db_image: Image = await db_get_image_by_id(
         session= session,
