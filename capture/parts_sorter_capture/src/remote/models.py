@@ -20,7 +20,7 @@
 
 
 from datetime import datetime, timezone
-from enum import Enum, unique
+from enum import IntEnum, unique
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -61,7 +61,7 @@ class ProcessImageResponse(BaseModel):
 
 
 @unique
-class ImageStatus(Enum):
+class ImageStatus(IntEnum):
     CAPTURED = 0
     TRANSITION_PUSH = 1
     TRANSITION_PASS = 2
