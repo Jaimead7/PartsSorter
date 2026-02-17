@@ -145,17 +145,29 @@ class Model(SQLModel, table= True):
 
 #********** IMAGES **********
 class ImageStatus(NoInstantiable):
-    _status: dict[str, int] = {    
+    _status: dict[str, int] = {
         'captured': 0,
-        'pushed': 1,
-        'left': 2,
-        'lost': 3
+        'transition_push': 1,
+        'transition_pass': 2,
+        'actuator_push': 3,
+        'actuator_pass': 4,
+        'pushed': 5,
+        'passed': 6,
+        'error_overwrite': -1,
+        'error_lost': -2,
+        'error_skipped': -3,
     }
 
     captured: int = _status['captured']
+    transition_push: int = _status['transition_push']
+    transition_pass: int = _status['transition_pass']
+    actuator_push: int = _status['actuator_push']
+    actuator_pass: int = _status['actuator_pass']
     pushed: int = _status['pushed']
-    left: int = _status['left']
-    lost: int = _status['lost']
+    passed: int = _status['passed']
+    error_overwrite: int = _status['error_overwrite']
+    error_lost: int = _status['error_lost']
+    error_skipped: int = _status['error_skipped']
 
     @classmethod
     def validate_name(cls, name: str) -> bool:
@@ -187,9 +199,9 @@ class ImageStatus(NoInstantiable):
         if isinstance(inp, int) and cls.validate_value(inp):
             for name, val in cls._status.items():
                 if val == inp:
-                    return name.capitalize()
+                    return name.replace('_', ' ').title()
         if isinstance(inp, str) and cls.validate_name(inp):
-            return inp.capitalize()
+            return inp.replace('_', ' ').title()
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
         return 'Not found'
 
