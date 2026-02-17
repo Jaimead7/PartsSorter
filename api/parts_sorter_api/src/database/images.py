@@ -42,7 +42,8 @@ from ..engine.results import ResultsType
 from ..engine.results_extractors import ClassResult, ResultsExtractorRegistry
 from ..engine.results_sorters import apply_results_sorters
 from ..models.api import ImageFilters, ProcessImageResult
-from ..models.database import Image, InspectionResult, OriginResult
+from ..models.database import (Image, ImageStatus, InspectionResult,
+                               OriginResult)
 from .inspection_results import db_inspection_result_name_exists
 from .models import db_get_model_inspection_result
 from .origin_results import db_get_origin_result
@@ -337,12 +338,16 @@ async def db_create_and_process_new_image(
     db_image.inspection_result = process_image_result.inpection_result_name
     db_image.trust = process_image_result.trust
     db_image.model = process_image_result.model_name
-    db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
-    db_image = await _db_add_image_and_commit(
+    result: bool = await db_get_image_origin_result(
         session= session,
         image= db_image
     )
-    result: bool = await db_get_image_origin_result(
+    if result:
+        db_image.status = ImageStatus.transition_push
+    else:
+        db_image.status = ImageStatus.transition_pass
+    db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
+    db_image = await _db_add_image_and_commit(
         session= session,
         image= db_image
     )
