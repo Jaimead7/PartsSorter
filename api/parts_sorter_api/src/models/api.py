@@ -52,7 +52,7 @@ class ImageFilters(BaseModel):
     min_trust: Optional[float] = 0.
     max_trust: Optional[float] = 1.
     models: list[Optional[str]] = []
-    status: list[str] = []
+    status: list[Optional[str | int]] = []
 
     @field_validator('inspection_results')
     @classmethod
@@ -110,7 +110,7 @@ class ImageFilters(BaseModel):
     @classmethod
     def validate_status(
         cls,
-        status_names: list[str]
+        status_names: list[Optional[str | int]]
     ) -> list[int]:
         return [
             ImageStatus.get_value(status_name)

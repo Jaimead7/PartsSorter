@@ -147,7 +147,7 @@ async def get_next_hist_image(
     true_result: Annotated[list[Optional[str]], Query()] = [],
     min_trust: Annotated[Optional[float], Query()] = None,
     max_trust: Annotated[Optional[float], Query()] = None,
-    status: Annotated[list[str], Query()] = [],
+    status: Annotated[list[Optional[str | int]], Query()] = [],
     index: Annotated[int, Query()] = 0
 )-> ImageHistResponse:
     filters: ImageFilters = ImageFilters(
