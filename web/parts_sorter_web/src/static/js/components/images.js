@@ -36,24 +36,24 @@ function resolveURL(url) {
 };
 
 function getBorderClassesFromData(imgData) {
-    if (!imgData || !imgData.status) return ['border-2'];
+    if (!imgData || !imgData.status) return ['border-4'];
 
     const status = imgData.status.toLowerCase();
     switch (status) {
         case 'captured':
             if (imgData.result) {
-                return ['border-2', 'border-warning'];
+                return ['border-4', 'border-warning'];
             } else {
-                return ['border-2', 'border-info-subtle'];
+                return ['border-4', 'border-info-subtle'];
             }
         case 'pushed':
-            return ['border-2', 'border-success'];
+            return ['border-4', 'border-success'];
         case 'left':
-            return ['border-2', 'border-info'];
+            return ['border-4', 'border-info'];
         case 'lost':
-            return ['border-2', 'border-danger'];
+            return ['border-4', 'border-danger'];
         default:
-            return ['border-2'];
+            return ['border-4'];
     }
 };
 
