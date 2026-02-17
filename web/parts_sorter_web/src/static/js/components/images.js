@@ -19,6 +19,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import { toSnakeCase } from '../utils';
+
+
 function formatTrust(value) {
     if (typeof value === 'number') {
         return (value * 100).toFixed(2) + '%';
@@ -35,22 +38,31 @@ function resolveURL(url) {
     return '/api/' + url;
 };
 
+//TODO: Use custom classes for status style
 function getBorderClassesFromData(imgData) {
     if (!imgData || !imgData.status) return ['border-4'];
 
-    const status = imgData.status.toLowerCase();
+    const status = imgData.status.toSnakeCase();
     switch (status) {
         case 'captured':
-            if (imgData.result) {
-                return ['border-4', 'border-warning'];
-            } else {
-                return ['border-4', 'border-info-subtle'];
-            }
+            return ['border-4'];
+        case 'transition_push':
+            return ['border-4', 'border-warning'];
+        case 'transition_pass':
+            return ['border-4', 'border-info'];
+        case 'actuator_push':
+            return ['border-4', 'border-warning'];
+        case 'actuator_pass':
+            return ['border-4', 'border-info'];
         case 'pushed':
             return ['border-4', 'border-success'];
-        case 'left':
-            return ['border-4', 'border-info'];
-        case 'lost':
+        case 'passed':
+            return ['border-4', 'border-success'];
+        case 'error_overwrite':
+            return ['border-4', 'border-danger'];
+        case 'error_lost':
+            return ['border-4', 'border-danger'];
+        case 'error_skipped':
             return ['border-4', 'border-danger'];
         default:
             return ['border-4'];
