@@ -109,6 +109,18 @@ function convertInputValue(element) {
     }
 };
 
+function toSnakeCase(str) {
+  return str
+    .trim()
+    .replace(/([A-Z])/g, '_$1')
+    .replace(/[\s-]+/g, '_')
+    .replace(/[^\w]/g, '')
+    .toLowerCase()
+    .replace(/_+/g, '_')
+    .replace(/^_/, '')
+    .replace(/_$/, '');
+};
+
 export {
     showAlert,
     initCollapseCard,
@@ -116,5 +128,6 @@ export {
     disableSubmitButton,
     enableSubmitButton,
     stringToParamName,
-    convertInputValue
+    convertInputValue,
+    toSnakeCase
 };
