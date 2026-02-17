@@ -72,11 +72,11 @@ class ActuatorManager:
             await asyncio.sleep(0.2)
             write(ACTUATOR_PIN, False)
         else:
-            my_logger.error(f'Part skiped with {part}. Tried to push so early.')
+            my_logger.error(f'Part skipped with {part}. Tried to push so early.')
             asyncio.create_task(
                 update_status(
                     uuid= part.id,
-                    status= ImageStatus.LOST.value
+                    status= ImageStatus.ERROR_SKIPPED.value
                 )
             )
 
@@ -104,7 +104,7 @@ class ActuatorManager:
                 asyncio.create_task(
                     update_status(
                         uuid= next_result.id,
-                        status= ImageStatus.LOST.value
+                        status= ImageStatus.ERROR_LOST.value
                     )
                 )
                 my_logger.error('Part lost. The part of this result didn\'t reach the actuator.')
@@ -112,6 +112,16 @@ class ActuatorManager:
                 continue
             result: ProcessImageResponse = await results_queue.get()
             my_logger.debug(f'New part on the actuator with {result}.')
+            if result.result:
+                push: int = ImageStatus.ACTUATOR_PASS.value
+            else:
+                push = ImageStatus.ACTUATOR_PUSH.value
+            asyncio.create_task(
+                    update_status(
+                        uuid= next_result.id,
+                        status= push
+                    )
+                )
             return result
 
     async def cycle(
@@ -137,7 +147,7 @@ class ActuatorManager:
                         asyncio.create_task(
                             update_status(
                                 uuid= next_part_to_push.id,
-                                status= ImageStatus.LOST.value
+                                status= ImageStatus.ERROR_OVERWRITE.value
                             )
                         )
                         my_logger.error(f'New part on the actuator without clearing last part.')
@@ -151,7 +161,7 @@ class ActuatorManager:
                             asyncio.create_task(
                                 update_status(
                                     uuid= next_part_to_push.id,
-                                    status= ImageStatus.LEFT.value
+                                    status= ImageStatus.PASSED.value
                                 )
                             )
                     next_part_to_push = None
