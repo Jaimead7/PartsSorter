@@ -182,7 +182,7 @@ class ImageStatus(NoInstantiable):
         return False
 
     @classmethod
-    def get_value(cls, inp: str | int) -> int:
+    def get_value(cls, inp: Optional[str | int]) -> int:
         if isinstance(inp, str):
             try:
                 inp = int(inp)
@@ -195,7 +195,7 @@ class ImageStatus(NoInstantiable):
         return cls.captured
 
     @classmethod
-    def get_name(cls, inp: str | int) -> str:
+    def get_name(cls, inp: Optional[str | int]) -> str:
         if isinstance(inp, int) and cls.validate_value(inp):
             for name, val in cls._status.items():
                 if val == inp:
