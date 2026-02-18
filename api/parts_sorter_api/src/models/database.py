@@ -218,12 +218,14 @@ class ImageStatus(NoInstantiable):
 
     @classmethod
     def get_name(cls, inp: Optional[str | int]) -> str:
-        if isinstance(inp, int) and cls.validate_value(inp):
+        if inp is None:
+            return 'Not found'
+        if cls.validate_value(inp) is not None:
             for name, val in cls._status.items():
                 if val == inp:
-                    return name.replace('_', ' ').title()
-        if isinstance(inp, str) and cls.validate_name(inp):
-            return inp.replace('_', ' ').title()
+                    return cls._title(name)
+        if isinstance(inp, str) and cls.validate_name(inp) is not None:
+            return cls._title(inp)
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
         return 'Not found'
 
