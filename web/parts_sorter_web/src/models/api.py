@@ -21,13 +21,14 @@
 
 from typing import Any, Optional, TypedDict
 
+import httpx
 from pydantic import BaseModel
 
 
 class RequestOptions(TypedDict, total=False):
     url: str
     headers: dict
-    timeout: float
+    timeout: httpx.Timeout
 
 
 class ModelResponse(BaseModel):

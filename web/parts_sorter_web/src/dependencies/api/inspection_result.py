@@ -34,7 +34,7 @@ async def api_get_inspection_results() -> list[InspectionResultResponse]:
         headers= {
             'accept': 'application/json'
         },
-        timeout= 30.0
+        timeout= httpx.Timeout(timeout= 5.0)
     )
     response: Optional[httpx.Response] = await api_request(options)
     if response is None:

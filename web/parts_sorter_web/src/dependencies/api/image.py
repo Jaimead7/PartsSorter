@@ -34,7 +34,7 @@ async def api_get_image_extensions() -> list[str]:
         headers= {
             'accept': 'application/json'
         },
-        timeout= 30.0
+        timeout= httpx.Timeout(timeout= 5.0)
     )
     response: Optional[httpx.Response] = await api_request(options)
     if response is None:
@@ -52,7 +52,7 @@ async def api_get_status_list() -> list[str]:
         headers= {
             'accept': 'application/json'
         },
-        timeout= 30.0
+        timeout= httpx.Timeout(timeout= 5.0)
     )
     response: Optional[httpx.Response] = await api_request(options)
     if response is None:
