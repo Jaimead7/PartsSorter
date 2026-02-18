@@ -164,7 +164,7 @@ async function initButtons() {
                 'accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(selectedCheckbox.value)
+            body: JSON.stringify({true_result: selectedCheckbox.value})
         };
         if (selectedCheckbox.value === 'No result') {
             content = {
@@ -179,6 +179,9 @@ async function initButtons() {
         .then((response) => {
             if (response.ok) {
                 showAlert('Success', 'success', 2);
+                const indexElement = document.getElementById('currentHistImgIndex');
+                let currentIndex = parseInt(indexElement.textContent) || 0;
+                getNewImageFromHist(currentIndex);
             } else {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
