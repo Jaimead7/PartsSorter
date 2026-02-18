@@ -219,7 +219,7 @@ class ImageStatus(NoInstantiable):
     @classmethod
     def get_name(cls, inp: Optional[str | int]) -> str:
         if inp is None:
-            return 'Not found'
+            return 'Unknown'
         if cls.validate_value(inp) is not None:
             for name, val in cls._status.items():
                 if val == inp:
@@ -227,7 +227,7 @@ class ImageStatus(NoInstantiable):
         if isinstance(inp, str) and cls.validate_name(inp) is not None:
             return cls._title(inp)
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
-        return 'Not found'
+        return 'Unknown'
 
     @classmethod
     def get_all_names(cls) -> list[str]:
