@@ -26,7 +26,7 @@ import { initOriginFilter, getOriginQueryParameters } from './filters/origin.js'
 import { initModelFilter, getModelQueryParameters } from './filters/model.js';
 import { initTrustFilter, getTrustQueryParameters } from './filters/image/trust.js';
 import { initClassFilter, getClassQueryParameters } from './filters/class.js';
-import { setImgData } from './components/images.js';
+import { setImgData, initImgButtons } from './components/images.js';
 import { showAlert } from './utils.js';
 
 
@@ -198,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTrustFilter();
     initClassFilter();
     
+    initImgButtons();
     initButtons();
     getNewImageFromHist(0);
 });
