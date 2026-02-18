@@ -20,7 +20,7 @@
 
 
 from .engine import api_request
-from .image import api_get_image_extensions
+from .image import api_get_image_extensions, api_get_status_list
 from .inspection_result import api_get_inspection_results
 from .model import api_get_model, api_get_models
 from .origin import api_get_origin, api_get_origins

@@ -44,3 +44,21 @@ async def api_get_image_extensions() -> list[str]:
     except Exception as e:
         my_logger.error(f'Error processing image extension from the api. {e}')
         return []
+
+
+async def api_get_status_list() -> list[str]:
+    options: RequestOptions = RequestOptions(
+        url= f'{API_URL}/image/status/',
+        headers= {
+            'accept': 'application/json'
+        },
+        timeout= 30.0
+    )
+    response: Optional[httpx.Response] = await api_request(options)
+    if response is None:
+        return []
+    try:
+        return [status for status in response.json()]
+    except Exception as e:
+        my_logger.error(f'Error processing image status from the api. {e}')
+        return []

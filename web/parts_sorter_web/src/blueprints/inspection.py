@@ -25,7 +25,7 @@ from werkzeug import Response
 
 from ..dependencies.api import (api_get_image_extensions,
                                 api_get_inspection_results, api_get_models,
-                                api_get_origins)
+                                api_get_origins, api_get_status_list)
 from ..models.api import (InspectionResultResponse, ModelResponse,
                           OriginResponse)
 
@@ -56,6 +56,7 @@ async def image_inspection() -> Response | str:
         models: list[ModelResponse] = await api_get_models()
         classes: list[InspectionResultResponse] = await api_get_inspection_results()
         image_extensions: list[str] = await api_get_image_extensions()
+        status_list: list[str] = await api_get_status_list()
     except httpx.ConnectError:
         return redirect('/', 302)
     return await render_template(
@@ -64,5 +65,6 @@ async def image_inspection() -> Response | str:
         origins= origins,
         models= models,
         classes= classes,
-        image_extensions= image_extensions
+        image_extensions= image_extensions,
+        status_list= status_list
     )
