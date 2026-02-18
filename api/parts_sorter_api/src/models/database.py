@@ -205,6 +205,10 @@ class ImageStatus(NoInstantiable):
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
         return 'Not found'
 
+    @classmethod
+    def get_all_names(cls) -> list[str]:
+        return list(cls._status.keys())
+
 
 class BaseImage(SQLModel):
     id: UUID = Field(
