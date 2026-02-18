@@ -26,7 +26,8 @@ from pyUtils import Styles
 from sqlalchemy import ScalarResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import func, select
+from sqlmodel import col, func, select
+from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import my_logger
 from ..models.database import ModelClass
@@ -106,11 +107,13 @@ async def db_get_model_classes(
     limit: int,
     offset: int
 ) -> Sequence[ModelClass]:
-    db_model_classes: ScalarResult[ModelClass] = await session.scalars(
-        select(ModelClass)
-        .offset(offset)
-        .limit(limit)
+    statement: SelectOfScalar[ModelClass] = select(ModelClass)
+    statement = statement.order_by(
+        col(ModelClass.model).asc(),
+        col(ModelClass.number).asc()
     )
+    statement = statement.offset(offset).limit(limit)
+    db_model_classes: ScalarResult[ModelClass] = await session.scalars(statement)
     db_model_classes_list: Sequence[ModelClass] = db_model_classes.all()
     if len(db_model_classes_list) == 0:
         msg: str = f'InspectionResult\'s not found.'
@@ -125,10 +128,9 @@ async def db_get_next_model_class_number_for_model(
     session: AsyncSession,
     model: str
 ) -> int:
-    result: ScalarResult[int] = await session.scalars(
-        select(func.max(ModelClass.number))
-        .where(ModelClass.model == model)
-    )
+    statement: SelectOfScalar[int] = select(func.max(ModelClass.number))
+    statement = statement.where(ModelClass.model == model)
+    result: ScalarResult[int] = await session.scalars(statement)
     max_num: Optional[int] = result.one_or_none()
     return (max_num or -1) + 1
 

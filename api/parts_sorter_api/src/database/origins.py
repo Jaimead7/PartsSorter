@@ -153,6 +153,7 @@ async def db_get_origins(
                 ]
             )
         )
+    statement = statement.order_by(col(Origin.name).asc())
     statement = statement.offset(offset).limit(limit)
     db_origins: ScalarResult[Origin] = await session.scalars(statement)
     db_origins_list: Sequence[Origin] = db_origins.all()

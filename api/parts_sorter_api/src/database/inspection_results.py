@@ -133,6 +133,7 @@ async def db_get_inspection_results(
                 ]
             )
         )
+    statement = statement.order_by(col(InspectionResult.name).asc())
     statement = statement.offset(offset).limit(limit)
     db_inspection_results: ScalarResult[InspectionResult] = await session.scalars(statement)
     db_inspection_results_list: Sequence[InspectionResult] = db_inspection_results.all()

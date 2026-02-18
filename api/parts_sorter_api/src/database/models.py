@@ -191,6 +191,7 @@ async def db_get_models(
         statement = statement.where(
             col(Model.name).in_([model.name for model in models])
         )
+    statement = statement.order_by(col(Model.name).asc())
     statement = statement.offset(offset).limit(limit)
     db_models: ScalarResult[Model] = await session.scalars(statement)
     db_models_list: Sequence[Model] = db_models.all()

@@ -414,5 +414,6 @@ async def db_get_image_extensions(
     session: AsyncSession
 ) -> Sequence[str]:
     statement: SelectOfScalar[str] = select(Image.extension).distinct()
+    statement = statement.order_by(col(Image.extension).asc())
     result: ScalarResult[str] = await session.scalars(statement)
     return result.all()

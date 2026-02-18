@@ -26,7 +26,8 @@ from pyUtils import Styles
 from sqlalchemy import ScalarResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
+from sqlmodel import col, select
+from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import my_logger
 from ..models.database import OriginResult
@@ -107,11 +108,13 @@ async def db_get_origin_results(
     limit: int,
     offset: int
 ) -> Sequence[OriginResult]:
-    db_origin_results: ScalarResult[OriginResult] = await session.scalars(
-        select(OriginResult)
-        .offset(offset)
-        .limit(limit)
+    statement: SelectOfScalar[OriginResult] = select(OriginResult)
+    statement = statement.order_by(
+        col(OriginResult.origin).asc(),
+        col(OriginResult.inspection_result).asc()
     )
+    statement = statement.offset(offset).limit(limit)
+    db_origin_results: ScalarResult[OriginResult] = await session.scalars(statement)
     db_origin_results_list: Sequence[OriginResult] = db_origin_results.all()
     if len(db_origin_results_list) == 0:
         msg: str = f'OriginResult\'s not found.'
