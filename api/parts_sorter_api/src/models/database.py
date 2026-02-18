@@ -169,28 +169,50 @@ class ImageStatus(NoInstantiable):
     error_lost: int = _status['error_lost']
     error_skipped: int = _status['error_skipped']
 
-    @classmethod
-    def validate_name(cls, name: str) -> bool:
-        if name.lower() in [key.lower() for key in cls._status.keys()]:
-            return True
-        return False
+    @staticmethod
+    def _snakecase(name: str) -> str:
+        name = name.strip()
+        name = name.lower()
+        for char in ' -!@#$%^&*()+=[]{}|;:,.<>?/~`':
+            name = name.replace(char, '_')
+        while '__' in name:
+            name = name.replace('__', '_')
+        return name
+
+    @staticmethod
+    def _title(name:str) -> str:
+        name = name.replace('_', ' ')
+        name = name.title()
+        return name
 
     @classmethod
-    def validate_value(cls, value: int) -> bool:
+    def validate_name(cls, name: str) -> Optional[str]:
+        name = cls._snakecase(name)
+        if name in [cls._snakecase(key) for key in cls._status.keys()]:
+            return name
+        return None
+
+    @classmethod
+    def validate_value(cls, value: int | str) -> Optional[int]:
+        try:
+            value = int(value)
+        except ValueError:
+            return None
         if value in cls._status.values():
-            return True
-        return False
+            return value
+        return None
 
     @classmethod
     def get_value(cls, inp: Optional[str | int]) -> int:
+        if inp is None:
+            return cls.captured
         if isinstance(inp, str):
-            try:
-                inp = int(inp)
-            except ValueError:
-                if cls.validate_name(inp):
-                    return cls._status[inp.lower()]
-        if isinstance(inp, int) and cls.validate_value(inp):
-            return inp
+            name: Optional[str] = cls.validate_name(inp)
+            if name:
+                return cls._status[name]
+        value: Optional[int] = cls.validate_value(inp)
+        if value:
+            return value
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
         return cls.captured
 
@@ -207,7 +229,10 @@ class ImageStatus(NoInstantiable):
 
     @classmethod
     def get_all_names(cls) -> list[str]:
-        return list(cls._status.keys())
+        return [
+            cls._title(status)
+            for status in cls._status.keys()
+        ]
 
 
 class BaseImage(SQLModel):
