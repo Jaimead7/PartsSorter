@@ -25,6 +25,7 @@ import { initExtensionFilter, getExtensionQueryParameters } from './filters/imag
 import { initOriginFilter, getOriginQueryParameters } from './filters/origin.js';
 import { initModelFilter, getModelQueryParameters } from './filters/model.js';
 import { initTrustFilter, getTrustQueryParameters } from './filters/image/trust.js';
+import { initStatusFilter, getStatusQueryParameters } from './filters/image/status.js';
 import { initClassFilter, getClassQueryParameters } from './filters/class.js';
 import { setImgData, initImgButtons } from './components/images.js';
 import { showAlert } from './utils.js';
@@ -37,9 +38,9 @@ function getQueryParameters(index) {
     params.push(getOriginQueryParameters());
     params.push(getModelQueryParameters());
     params.push(getTrustQueryParameters());
+    params.push(getStatusQueryParameters());
     params.push(getClassQueryParameters());
     // TODO: add true result filter
-    // TODO: add status filter
     params.push(`index=${index}`);
     return params.filter(item => item !== '').join('&');
 };
@@ -199,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initOriginFilter();
     initModelFilter();
     initTrustFilter();
+    initStatusFilter();
     initClassFilter();
     
     initImgButtons();
