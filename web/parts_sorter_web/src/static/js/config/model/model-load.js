@@ -61,14 +61,13 @@ async function initFormEvents() {
 
         fetch(endpoint, content)
         .then(response => {
-            if (response.ok) {
-                window.location.replace('/config/models/');
-            } else {
-                throw new Error(`Error on server response (${response.status}) ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`${response.status} (${response.statusText})`)
             }
+            window.location.replace('/config/models/');
         })
         .catch(error => {
-            showAlert('Error creating model: ' + error.message, 'danger', 2);
+            showAlert(`Error creating model: ${error.message}`, 'danger', 2);
         })
         .finally(() => {
             enableSubmitButton(this, 'Load');

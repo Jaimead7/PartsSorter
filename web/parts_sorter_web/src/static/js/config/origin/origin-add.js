@@ -68,14 +68,13 @@ async function initFormEvents() {
 
         fetch(endpoint, content)
         .then((response) => {
-            if (response.ok) {
-                window.location.replace('/config/origins/');
-            } else {
-                throw new Error(`Error on server response (${response.status})`);
+            if (!response.ok) {
+                throw new Error(`${response.status} (${response.statusText})`)
             }
+            window.location.replace('/config/origins/');
         })
         .catch((error) => {
-            showAlert('Error adding origin: ' + error.message, 'danger', 2);
+            showAlert(`Error adding origin: ${error.message}`, 'danger', 2);
         })
         .finally(() => {
             enableSubmitButton(this, 'Add');

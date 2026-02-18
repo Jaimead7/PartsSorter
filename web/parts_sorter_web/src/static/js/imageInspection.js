@@ -71,19 +71,23 @@ function clearImageInspection() {
 
 async function getNewImageFromHist(index) {
     const endpoint = `/api/image/hist/next/?${getQueryParameters(index)}`;
-    try {
-        const response = await fetch(endpoint);
+    fetch(endpoint)
+    .then(async (response) => {
         if (response.status === 404) {
             showAlert('No images found.', 'warning', 2);
             clearImageInspection();
             return;
         }
+        if (!response.ok) {
+            throw new Error(`${response.status} (${response.statusText})`)
+        }
         const data = await response.json();
         setImageInspection(data);
-    } catch (error) {
-        showAlert(`Error fetching image: ${error}`, 'danger', 2);
+    })
+    .catch((error) => {
+        showAlert(`Error fetching image: ${error.message}`, 'danger', 2);
         clearImageInspection();
-    }
+    });
 };
 
 async function initButtons() {
@@ -118,26 +122,17 @@ async function initButtons() {
 
         fetch(endpoint, content)
         .then((response) => {
-            if (response.ok) {
-                showAlert('Success', 'success', 2);
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`${response.status} (${response.statusText})`)
             }
+            showAlert('Success', 'success', 2);
             const indexElement = document.getElementById('currentHistImgIndex');
-            const totalIndexElement = document.getElementById('totalHistImgIndex');
-            let currentIndex = parseInt(indexElement.textContent) || 1;
-            let totalIndex = parseInt(totalIndexElement.textContent) || 1;
-            if (currentIndex >= totalIndex) {
-                currentIndex = totalIndex - 1;
-            }
-            if (currentIndex < 1) {
-                currentIndex = 1;
-            }
-            getNewImageFromHist(currentIndex - 1);
+            let currentIndex = parseInt(indexElement.textContent) - 1 || 0;
+            if (currentIndex < 0) currentIndex = 0;
+            getNewImageFromHist(currentIndex);
         })
         .catch((error) => {
-            console.error('Error:', error);
-            showAlert('Error', 'danger', 2);
+            showAlert(`Error: ${error.message}`, 'danger', 2);
         });
     });
 
@@ -178,17 +173,16 @@ async function initButtons() {
         }
         fetch(endpoint, content)
         .then((response) => {
-            if (response.ok) {
-                showAlert('Success', 'success', 2);
-                const indexElement = document.getElementById('currentHistImgIndex');
-                let currentIndex = parseInt(indexElement.textContent) || 0;
-                getNewImageFromHist(currentIndex);
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`${response.status} (${response.statusText})`)
             }
+            showAlert('Success', 'success', 2);
+            const indexElement = document.getElementById('currentHistImgIndex');
+            let currentIndex = parseInt(indexElement.textContent) || 0;
+            getNewImageFromHist(currentIndex);
         })
         .catch((error) => {
-            showAlert(`Error: ${error}`, 'danger', 2);
+            showAlert(`Error: ${error.message}`, 'danger', 2);
         });
     });
 };

@@ -60,15 +60,13 @@ async function initDeleteOrigin() {
 
         fetch(endpoint, content)
         .then((response) => {
-            if (response.ok) {
-                window.location.replace('/config/origins/');
-            } else {
-                throw new Error(`Error on server response (${response.status})`);
+            if (!response.ok) {
+                throw new Error(`${response.status} (${response.statusText})`)
             }
+            window.location.replace('/config/origins/');
         })
         .catch((error) => {
-            console.error('Error:', error);
-            showAlert('Error deleting origin: ' + error.message, 'danger', 2);
+            showAlert(`Error deleting origin: ${error.message}`, 'danger', 2);
         });
     });
 };
@@ -103,14 +101,13 @@ async function initFormEvents() {
 
         fetch(endpoint, content)
         .then((response) => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                throw new Error(`Error on server response (${response.status})`);
+            if (!response.ok) {
+                throw new Error(`${response.status} (${response.statusText})`)
             }
+            location.reload();
         })
         .catch((error) => {
-            showAlert('Error saving origin: ' + error.message, 'danger', 2);
+            showAlert(`Error saving origin: ${error.message}`, 'danger', 2);
         })
         .finally(() => {
             enableSubmitButton(this, 'Save');
