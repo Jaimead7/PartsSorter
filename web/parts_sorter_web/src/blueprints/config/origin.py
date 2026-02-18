@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import asyncio
 from typing import Optional
 
 import httpx
@@ -62,17 +63,18 @@ async def add_origin() -> Response | str:
 @origin_config_bp.route(f'/<path:origin_name>/')
 async def config_origin(origin_name: str) -> Response | str:
     try:
-        origin: Optional[OriginResponse] = await api_get_origin(origin_name)
-        origins: list[OriginResponse] = await api_get_origins()
+        origin: Optional[OriginResponse]
+        origins: list[OriginResponse]
+        models: list[ModelResponse]
+        origin, origins, models = await asyncio.gather(
+            api_get_origin(origin_name),
+            api_get_origins(),
+            api_get_models()
+        )
     except httpx.ConnectError:
         return redirect('/config/origins/', 302)
     if origin is None:
         return redirect('/config/origins/', 302)
-    models: list[ModelResponse] = []
-    try:
-        models += await api_get_models()
-    except httpx.ConnectError:
-        pass
     return await render_template(
         'config/origin/origin.html',
         page_title= 'Configuration',

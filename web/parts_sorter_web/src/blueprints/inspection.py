@@ -19,6 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import asyncio
+
 import httpx
 from quart import Blueprint, redirect, render_template, request
 from werkzeug import Response
@@ -52,11 +54,18 @@ async def image_stream() -> str:
 @inspection_bp.route('/image-inspection/')
 async def image_inspection() -> Response | str:
     try:
-        origins: list[OriginResponse] = await api_get_origins()
-        models: list[ModelResponse] = await api_get_models()
-        classes: list[InspectionResultResponse] = await api_get_inspection_results()
-        image_extensions: list[str] = await api_get_image_extensions()
-        status_list: list[str] = await api_get_status_list()
+        origins: list[OriginResponse]
+        models: list[ModelResponse]
+        classes: list[InspectionResultResponse]
+        image_extensions: list[str]
+        status_list: list[str]
+        origins, models, classes, image_extensions, status_list = await asyncio.gather(
+            api_get_origins(),
+            api_get_models(),
+            api_get_inspection_results(),
+            api_get_image_extensions(),
+            api_get_status_list()
+        )
     except httpx.ConnectError:
         return redirect('/', 302)
     return await render_template(

@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import asyncio
 from typing import Optional
 
 import httpx
@@ -56,8 +57,12 @@ async def load_model() -> Response | str:
 @models_config_bp.route(f'/<path:model_name>/')
 async def config_model(model_name: str) -> Response | str:
     try:
-        model: Optional[ModelResponse] = await api_get_model(model_name)
-        models: list[ModelResponse] = await api_get_models()
+        model: Optional[ModelResponse]
+        models: list[ModelResponse]
+        model, models = asyncio.gather(
+            api_get_model(model_name),
+            api_get_models()
+        )
     except httpx.ConnectError:
         return redirect('/config/models/', 302)
     if model is None:
