@@ -19,14 +19,14 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { initClassSelector, checkClassSelector } from './selectors/class.js';
+import { initTrueResultSelector, checkTrueResultSelector } from './selectors/trueResult.js';
 import { initDateFilter, getDateQueryParameters } from './filters/date.js';
 import { initExtensionFilter, getExtensionQueryParameters } from './filters/image/extension.js';
 import { initOriginFilter, getOriginQueryParameters } from './filters/origin.js';
 import { initModelFilter, getModelQueryParameters } from './filters/model.js';
 import { initTrustFilter, getTrustQueryParameters } from './filters/image/trust.js';
 import { initStatusFilter, getStatusQueryParameters } from './filters/image/status.js';
-import { initClassFilter, getClassQueryParameters } from './filters/class.js';
+import { initInspResultFilter, getInspResultQueryParameters } from './filters/inspResult.js';
 import { setImgData, initImgButtons } from './components/images.js';
 import { showAlert } from './utils.js';
 
@@ -39,7 +39,7 @@ function getQueryParameters(index) {
     params.push(getModelQueryParameters());
     params.push(getTrustQueryParameters());
     params.push(getStatusQueryParameters());
-    params.push(getClassQueryParameters());
+    params.push(getInspResultQueryParameters());
     // TODO: add true result filter
     params.push(`index=${index}`);
     return params.filter(item => item !== '').join('&');
@@ -58,7 +58,7 @@ function setImageInspection(data) {
         setImgData('img0', data);
         setPaginationNumber('currentHistImgIndex', data.index + 1);
         setPaginationNumber('totalHistImgIndex', data.total);
-        checkClassSelector(data.true_result);
+        checkTrueResultSelector(data.true_result);
     }
 };
 
@@ -66,7 +66,7 @@ function clearImageInspection() {
     setImgData('img0', {});
     setPaginationNumber('currentHistImgIndex', null);
     setPaginationNumber('totalHistImgIndex', null);
-    checkClassSelector(null);
+    checkTrueResultSelector(null);
 };
 
 async function getNewImageFromHist(index) {
@@ -145,7 +145,7 @@ async function initButtons() {
         }
 
         const selectedCheckbox = Array.from(
-            document.querySelectorAll('input[name="classSelectorOption"]')
+            document.querySelectorAll('input[name="trueResultSelectorOption"]')
         ).find(checkbox => checkbox.checked);
 
         if (!selectedCheckbox) {
@@ -188,14 +188,14 @@ async function initButtons() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    initClassSelector();
+    initTrueResultSelector();
     initDateFilter();
     initExtensionFilter();
     initOriginFilter();
     initModelFilter();
     initTrustFilter();
     initStatusFilter();
-    initClassFilter();
+    initInspResultFilter();
     
     initImgButtons();
     initButtons();

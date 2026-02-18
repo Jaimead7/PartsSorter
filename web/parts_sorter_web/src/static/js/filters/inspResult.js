@@ -19,10 +19,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initClassFilter() {
+function initInspResultFilter() {
     // COLLAPSE
-    const collapseElement = document.getElementById('classFilterCollapseCard');
-    const buttonIcon = document.querySelector('button[data-bs-target="#classFilterCollapseCard"] .bi');
+    const collapseElement = document.getElementById('inspResultFilterCollapseCard');
+    const buttonIcon = document.querySelector('button[data-bs-target="#inspResultFilterCollapseCard"] .bi');
 
     collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
@@ -35,23 +35,23 @@ function initClassFilter() {
     });
 
     // SELECT ALL
-    const selectAllCheckbox = document.getElementById('classFilterSelectAll');
-    const classOptions = document.querySelectorAll('input[name="class-filter-option"]');
+    const selectAllCheckbox = document.getElementById('inspResultFilterSelectAll');
+    const inspResultOptions = document.querySelectorAll('input[name="inspResultFilterOption"]');
 
-    function saveClasssOptions() {
-        const selectedClasss = Array.from(classOptions)
+    function saveInspResultOptions() {
+        const selectedInspResult = Array.from(inspResultOptions)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
-        localStorage.setItem('classFilterOptions', JSON.stringify(selectedClasss));
+        localStorage.setItem('inspResultFilterOptions', JSON.stringify(selectedInspResult));
     };
 
-    function loadClasssOptions() {
-        const savedClasss = localStorage.getItem('classFilterOptions');
+    function loadInspResultOptions() {
+        const savedInspResults = localStorage.getItem('inspResultFilterOptions');
 
-        if (savedClasss) {
-            const selectedClasss = JSON.parse(savedClasss);
-            classOptions.forEach((checkbox) => {
-                checkbox.checked = selectedClasss.includes(checkbox.value);
+        if (savedInspResults) {
+            const selectedInspResults = JSON.parse(savedInspResults);
+            inspResultOptions.forEach((checkbox) => {
+                checkbox.checked = selectedInspResults.includes(checkbox.value);
             });
         }
     };
@@ -59,45 +59,45 @@ function initClassFilter() {
     selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
-        classOptions.forEach((checkbox) => {
+        inspResultOptions.forEach((checkbox) => {
             checkbox.checked = isChecked;
         });
 
         selectAllCheckbox.indeterminate = false;
 
-        saveClasssOptions();
+        saveInspResultOptions();
     });
 
     function updateSelectAllState() {
-        const allChecked = Array.from(classOptions).every(checkbox => checkbox.checked);
-        const someChecked = Array.from(classOptions).some(checkbox => checkbox.checked);
+        const allChecked = Array.from(inspResultOptions).every(checkbox => checkbox.checked);
+        const someChecked = Array.from(inspResultOptions).some(checkbox => checkbox.checked);
 
         if (selectAllCheckbox) {
             selectAllCheckbox.checked = allChecked;
             selectAllCheckbox.indeterminate = someChecked && !allChecked;
         }
 
-        saveClasssOptions();
+        saveInspResultOptions();
     };
 
-    classOptions.forEach((checkbox) => {
+    inspResultOptions.forEach((checkbox) => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
-    loadClasssOptions();
+    loadInspResultOptions();
     updateSelectAllState();
 };
 
-function getClassQueryParameters() {
-    const classOptions = document.querySelectorAll('input[name="class-filter-option"]');
-    let classParams = [];
-    classOptions.forEach((checkbox) => {
+function getInspResultQueryParameters() {
+    const inspResultOptions = document.querySelectorAll('input[name="inspResultFilterOption"]');
+    let inspResultParams = [];
+    inspResultOptions.forEach((checkbox) => {
         if (checkbox.checked) {
-            classParams.push(`inspection_result=${encodeURIComponent(checkbox.value)}`);
+            inspResultParams.push(`inspection_result=${encodeURIComponent(checkbox.value)}`);
         }
     });
-    return classParams.join('&');
+    return inspResultParams.join('&');
 };
 
 
-export { initClassFilter, getClassQueryParameters };
+export { initInspResultFilter, getInspResultQueryParameters };

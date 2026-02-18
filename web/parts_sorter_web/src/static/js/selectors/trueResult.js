@@ -19,10 +19,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initClassSelector() {
+function initTrueResultSelector() {
     // COLLAPSE
-    const collapseElement = document.getElementById('classSelectorCollapseCard');
-    const buttonIcon = document.querySelector('button[data-bs-target="#classSelectorCollapseCard"] .bi');
+    const collapseElement = document.getElementById('trueResultSelectorCollapseCard');
+    const buttonIcon = document.querySelector('button[data-bs-target="#trueResultSelectorCollapseCard"] .bi');
     
     collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
@@ -35,7 +35,7 @@ function initClassSelector() {
     });
 
     // SELECT ONLY ONE
-    const optionCheckboxes = document.querySelectorAll('input[name="classSelectorOption"]');
+    const optionCheckboxes = document.querySelectorAll('input[name="trueResultSelectorOption"]');
 
     optionCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', function() {
@@ -49,8 +49,8 @@ function initClassSelector() {
     });
 };
 
-function checkClassSelector(option) {
-    const optionCheckboxes = document.querySelectorAll('input[name="classSelectorOption"]');
+function checkTrueResultSelector(option) {
+    const optionCheckboxes = document.querySelectorAll('input[name="trueResultSelectorOption"]');
     optionCheckboxes.forEach((checkbox) => {
         checkbox.checked = false;
         if (checkbox.value === option) {
@@ -60,4 +60,4 @@ function checkClassSelector(option) {
 }
 
 
-export { initClassSelector, checkClassSelector };
+export { initTrueResultSelector, checkTrueResultSelector };

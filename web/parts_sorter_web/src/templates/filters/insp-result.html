@@ -2,30 +2,30 @@
     <button class="btn card-header p-0 ps-1 pe-1 d-flex justify-content-between align-items-center collapsed"
             type="button" 
             data-bs-toggle="collapse"
-            data-bs-target="#classFilterCollapseCard" 
+            data-bs-target="#inspResultFilterCollapseCard" 
             aria-expanded="false"
-            aria-controls="classFilterCollapseCard"
+            aria-controls="inspResultFilterCollapseCard"
     >
-        <span class="fs-8 fst-italic p-0">Classes:</span>
+        <span class="fs-8 fst-italic p-0">Inspection result:</span>
         <span class="bi bi-caret-down-square fs-5"></span>
     </button>
-    <section class="card-body collapse p-1" id="classFilterCollapseCard">
+    <section class="card-body collapse p-1" id="inspResultFilterCollapseCard">
         <label class="form-check mb-1 border-bottom">
-            <input class="form-check-input" type="checkbox" id="classFilterSelectAll">
+            <input class="form-check-input" type="checkbox" id="inspResultFilterSelectAll">
             <strong>All</strong>
         </label>
         <ul class="list-group">
             <li class="list-group-item p-0 ps-1 pe-1 text-truncate">
                 <label class="d-flex gap-1">
-                    <input class="form-check-input" type="checkbox" name="class-filter-option" value="No result">
+                    <input class="form-check-input" type="checkbox" name="inspResultFilterOption" value="No result">
                     No result
                 </label>
             </li>
-            {% for class in classes: %}
+            {% for inspResult in classes: %}
                 <li class="list-group-item p-0 ps-1 pe-1 text-truncate">
                     <label class="d-flex gap-1">
-                        <input class="form-check-input" type="checkbox" name="class-filter-option" value="{{ class.name }}">
-                        {{ class.name }}
+                        <input class="form-check-input" type="checkbox" name="inspResultFilterOption" value="{{ inspResult.name }}">
+                        {{ inspResult.name }}
                     </label>
                 </li>
             {% endfor %}
@@ -33,7 +33,7 @@
     </section>
 
     <script
-        src="{{ url_for('static', filename='js/filters/class.js') }}"
+        src="{{ url_for('static', filename='js/filters/inspResult.js') }}"
         type="module">
     </script>
 </article>

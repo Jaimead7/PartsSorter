@@ -98,7 +98,6 @@ function convertInputValue(element) {
     const type = element.getAttribute('type') || 'text';
     switch (type.toLocaleLowerCase()) {
         case 'number':
-        case 'number':
             const num = parseFloat(element.value);
             return isNaN(element.value) ? element.value.trim() : num;
         case 'checkbox':

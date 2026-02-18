@@ -87,7 +87,7 @@ function getImgData(imgId) {
     const img = article?.querySelector('[name="img"]');
     const id = article?.querySelector('[name="imgName"]');
     const origin = article?.querySelector('[name="imgOrigin"]');
-    const insp_result = article?.querySelector('[name="imgType"]');
+    const insp_result = article?.querySelector('[name="imgInspResult"]');
     const trust = article?.querySelector('[name="imgTrust"]');
     const model = article?.querySelector('[name="imgModel"]');
     const status = article?.querySelector('[name="imgStatus"]');
@@ -112,7 +112,7 @@ function setImgData(imgId, imgData) {
     const alt = article.querySelector('[name="imgAlt"]');
     const id = article.querySelector('[name="imgName"]');
     const origin = article.querySelector('[name="imgOrigin"]');
-    const insp_result = article.querySelector('[name="imgType"]');
+    const insp_result = article.querySelector('[name="imgInspResult"]');
     const trust = article.querySelector('[name="imgTrust"]');
     const model = article.querySelector('[name="imgModel"]');
     const status = article.querySelector('[name="imgStatus"]');
