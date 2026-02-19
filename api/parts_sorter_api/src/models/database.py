@@ -105,6 +105,10 @@ class Model(SQLModel, table= True):
     name: str = Field(
         primary_key= True
     )
+    description: Optional[str] = Field(
+        default= None,
+        nullable= True
+    )
 
     model_classes_of_model: Optional[list['ModelClass']] = Relationship(
         back_populates= 'model_of_model_class',
