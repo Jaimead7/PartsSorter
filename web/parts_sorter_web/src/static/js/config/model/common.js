@@ -20,8 +20,8 @@
 
 
 function getModelData() {
-    const descriptionText = document.getElementById('modelDescription')?.textContent;
-    
+    const descriptionText = document.getElementById('modelDescription')?.value?.trim() || null;
+
     return {
         description: descriptionText
     };

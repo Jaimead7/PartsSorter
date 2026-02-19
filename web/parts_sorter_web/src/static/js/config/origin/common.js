@@ -28,7 +28,7 @@ import {
 
 
 function getOriginData() {
-    const description = document.getElementById('originDescription')?.textContent?.trim() || null;
+    const description = document.getElementById('originDescription')?.value?.trim() || null;
     const model = document.getElementById('originModel')?.value?.trim() || null;
     const params = {};
 
