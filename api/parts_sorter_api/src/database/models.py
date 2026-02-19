@@ -142,7 +142,10 @@ async def db_update_model(
         session= session,
         model= model
     )
-    ...
+    db_model.description = model.description
+    session.add(db_model)
+    await session.commit()
+    await session.refresh(db_model)
     return db_model
 
 async def db_delete_models(

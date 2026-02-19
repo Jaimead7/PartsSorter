@@ -128,11 +128,12 @@ async def delete_model(
 )
 async def update_model(
     session: Annotated[AsyncSession, Depends(get_session)],
-    name: Annotated[str, Path()]
+    name: Annotated[str, Path()],
+    description: Annotated[Optional[str], Body(embed= True)] = None
 ) -> Model:
     return await db_update_model(
         session= session,
-        model= Model(name= name)
+        model= Model(name= name, description= description)
     )
 
 @models_router.get(
