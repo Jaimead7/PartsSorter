@@ -68,7 +68,7 @@ function createParamInputElement(paramName) {
     const keyInput = document.createElement('label');
     keyInput.className = 'input-group-text';
     keyInput.setAttribute('name', 'paramName');
-    keyInput.htmlFor = `${paramName}-Value`;
+    keyInput.htmlFor = `${paramName}Value`;
     keyInput.textContent = paramName;
 
     //value input
@@ -76,7 +76,7 @@ function createParamInputElement(paramName) {
     valueInput.type = 'text';
     valueInput.className = 'form-control';
     valueInput.name = 'paramValue';
-    valueInput.id = `${paramName}-Value`;
+    valueInput.id = `${paramName}Value`;
 
     //select
     const select = document.createElement('select');

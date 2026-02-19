@@ -20,8 +20,8 @@
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeIcon = document.getElementById('theme-icon');
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
     const htmlElement = document.documentElement;
 
     const savedTheme = localStorage.getItem('theme') || 'dark';

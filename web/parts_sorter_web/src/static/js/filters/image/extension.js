@@ -36,7 +36,7 @@ function initExtensionFilter() {
 
     // SELECT ALL
     const selectAllCheckbox = document.getElementById('imageExtensionFilterSelectAll');
-    const imageExtensionOptions = document.querySelectorAll('input[name="image-extension-filter-option"]');
+    const imageExtensionOptions = document.querySelectorAll('input[name="imageExtensionFilterOption"]');
 
     function saveImageExtensionsOptions() {
         const selectedImageExtensions = Array.from(imageExtensionOptions)
@@ -89,7 +89,7 @@ function initExtensionFilter() {
 };
 
 function getExtensionQueryParameters() {
-    const extensionOptions = document.querySelectorAll('input[name="image-extension-filter-option"]');
+    const extensionOptions = document.querySelectorAll('input[name="imageExtensionFilterOption"]');
     let extensionParams = [];
     extensionOptions.forEach((checkbox) => {
         if (checkbox.checked) {

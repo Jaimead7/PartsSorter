@@ -36,7 +36,7 @@ function initModelFilter() {
 
     // SELECT ALL
     const selectAllCheckbox = document.getElementById('modelFilterSelectAll');
-    const modelOptions = document.querySelectorAll('input[name="model-filter-option"]');
+    const modelOptions = document.querySelectorAll('input[name="modelFilterOption"]');
 
     function saveModelsOptions() {
         const selectedModels = Array.from(modelOptions)
@@ -89,7 +89,7 @@ function initModelFilter() {
 };
 
 function getModelQueryParameters() {
-    const modelOptions = document.querySelectorAll('input[name="model-filter-option"]');
+    const modelOptions = document.querySelectorAll('input[name="modelFilterOption"]');
     let modelParams = [];
     modelOptions.forEach((checkbox) => {
         if (checkbox.checked) {

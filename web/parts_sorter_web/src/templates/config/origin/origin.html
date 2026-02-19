@@ -76,8 +76,8 @@
                                     {% for key, value in origin.params.items() %}
                                         <li class="d-flex mb-1">
                                             <div class="input-group">
-                                                <label name="paramName" class="input-group-text" for="{{ key }}-Value">{{ key }}</label>
-                                                <input name="paramValue" id="{{ key }}-Value" type="{% if value is integer or value is float %}number{% else %}text{% endif %}" class="form-control" value="{{ value }}">
+                                                <label name="paramName" class="input-group-text" for="{{ key }}Value">{{ key }}</label>
+                                                <input name="paramValue" id="{{ key }}Value" type="{% if value is integer or value is float %}number{% else %}text{% endif %}" class="form-control" value="{{ value }}">
                                                 <select name="paramType" class="input-group-text text-start">
                                                     <option {% if value is string %}selected{% endif %} value="text">Text</option>
                                                     <option {% if value is integer or value is float %}selected{% endif %} value="number">Number</option>
