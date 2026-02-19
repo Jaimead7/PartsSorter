@@ -24,6 +24,9 @@ import {
     disableSubmitButton,
     enableSubmitButton
 } from '../../utils.js';
+import {
+    getModelData
+} from './common.js';
 
 
 async function initFormEvents() {
@@ -36,9 +39,8 @@ async function initFormEvents() {
     form.querySelector('button[type="submit"]')?.addEventListener('click', async function(event) {
         event.preventDefault();
 
-        
         const endpoint = `/api/model/`;
-        
+
         const fileInput = document.getElementById('modelFile');
         const file = fileInput.files[0];
         if (!file) {
@@ -50,6 +52,9 @@ async function initFormEvents() {
 
         const formData = new FormData();
         formData.append('file', file);
+
+        const modelData = getModelData();
+        formData.append('description', modelData.description);
 
         let content = {
             method: 'POST',

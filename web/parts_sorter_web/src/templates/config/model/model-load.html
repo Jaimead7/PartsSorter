@@ -10,10 +10,14 @@
                 <header class="d-flex align-items-center justify-content-between mb-3 pb-1 border-bottom border-2">
                     <h1 class="h3 m-0">Load model</h1>
                 </header>
-                <section class="">
-                    <div class="input-group">
-                        <input type="file" accept=".zip" class="form-control" id="modelFile">
-                    </div>
+                <section class="input-group">
+                    <input type="file" accept=".zip" class="form-control" id="modelFile">
+                </section>
+                <section class="mt-2">
+                    <label class="rounded-top border border-bottom-0 bg-body-tertiary p-2" for="modelDescription">
+                        Description:
+                    </label>
+                    <textarea class="form-control rounded-0 rounded-bottom rounded-end" rows="3" id="modelDescription"></textarea>
                 </section>
                 <footer class="d-flex justify-content-center gap-3 mt-3 border-top pt-2 border-2">
                     <button type="reset" class="btn btn-secondary">Cancel</button>

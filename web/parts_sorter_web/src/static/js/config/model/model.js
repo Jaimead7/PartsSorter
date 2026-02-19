@@ -24,15 +24,10 @@ import {
     enableSubmitButton,
     showAlert
 } from '../../utils.js';
+import {
+    getModelData
+} from './common.js';
 
-
-function getModelData() {
-    const description = document.getElementById('modelDescription')?.textContent;
-    
-    return {
-        'description': description
-    };
-};
 
 async function initDeleteModel() {
     const deleteBtn = document.getElementById('deleteModelButton');
@@ -90,7 +85,7 @@ async function initFormEvents() {
         const endpoint = `/api/model/${modelName}/`;
 
         disableSubmitButton(this, 'Saving...');
-        
+
         let content = {
             method: 'PUT',
             headers: {
