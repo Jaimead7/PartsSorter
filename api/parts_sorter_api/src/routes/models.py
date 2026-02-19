@@ -46,7 +46,7 @@ models_router = APIRouter()
 async def create_new_model(
     session: Annotated[AsyncSession, Depends(get_session)],
     file: UploadFile,
-    description: Optional[str]
+    description: Annotated[Optional[str], Body(embed= True)] = None
 ) -> Model:
     return await db_create_new_model(
         session= session,
