@@ -44,7 +44,8 @@ from .model_classes import db_create_new_model_class, db_get_model_class
 
 async def db_create_new_model(
     session: AsyncSession,
-    file: UploadFile
+    file: UploadFile,
+    description: Optional[str]
 ) -> Model:
     #TODO: validate folder structure
     if file.filename is None:
@@ -62,23 +63,23 @@ async def db_create_new_model(
             detail= msg
         )
     safe_name: str = file.filename.replace(' ', '_').replace('.zip', '')
-    model: Model = Model(name= safe_name)
-    exists = False
+    model: Model = Model(
+        name= safe_name,
+        description= description
+    )
     try:
         await db_get_model(
             session= session,
             model= model
         )
-        exists = True
-    except HTTPException:
-        ...
-    if exists:
         msg: str = f'Model("{safe_name}") already exists.'
         my_logger.error(msg)
         raise HTTPException(
             status_code= status.HTTP_400_BAD_REQUEST,
             detail= msg
         )
+    except HTTPException:
+        pass
     session.add(model)
     await session.commit()
     await session.refresh(model)

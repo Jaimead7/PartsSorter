@@ -45,11 +45,13 @@ models_router = APIRouter()
 )
 async def create_new_model(
     session: Annotated[AsyncSession, Depends(get_session)],
-    file: UploadFile
+    file: UploadFile,
+    description: Optional[str]
 ) -> Model:
     return await db_create_new_model(
         session= session,
-        file= file
+        file= file,
+        description= description
     )
 
 @models_router.get(
