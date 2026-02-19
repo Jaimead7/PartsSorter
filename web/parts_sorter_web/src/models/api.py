@@ -33,7 +33,7 @@ class RequestOptions(TypedDict, total=False):
 
 class ModelResponse(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: Optional[str] = ''
 
 
 class OriginResponse(BaseModel):

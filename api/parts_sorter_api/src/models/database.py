@@ -106,7 +106,7 @@ class Model(SQLModel, table= True):
         primary_key= True
     )
     description: Optional[str] = Field(
-        default= None,
+        default= '',
         nullable= True
     )
 
