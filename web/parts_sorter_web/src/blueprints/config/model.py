@@ -59,7 +59,7 @@ async def config_model(model_name: str) -> Response | str:
     try:
         model: Optional[ModelResponse]
         models: list[ModelResponse]
-        model, models = asyncio.gather(
+        model, models = await asyncio.gather(
             api_get_model(model_name),
             api_get_models()
         )
