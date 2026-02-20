@@ -38,6 +38,7 @@ class TAGS(Enum):
     MODELS = 'Models'
     ORIGINS = 'Origins'
     ORIGIN_RESULTS = 'Origin results'
+    ALARMS = 'Alarms'
 
 
 class EnvVars(Enum):
