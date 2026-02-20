@@ -73,13 +73,13 @@ async def create_new_image(
 )
 async def get_images(
     session: Annotated[AsyncSession, Depends(get_session)],
-    uuids: Annotated[list[UUID], Query()] = [],
+    uuid: Annotated[list[UUID], Query()] = [],
     limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
     offset: Annotated[int, Query()] = 0
 ) -> Sequence[ImageResponse]:
     db_images: Sequence[Image] = await db_get_images_by_ids(
         session= session,
-        images_uuids= uuids,
+        images_uuids= uuid,
         limit= limit,
         offset= offset
     )

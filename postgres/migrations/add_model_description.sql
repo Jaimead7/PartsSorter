@@ -1,2 +1,2 @@
 ALTER TABLE public.models
-ADD COLUMN description TEXT DEFAULT '';
+ADD COLUMN description character varying DEFAULT '';
