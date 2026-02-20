@@ -77,3 +77,10 @@ async def image_inspection() -> Response | str:
         image_extensions= image_extensions,
         status_list= status_list
     )
+
+@inspection_bp.route('/alarms/')
+async def alarms_list() -> str:
+    return await render_template(
+        'alarms.html',
+        page_title= 'Alarms'
+    )
