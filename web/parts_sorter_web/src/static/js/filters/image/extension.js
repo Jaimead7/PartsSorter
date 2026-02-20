@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initExtensionFilter() {
+async function initExtensionFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('imageExtensionFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#imageExtensionFilterCollapseCard"] .bi');

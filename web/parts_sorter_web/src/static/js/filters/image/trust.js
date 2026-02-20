@@ -26,7 +26,7 @@ const maxCheck = document.getElementById('maxTrustFilterCheck');
 const minLabel = document.getElementById('imageTrustMinFilterLabel');
 const maxLabel = document.getElementById('imageTrustMaxFilterLabel');
 
-function initTrustFilter() {
+async function initTrustFilter() {
     if (!minElement || !maxElement || !minCheck || !maxCheck || !minLabel || !maxLabel) {
         console.error('No Trust Elements found.');
         return;

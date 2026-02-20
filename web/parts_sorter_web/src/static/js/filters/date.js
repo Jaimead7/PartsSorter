@@ -24,7 +24,7 @@ const startDateCheckElement = document.getElementById('startDateFilterCheck');
 const endDateFieldElement = document.getElementById('endDateFilterField');
 const endDateCheckElement = document.getElementById('endDateFilterCheck');
 
-function initDateFilter() {
+async function initDateFilter() {
     function saveDateOptions() {
         try {
             const options = [

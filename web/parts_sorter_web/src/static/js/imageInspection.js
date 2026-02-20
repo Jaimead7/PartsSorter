@@ -189,17 +189,19 @@ async function initButtons() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    initTrueResultSelector();
-    initDateFilter();
-    initExtensionFilter();
-    initOriginFilter();
-    initModelFilter();
-    initTrustFilter();
-    initStatusFilter();
-    initInspResultFilter();
-    initTrueResultFilter();
-
     initImgButtons();
     initButtons();
-    getNewImageFromHist(0);
+
+    Promise.all([
+        initTrueResultSelector(),
+        initDateFilter(),
+        initExtensionFilter(),
+        initOriginFilter(),
+        initModelFilter(),
+        initTrustFilter(),
+        initStatusFilter(),
+        initInspResultFilter(),
+        initTrueResultFilter()
+    ])
+    .then(() => getNewImageFromHist(0));
 });

@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initAlarmTypeFilter() {
+async function initAlarmTypeFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('alarmTypeFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#alarmTypeFilterCollapseCard"] .bi');

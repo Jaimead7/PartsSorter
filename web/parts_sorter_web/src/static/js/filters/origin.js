@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initOriginFilter() {
+async function initOriginFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('originFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#originFilterCollapseCard"] .bi');
@@ -98,7 +98,6 @@ function getOriginQueryParameters() {
     });
     return originParams.join('&');
 };
-
 
 function getOriginFilterOptions() {
     const originOptions = document.querySelectorAll('input[name="originFilterOption"]');

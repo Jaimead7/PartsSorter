@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initStatusFilter() {
+async function initStatusFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('statusFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#statusFilterCollapseCard"] .bi');

@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initInspResultFilter() {
+async function initInspResultFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('inspResultFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#inspResultFilterCollapseCard"] .bi');

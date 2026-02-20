@@ -114,7 +114,10 @@ function transferImages() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    initOriginFilter();
     initImgButtons();
-    initWebSocket();
+
+    Promise.all([
+        initOriginFilter()
+    ])
+    .then(() => initWebSocket());
 });

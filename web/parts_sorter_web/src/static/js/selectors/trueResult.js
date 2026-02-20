@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initTrueResultSelector() {
+async function initTrueResultSelector() {
     // COLLAPSE
     const collapseElement = document.getElementById('trueResultSelectorCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#trueResultSelectorCollapseCard"] .bi');
@@ -57,7 +57,7 @@ function checkTrueResultSelector(option) {
             checkbox.checked = true;
         }
     });
-}
+};
 
 
 export { initTrueResultSelector, checkTrueResultSelector };

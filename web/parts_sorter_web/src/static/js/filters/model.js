@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function initModelFilter() {
+async function initModelFilter() {
     // COLLAPSE
     const collapseElement = document.getElementById('modelFilterCollapseCard');
     const buttonIcon = document.querySelector('button[data-bs-target="#modelFilterCollapseCard"] .bi');
