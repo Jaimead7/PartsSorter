@@ -33,6 +33,7 @@ from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 from ..dependencies.config import (INTERNAL_IMAGES_FOLDER,
                                    INTERNAL_MODELS_FOLDER,
                                    STATIC_IMAGES_FOLDER, my_logger)
+from ..dependencies.func import to_snakecase, to_title
 from .metadata_files import ModelMetadataDict
 
 
@@ -86,6 +87,9 @@ class Origin(SQLModel, table= True):
 
     images_of_origin: Optional[list['Image']] = Relationship(
         back_populates= 'origin_of_image'
+    )
+    alarms_of_origin: Optional[list['Alarm']] = Relationship(
+        back_populates= 'origin_of_alarm'
     )
     origin_results_of_origin: Optional[list['OriginResult']] = Relationship(
         back_populates= 'origin_of_origin_result',
@@ -173,26 +177,10 @@ class ImageStatus(NoInstantiable):
     error_lost: int = _status['error_lost']
     error_skipped: int = _status['error_skipped']
 
-    @staticmethod
-    def _snakecase(name: str) -> str:
-        name = name.strip()
-        name = name.lower()
-        for char in ' -!@#$%^&*()+=[]{}|;:,.<>?/~`':
-            name = name.replace(char, '_')
-        while '__' in name:
-            name = name.replace('__', '_')
-        return name
-
-    @staticmethod
-    def _title(name:str) -> str:
-        name = name.replace('_', ' ')
-        name = name.title()
-        return name
-
     @classmethod
     def validate_name(cls, name: str) -> Optional[str]:
-        name = cls._snakecase(name)
-        if name in [cls._snakecase(key) for key in cls._status.keys()]:
+        name = to_snakecase(name)
+        if name in [to_snakecase(key) for key in cls._status.keys()]:
             return name
         return None
 
@@ -227,16 +215,16 @@ class ImageStatus(NoInstantiable):
         if cls.validate_value(inp) is not None:
             for name, val in cls._status.items():
                 if val == inp:
-                    return cls._title(name)
+                    return to_title(name)
         if isinstance(inp, str) and cls.validate_name(inp) is not None:
-            return cls._title(inp)
+            return to_title(inp)
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
         return 'Unknown'
 
     @classmethod
     def get_all_names(cls) -> list[str]:
         return [
-            cls._title(status)
+            to_title(status)
             for status in cls._status.keys()
         ]
 
@@ -252,7 +240,7 @@ class BaseImage(SQLModel):
         nullable= False,
         default= '.png'
     )
-    processed_date: Optional[datetime] = Field(
+    processed_date: datetime = Field(
         default_factory= lambda: datetime.now(timezone.utc).replace(tzinfo=None),
         sa_column= Column(
             DateTime(timezone= False),
@@ -384,4 +372,109 @@ class OriginResult(SQLModel, table= True):
     )
     result_of_origin_result: Optional['InspectionResult'] = Relationship(
         back_populates= 'origin_results_of_result'
+    )
+
+
+#********** ALARM **********
+class AlarmTypes(NoInstantiable):
+    _status: dict[str, int] = {
+        'unknown': 0,
+        'info': 1,
+        'warning': 2,
+        'error': 3,
+        'critical': 4,
+    }
+
+    unknown: int = _status['unknown']
+    info: int = _status['info']
+    warning: int = _status['warning']
+    error: int = _status['error']
+    critical: int = _status['critical']
+
+    @classmethod
+    def validate_name(cls, name: str) -> Optional[str]:
+        name = to_snakecase(name)
+        if name in [to_snakecase(key) for key in cls._status.keys()]:
+            return name
+        return None
+
+    @classmethod
+    def validate_value(cls, value: int | str) -> Optional[int]:
+        try:
+            value = int(value)
+        except ValueError:
+            return None
+        if value in cls._status.values():
+            return value
+        return None
+
+    @classmethod
+    def get_value(cls, inp: Optional[str | int]) -> int:
+        if inp is None:
+            return cls.info
+        if isinstance(inp, str):
+            name: Optional[str] = cls.validate_name(inp)
+            if name:
+                return cls._status[name]
+        value: Optional[int] = cls.validate_value(inp)
+        if value:
+            return value
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
+        return cls.info
+
+    @classmethod
+    def get_name(cls, inp: Optional[str | int]) -> str:
+        if inp is None:
+            return 'Unknown'
+        if cls.validate_value(inp) is not None:
+            for name, val in cls._status.items():
+                if val == inp:
+                    return to_title(name)
+        if isinstance(inp, str) and cls.validate_name(inp) is not None:
+            return to_title(inp)
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
+        return 'Unknown'
+
+    @classmethod
+    def get_all_names(cls) -> list[str]:
+        return [
+            to_title(status)
+            for status in cls._status.keys()
+        ]
+
+
+class Alarm(SQLModel, table= True):
+    __tablename__: str = 'alarms' # type: ignore
+
+    id: UUID = Field(
+        default_factory=uuid4,
+        primary_key=True,
+        index=True
+    )
+    date: datetime = Field(
+        default_factory= lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        sa_column= Column(
+            DateTime(timezone= False),
+            server_default= func.now(),
+            nullable= False
+        )
+    )
+    origin: Optional[str] = Field(
+        default= None,
+        nullable= True,
+        foreign_key= 'origins.name',
+        ondelete= 'SET NULL'
+    )
+    alarm_type: int = Field(
+        default= 0,
+        nullable= False,
+        index= True
+    )
+    message: str = Field(
+        default= '',
+        nullable= False
+    )
+    
+    origin_of_alarm: Optional['Origin'] = Relationship(
+        back_populates= 'alarms_of_origin'
     )

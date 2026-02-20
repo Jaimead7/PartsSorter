@@ -28,7 +28,7 @@ from sqlmodel import col, or_
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from typing_extensions import Self
 
-from .database import Image, ImageStatus
+from .database import Alarm, AlarmTypes, Image, ImageStatus
 
 
 class HealthResponse(BaseModel):
@@ -295,7 +295,12 @@ class ImageResponse(BaseModel):
     model: Optional[str] = 'Unknown'
     true_result: Optional[str] = 'No result'
     trust: Optional[float] = 0.
-    status: Optional[str | int] = 'Captured'
+    status: Optional[str | int] = ImageStatus.get_name(0)
+
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'img'
 
     @field_validator('insp_result', 'true_result')
     @classmethod
@@ -320,7 +325,7 @@ class ImageResponse(BaseModel):
 
     @field_validator('status')
     @classmethod
-    def validate_captured(cls, v: Optional[str | int]) -> str:
+    def validate_status(cls, v: Optional[str | int]) -> str:
         if v is None:
             v = ImageStatus.captured
         return ImageStatus.get_name(v)
@@ -331,7 +336,7 @@ class ImageResponse(BaseModel):
         image: Image
     ) -> Self:
         return cls(
-            id = image.id,
+            id= image.id,
             url= image.external_relative_path,
             insp_result= image.inspection_result,
             origin= image.origin,
@@ -393,6 +398,11 @@ class ImageStatusResponse(BaseModel):
     image_url: str
     status: str = 'Captured'
 
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'imgStatus'
+
     @classmethod
     def from_image(
         cls,
@@ -402,4 +412,36 @@ class ImageStatusResponse(BaseModel):
             image_url= image.external_relative_path,
             id= image.id,
             status= ImageStatus.get_name(image.status)
+        )
+
+
+class AlarmResponse(BaseModel):
+    type: str = 'alarm'
+    date: datetime
+    origin: Optional[str]
+    alarm_type: Optional[str | int] = AlarmTypes.get_name(0)
+    message: str = ''
+
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'alarm'
+
+    @field_validator('alarm_type')
+    @classmethod
+    def validate_alarm_type(cls, v: Optional[str | int]) -> str:
+        if v is None:
+            v = AlarmTypes.unknown
+        return AlarmTypes.get_name(v)
+
+    @classmethod
+    def from_alarm(
+        cls,
+        alarm: Alarm
+    ) -> Self:
+        return cls(
+            date= alarm.date,
+            origin= alarm.origin,
+            alarm_type= alarm.alarm_type,
+            message= alarm.message
         )
