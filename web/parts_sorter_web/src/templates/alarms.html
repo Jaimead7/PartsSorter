@@ -1,0 +1,46 @@
+{% extends "index.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <section class="d-flex h-100">
+        <aside class="col-2 p-1 h-100 overflow-auto">
+            <article class="border border-1 rouded p-1">
+                <header><h3><strong>Filters:</strong></h3></header>
+                <section class="d-flex flex-column gap-1">
+                    {% include 'filters/date.html' %}
+                    {% include 'filters/origin.html' %}
+                </section>
+                <footer class="d-flex mt-1 justify-content-center">
+                    <button type="button" class="btn btn-secondary" id="applyFiltersBtn">Apply</button>
+                </footer>
+            </article>
+        </aside>
+        <section class="col-8 p-1 ps-4 pe-4 d-flex flex-column align-items-center">
+            <header class="d-flex align-items-center mb-3 pb-1 border-bottom border-2 w-100">
+                <h1 class="h1 m-0">Alarms list</h1>
+            </header>
+            <table id="alarmsTable" class="w-100 table table-sm table-hover mb-3">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Origin</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Message</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                </tbody>
+            </table>
+            {% include 'components/pagination.html' %}
+        </section>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script
+        src="{{ url_for('static', filename='js/alarms.js') }}"
+        type="module">
+    </script>
+{% endblock %}
