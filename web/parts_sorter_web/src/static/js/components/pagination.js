@@ -20,16 +20,16 @@
 
 
 function setCurrentPage(value) {
-    const element = document.getElementById('currenPage');
+    const element = document.getElementById('currentPage');
     if (element) {
         const defaultText = element.dataset.defaultText || '-';
-        element.textContent = value || defaultText;
+        element.textContent = value + 1 || defaultText;
     }
 };
 
 function getCurrentPage() {
     const element = document.getElementById('currentPage');
-    const parsedValue = element ? parseInt(element.textContent, 10) : 0;
+    const parsedValue = element ? parseInt(element.textContent, 10) : 1;
     return isNaN(parsedValue) ? 0 : parsedValue - 1;
 };
 
@@ -44,7 +44,7 @@ function setTotalPages(value) {
 function getTotalPages() {
     const element = document.getElementById('totalPages');
     const parsedValue = element ? parseInt(element.textContent, 10) : 0;
-    return isNaN(parsedValue) ? 0 : parsedValue - 1;
+    return isNaN(parsedValue) ? 0 : parsedValue;
 };
 
 
