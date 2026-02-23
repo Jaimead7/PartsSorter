@@ -148,10 +148,22 @@ function formatDate(dateString) {
 function getTableRow(alarm) {
     const row = document.createElement('tr');
     const formattedDate = formatDate(alarm.date);
+
+    let colorClass = '';
+    switch (toSnakeCase(alarm.alarm_type)) {
+        case 'warning':
+            colorClass = 'table-warning';
+            break;
+        case 'error':
+        case 'critical':
+            colorClass = 'table-danger';
+            break;
+    }
+
     row.innerHTML = `
         <td>${formattedDate}</td>
         <td>${escapeHtml(alarm.origin)}</td>
-        <td>${escapeHtml(alarm.alarm_type)}</td>
+        <td class="${colorClass}">${escapeHtml(alarm.alarm_type)}</td>
         <td class="text-start">${escapeHtml(alarm.message)}</td>
     `;
     return row;

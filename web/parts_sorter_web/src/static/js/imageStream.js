@@ -78,7 +78,10 @@ function connectWebSocket(url) {
 };
 
 async function processNewAlarm(data) {
-    await addAlarmsToTable([data]);
+    const originOptions = getOriginFilterOptions();
+    if (originOptions.includes(data.origin)) {
+        await addAlarmsToTable([data]);
+    }
 };
 
 async function setNewImage(data) {
