@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert, escapeHtml, formatDate } from './utils.js';
+import { showAlert, addAlarmsToTable, clearAlarmTable } from './utils.js';
 import { getCurrentPage, getTotalPages, setCurrentPage, setTotalPages } from './components/pagination.js';
 import { getAlarmTypeQueryParameters, initAlarmTypeFilter } from './filters/alarm/type.js';
 import { getDateQueryParameters, initDateFilter } from './filters/date.js';
@@ -43,42 +43,6 @@ function getQueryParameters(limit= 10, page= 0) {
     return params.filter(item => item !== '').join('&');
 };
 
-function getTableRow(alarm) {
-    const row = document.createElement('tr');
-    const formattedDate = formatDate(alarm.date);
-    row.innerHTML = `
-        <td>${formattedDate}</td>
-        <td>${escapeHtml(alarm.origin)}</td>
-        <td>${escapeHtml(alarm.alarm_type)}</td>
-        <td class="text-start">${escapeHtml(alarm.message)}</td>
-    `;
-    return row;
-};
-
-async function updateAlarmTable(data) {
-    await clearAlarmTable();
-
-    const tbody = document.querySelector('#alarmsTable tbody');
-    if (!tbody) return;
-    if (!data || data.length === 0) return;
-
-    setCurrentPage(data.current_page);
-    setTotalPages(data.total_pages);
-    console.log(data);
-    data.alarms?.forEach(alarm => {
-        tbody.appendChild(getTableRow(alarm));
-    });    
-};
-
-async function clearAlarmTable() {
-    const tbody = document.querySelector('#alarmsTable tbody');
-    if (tbody) {
-        tbody.innerHTML = '';
-    }
-    setCurrentPage(0);
-    setTotalPages(0);
-};
-
 async function loadAlarms(limit= 10, page= 0) {
     const endpoint = `/api/alarm/?${getQueryParameters(limit, page)}`;
     fetch(endpoint)
@@ -86,17 +50,23 @@ async function loadAlarms(limit= 10, page= 0) {
         if (response.status === 404) {
             showAlert('No alrams found.', 'warning', 2);
             clearAlarmTable();
+            setCurrentPage(0);
+            setTotalPages(0);
             return;
         }
         if (!response.ok) {
             throw new Error(`${response.status} (${response.statusText})`)
         }
         const data = await response.json();
-        updateAlarmTable(data);
+        setCurrentPage(data.current_page);
+        setTotalPages(data.total_pages);
+        addAlarmsToTable(data.alarms);
     })
     .catch((error) => {
         showAlert(`Error fetching alarms: ${error.message}`, 'danger', 2);
         clearAlarmTable();
+        setCurrentPage(0);
+        setTotalPages(0);
     });
 };
 
@@ -140,3 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ])
     .finally(() => updateFilters());
 });
+
+
+export {
+    addAlarmsToTable
+};

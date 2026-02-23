@@ -145,6 +145,37 @@ function formatDate(dateString) {
     }
 };
 
+function getTableRow(alarm) {
+    const row = document.createElement('tr');
+    const formattedDate = formatDate(alarm.date);
+    row.innerHTML = `
+        <td>${formattedDate}</td>
+        <td>${escapeHtml(alarm.origin)}</td>
+        <td>${escapeHtml(alarm.alarm_type)}</td>
+        <td class="text-start">${escapeHtml(alarm.message)}</td>
+    `;
+    return row;
+};
+
+async function addAlarmsToTable(data) {
+    await clearAlarmTable();
+
+    const tbody = document.querySelector('#alarmsTable tbody');
+    if (!tbody) return;
+    if (!data || data.length === 0) return;
+
+    data.forEach(alarm => {
+        tbody.appendChild(getTableRow(alarm));
+    });    
+};
+
+async function clearAlarmTable() {
+    const tbody = document.querySelector('#alarmsTable tbody');
+    if (tbody) {
+        tbody.innerHTML = '';
+    }
+};
+
 export {
     showAlert,
     initCollapseCard,
@@ -155,5 +186,7 @@ export {
     convertInputValue,
     toSnakeCase,
     escapeHtml,
-    formatDate
+    formatDate,
+    addAlarmsToTable,
+    clearAlarmTable
 };

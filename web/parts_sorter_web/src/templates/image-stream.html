@@ -7,7 +7,7 @@
     <div class="d-flex h-100">
         <section class="col-md-8 p-1">
             <div class="d-flex flex-column gap-1">
-                <article id="img0" class="col-12 d-flex align-items-center border border-2 rounded p-1">
+                <article id="img0" class="w-100 d-flex align-items-center border border-2 rounded p-1">
                     <section class="col-8 d-flex flex-column align-items-center border border-4 rounded text-center" name="imgSection">
                         <div class="ratio ratio-4x3">
                             <div class="d-flex align-items-center justify-content-center p-1">
@@ -45,9 +45,25 @@
                         </ul>
                     </section>
                 </article>
-                <article class="col-3">
-                    {% include 'filters/origin.html' %}
-                </article>
+                <div class="w-100 d-flex">
+                    <article class="col-9 pe-3">
+                        <table id="alarmsTable" class="table table-sm table-hover text-center table-striped-columns">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Origin</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Message</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            </tbody>
+                        </table>
+                    </article>
+                    <article class="col-3">
+                        {% include 'filters/origin.html' %}
+                    </article>
+                </div>
             </div>
         </section>
         <section class="col-4 h-100 overflow-auto p-1">

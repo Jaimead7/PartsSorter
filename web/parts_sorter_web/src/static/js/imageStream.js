@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from './utils.js';
+import { showAlert, addAlarmsToTable } from './utils.js';
 import { getImgData, setImgData, initImgButtons } from './components/images.js';
 import { initOriginFilter, getOriginFilterOptions } from './filters/origin.js';
 
@@ -78,7 +78,7 @@ function connectWebSocket(url) {
 };
 
 async function processNewAlarm(data) {
-    console.log(data); //TODO
+    await addAlarmsToTable([data]);
 };
 
 async function setNewImage(data) {
