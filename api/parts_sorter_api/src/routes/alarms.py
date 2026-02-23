@@ -20,18 +20,19 @@
 
 
 from collections.abc import Sequence
-from typing import Annotated
+from datetime import datetime
+from typing import Annotated, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Body, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.alarms import (db_create_new_alarm, db_delete_alarm_by_id,
-                               db_get_alarms_by_type)
+                               db_get_alarms_page)
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..dependencies.web_sockets import ImageStreamSocketManager
-from ..models.api import AlarmResponse
+from ..models.api import AlarmFilters, AlarmResponse, AlarmsListResponse
 from ..models.database import Alarm, AlarmTypes
 
 alarms_router: APIRouter = APIRouter()
@@ -61,24 +62,41 @@ async def new_alarm(
 
 @alarms_router.get(
     '/',
-    response_model= Sequence[AlarmResponse],
+    response_model= AlarmsListResponse,
     summary= 'Get Alarm\'s of the database.',
     response_description= 'The Alarm\'s list.',
     status_code= status.HTTP_200_OK
 )
-async def get_images(
+async def get_alarms(
     session: Annotated[AsyncSession, Depends(get_session)],
+    start_date: Annotated[Optional[datetime], Query()] = None,
+    end_date: Annotated[Optional[datetime], Query()] = None,
+    origin: Annotated[list[Optional[str]], Query()] = [],
     alarm_type: Annotated[list[str | int], Query()] = [],
     limit: Annotated[int, Query()] = DATABASE_GET_LIMIT,
-    offset: Annotated[int, Query()] = 0
-) -> Sequence[AlarmResponse]:
-    db_alarms: Sequence[Alarm] = await db_get_alarms_by_type(
-        session= session,
-        alarm_types= alarm_type,
-        limit= limit,
-        offset= offset
+    page: Annotated[int, Query()] = 0
+) -> AlarmsListResponse:
+    filters: AlarmFilters = AlarmFilters(
+        start_date= start_date,
+        end_date= end_date,
+        origins= origin,
+        alarm_types= alarm_type
     )
-    return [AlarmResponse.from_alarm(alarm= alarm) for alarm in db_alarms]
+    db_alarms: Sequence[Alarm]
+    current_page: int
+    total_pages: int
+    db_alarms, current_page, total_pages = await db_get_alarms_page(
+        session= session,
+        filters= filters,
+        limit= limit,
+        page= page
+    )
+    list_response = AlarmsListResponse(
+        alarms= [AlarmResponse.from_alarm(alarm= alarm) for alarm in db_alarms],
+        current_page= current_page,
+        total_pages= total_pages
+    )
+    return list_response
 
 @alarms_router.delete(
     '/',

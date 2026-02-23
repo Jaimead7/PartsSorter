@@ -20,15 +20,17 @@
 
 
 from collections.abc import Sequence
+from math import ceil
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import Delete
+from sqlalchemy import Delete, Result
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import col, delete, select
+from sqlmodel import col, delete, func, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import my_logger
+from ..models.api import AlarmFilters
 from ..models.database import Alarm, AlarmTypes
 from .origins import db_origin_name_exists
 
@@ -47,22 +49,26 @@ async def db_create_new_alarm(
     my_logger.debug(f'New alarm added to the database {alarm.id}.')
     return alarm
 
-async def db_get_alarms_by_type(
+async def db_get_alarms_page(
     session: AsyncSession,
-    alarm_types: list[str |int],
+    filters: AlarmFilters,
     limit: int,
-    offset:int
-) -> Sequence[Alarm]:
-    statement: SelectOfScalar[Alarm] = select(Alarm)
-    if len(alarm_types) > 0:
-        statement = statement.where(
-            col(Alarm.alarm_type).in_(
-                [AlarmTypes.get_value(v) for v in alarm_types]
-            )
-        )
-    statement.order_by(col(Alarm.date).asc())
-    statement = statement.offset(offset).limit(limit)
-    db_alarms: Sequence[Alarm] = (await session.scalars(statement)).all()
+    page: int
+) -> tuple[Sequence[Alarm], int, int]:
+    current_page: int
+    total_pages: int
+    current_page, total_pages = await _db_get_pagination(
+        session= session,
+        filters= filters,
+        limit= limit,
+        page= page
+    )
+    db_alarms: Sequence[Alarm] = await _db_get_alarms(
+        session= session,
+        filters= filters,
+        limit= limit,
+        page= current_page
+    )
     if len(db_alarms) == 0:
         msg: str = f'Alarms not found.'
         my_logger.error(msg)
@@ -71,7 +77,44 @@ async def db_get_alarms_by_type(
             detail= msg
         )
     my_logger.info(f'{len(db_alarms)} Alarms readed form database.')
-    return db_alarms
+    return db_alarms, current_page, total_pages
+
+async def _db_get_alarms(
+    session: AsyncSession,
+    filters: AlarmFilters,
+    limit: int,
+    page: int
+) -> Sequence[Alarm]:
+    statement: SelectOfScalar[Alarm] = select(Alarm)
+    statement = filters.add_filters_to_statement(statement)
+    statement.order_by(col(Alarm.date).asc())
+    statement = statement.offset(page * limit).limit(limit)
+    return (await session.scalars(statement)).all()
+
+async def _db_get_pagination(
+    session: AsyncSession,
+    filters: AlarmFilters,
+    limit: int,
+    page: int
+) -> tuple[int, int]:
+    total_alarms: int = await db_get_total_alarms(
+        session= session,
+        filters= filters
+    )
+    if total_alarms == 0:
+        return 0, 0
+    total_pages: int = ceil(total_alarms / limit)
+    page = min(page, total_pages)
+    return page, total_pages
+
+async def db_get_total_alarms(
+    session: AsyncSession,
+    filters: AlarmFilters,
+) -> int:
+    statement: SelectOfScalar[int] = select(func.count(col(Alarm.id)))
+    statement = filters.add_filters_to_statement(statement)
+    result: Result[tuple[int]] = await session.execute(statement)
+    return result.scalar_one()
 
 async def db_delete_alarm_by_id(
     session: AsyncSession,

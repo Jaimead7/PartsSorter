@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from collections.abc import Sequence
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal, Optional, Protocol
 from uuid import UUID
@@ -445,3 +446,90 @@ class AlarmResponse(BaseModel):
             alarm_type= alarm.alarm_type,
             message= alarm.message
         )
+
+
+class AlarmsListResponse(BaseModel):
+    type: str = 'alarmList'
+    alarms: Sequence[AlarmResponse]
+    current_page: int
+    total_pages: int
+
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'alarmList'
+
+
+class AlarmFilters(BaseModel):
+    start_date: Optional[datetime] = datetime.now(timezone.utc) - timedelta(days=30)
+    end_date: Optional[datetime] = datetime.now(timezone.utc)
+    origins: list[Optional[str]] = []
+    alarm_types: list[str | int] = []
+
+    @field_validator('origins')
+    @classmethod
+    def validate_origins(
+        cls,
+        origins: list[Optional[str]]
+    ) -> list[Optional[str]]:
+        return [
+            None
+            if origin == 'Unknown'
+            else origin
+            for origin in origins
+        ]
+
+    def add_date_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        if self.start_date:
+            statement = statement.where(
+                col(Alarm.date) >= self.start_date
+            )
+        if self.end_date:
+            statement = statement.where(
+                col(Alarm.date) <= self.end_date,
+            )
+        return statement
+
+    def add_origins_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        if len(self.origins) > 0:
+            if None in self.origins:
+                statement = statement.where(
+                    or_(
+                        col(Alarm.origin).in_(self.origins),
+                        col(Alarm.origin).is_(None)
+                    )
+                )
+            else:
+                statement = statement.where(
+                    col(Alarm.origin).in_(self.origins)
+                )
+        return statement
+
+    def add_type_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        alarm_types_numbers: list[int] = [
+            AlarmTypes.get_value(v)
+            for v in self.alarm_types
+        ]
+        if len(alarm_types_numbers) > 0:
+            statement = statement.where(
+                col(Alarm.alarm_type).in_(alarm_types_numbers)
+            )
+        return statement
+
+    def add_filters_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        statement = self.add_date_filter_to_statement(statement)
+        statement = self.add_origins_filter_to_statement(statement)
+        statement = self.add_type_filter_to_statement(statement)
+        return statement
