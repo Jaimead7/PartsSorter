@@ -24,9 +24,9 @@ from datetime import datetime, timedelta, timezone
 from typing import NoReturn, Optional
 
 from gpio import EdgeType, detect_edge, write
-from remote.models import (ActuatorParamsResponse, ImageStatus,
+from remote.models import (ActuatorParamsResponse, AlarmType, ImageStatus,
                            ProcessImageResponse)
-from remote.requests import get_actuator_params, update_status
+from remote.requests import get_actuator_params, send_alarm, update_status
 from utils.config import ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, my_logger
 from utils.models import AsyncList
 
@@ -60,25 +60,32 @@ class ActuatorManager:
         await asyncio.sleep(self.params.actuator_delay / 1000.)
         now: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
         if now - self.last_push > timedelta(milliseconds= self.params.actuator_cycle_time):
-            my_logger.debug(f'Pushing new part with {part}.')
             asyncio.create_task(
                 update_status(
                     uuid= part.id,
                     status= ImageStatus.PUSHED
                 )
             )
+            my_logger.debug(f'Pushing new part with {part}.')
             self.last_push = now
             write(ACTUATOR_PIN, True)
             await asyncio.sleep(0.2)
             write(ACTUATOR_PIN, False)
         else:
-            my_logger.error(f'Part skipped with {part}. Tried to push so early.')
+            msg: str = f'Part skipped with {part}. Tried to push so early.'
             asyncio.create_task(
                 update_status(
                     uuid= part.id,
                     status= ImageStatus.ERROR_SKIPPED
                 )
             )
+            asyncio.create_task(
+                send_alarm(
+                    alarm_type= AlarmType.ERROR,
+                    message= msg
+                )
+            )
+            my_logger.error(msg)
 
     async def get_next_result(
         self,
@@ -89,13 +96,27 @@ class ActuatorManager:
             try:
                 next_result: ProcessImageResponse = await results_queue.check_first()
             except asyncio.QueueEmpty:
-                my_logger.error('Result lost. There are no results in the queue. The part will be pushed.')
+                msg: str = 'Result lost. There are no results in the queue. The part will be pushed.'
+                asyncio.create_task(
+                    send_alarm(
+                        alarm_type= AlarmType.WARNING,
+                        message= msg
+                    )
+                )
+                my_logger.error(msg)
                 return ProcessImageResponse(
                     date= now,
                     result= True
                 )
             if now - next_result.date < timedelta(milliseconds= self.sensors_interval_ms * 0.75):
-                my_logger.error('Result lost. The part doesn\'t have a result on the queue. The part will be pushed.')
+                msg: str = 'Result lost. The part doesn\'t have a result on the queue. The part will be pushed.'
+                asyncio.create_task(
+                    send_alarm(
+                        alarm_type= AlarmType.WARNING,
+                        message= msg
+                    )
+                )
+                my_logger.error(msg)
                 return ProcessImageResponse(
                     date= now,
                     result= True
@@ -107,7 +128,14 @@ class ActuatorManager:
                         status= ImageStatus.ERROR_LOST
                     )
                 )
-                my_logger.error('Part lost. The part of this result didn\'t reach the actuator.')
+                msg: str = 'Part lost. The part of this result didn\'t reach the actuator.'
+                asyncio.create_task(
+                    send_alarm(
+                        alarm_type= AlarmType.WARNING,
+                        message= msg
+                    )
+                )
+                my_logger.error(msg)
                 await results_queue.get()
                 continue
             result: ProcessImageResponse = await results_queue.get()
@@ -151,7 +179,14 @@ class ActuatorManager:
                                 status= ImageStatus.ERROR_OVERWRITE
                             )
                         )
-                        my_logger.error(f'New part on the actuator without clearing last part.')
+                        msg: str = 'New part on the actuator without clearing last part.'
+                        asyncio.create_task(
+                            send_alarm(
+                                alarm_type= AlarmType.ERROR,
+                                message= msg
+                            )
+                        )
+                        my_logger.error(msg)
                     next_part_to_push = await self.get_next_result(results_queue)
                 if edge_type == EdgeType.FALLING:
                     my_logger.debug(f'Part to be pushed with {next_part_to_push}.')
