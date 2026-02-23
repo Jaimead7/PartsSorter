@@ -61,7 +61,7 @@ async def new_alarm(
 
 @alarms_router.get(
     '/',
-    response_model= Sequence[Alarm],
+    response_model= Sequence[AlarmResponse],
     summary= 'Get Alarm\'s of the database.',
     response_description= 'The Alarm\'s list.',
     status_code= status.HTTP_200_OK
