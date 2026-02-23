@@ -19,8 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from .engine import api_request  #isort: skip
 from .alarms import api_get_alarms_types
-from .engine import api_request
 from .image import api_get_image_extensions, api_get_status_list
 from .inspection_result import api_get_inspection_results
 from .model import api_get_model, api_get_models
