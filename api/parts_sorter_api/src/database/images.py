@@ -22,7 +22,7 @@
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Sequence, Tuple
+from typing import Optional
 from uuid import UUID
 
 import aiofiles
@@ -319,7 +319,7 @@ async def db_create_and_process_new_image(
     session: AsyncSession,
     file: UploadFile,
     origin_name: Optional[str]
-) -> Tuple[Image, bool]:
+) -> tuple[Image, bool]:
     db_image: Image = await db_create_new_image(
         session= session,
         file= file,
@@ -388,7 +388,7 @@ async def db_get_count_images_with_filters(
 ) -> int:
     statement: SelectOfScalar[int] = select(func.count(col(Image.id)))
     statement = filters.add_filters_to_statement(statement)
-    result: Result[Tuple[int]] = await session.execute(statement)
+    result: Result[tuple[int]] = await session.execute(statement)
     return result.scalar_one()
 
 async def db_get_images_with_filters(
