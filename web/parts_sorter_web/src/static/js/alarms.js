@@ -50,7 +50,7 @@ function getTableRow(alarm) {
         <td>${formattedDate}</td>
         <td>${escapeHtml(alarm.origin)}</td>
         <td>${escapeHtml(alarm.alarm_type)}</td>
-        <td>${escapeHtml(alarm.message)}</td>
+        <td class="text-start">${escapeHtml(alarm.message)}</td>
     `;
     return row;
 };
