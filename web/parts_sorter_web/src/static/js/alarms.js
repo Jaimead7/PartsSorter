@@ -50,8 +50,8 @@ async function loadAlarms(limit= 10, page= 0) {
         if (response.status === 404) {
             showAlert('No alrams found.', 'warning', 2);
             clearAlarmTable();
-            setCurrentPage(0);
-            setTotalPages(0);
+            setCurrentPage(null);
+            setTotalPages(null);
             return;
         }
         if (!response.ok) {
@@ -65,8 +65,8 @@ async function loadAlarms(limit= 10, page= 0) {
     .catch((error) => {
         showAlert(`Error fetching alarms: ${error.message}`, 'danger', 2);
         clearAlarmTable();
-        setCurrentPage(0);
-        setTotalPages(0);
+        setCurrentPage(null);
+        setTotalPages(null);
     });
 };
 
@@ -93,7 +93,7 @@ async function initButtons() {
     document.getElementById('nextPageButton')?.addEventListener('click', async () => {
         const nAlarmsPage = 10; //TODO: insert a selector
 
-        let nextPage = Math.min(getCurrentPage() + 1, getTotalPages());
+        let nextPage = Math.min(getCurrentPage() + 1, getTotalPages() - 1);
         nextPage = nextPage < 0 ? 0 : nextPage;
 
         await loadAlarms(nAlarmsPage, nextPage);
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initOriginFilter(),
         initAlarmTypeFilter()
     ])
-    .finally(() => updateFilters());
+    .then(() => updateFilters());
 });
 
 

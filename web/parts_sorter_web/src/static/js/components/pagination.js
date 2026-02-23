@@ -23,7 +23,8 @@ function setCurrentPage(value) {
     const element = document.getElementById('currentPage');
     if (element) {
         const defaultText = element.dataset.defaultText || '-';
-        element.textContent = value + 1 || defaultText;
+        const text = value == null ? defaultText : value + 1;
+        element.textContent = text;
     }
 };
 

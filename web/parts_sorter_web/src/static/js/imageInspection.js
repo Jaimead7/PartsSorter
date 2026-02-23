@@ -203,5 +203,5 @@ document.addEventListener('DOMContentLoaded', () => {
         initInspResultFilter(),
         initTrueResultFilter()
     ])
-    .finally(() => getNewImageFromHist(0));
+    .then(() => getNewImageFromHist(0));
 });

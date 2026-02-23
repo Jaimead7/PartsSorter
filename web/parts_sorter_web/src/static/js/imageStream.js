@@ -129,5 +129,5 @@ document.addEventListener('DOMContentLoaded', () => {
     Promise.all([
         initOriginFilter()
     ])
-    .finally(() => initWebSocket());
+    .then(() => initWebSocket());
 });
