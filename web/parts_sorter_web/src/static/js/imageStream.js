@@ -62,6 +62,9 @@ function connectWebSocket(url) {
             case 'imgStatus':
                 processNewImageStatus(data);
                 break;
+            case 'alarm':
+                processNewAlarm(data);
+                break;
         }
     };
 
@@ -72,6 +75,10 @@ function connectWebSocket(url) {
     ws.onclose = () => {
         scheduleReconnect('Websocket disconnected.', 'warning');
     };
+};
+
+async function processNewAlarm(data) {
+    console.log(data); //TODO
 };
 
 async function setNewImage(data) {
