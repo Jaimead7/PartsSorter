@@ -19,8 +19,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from './utils.js';
-import { getCurrentPage, getTotalPages } from './components/pagination.js';
+import { showAlert, escapeHtml, formatDate } from './utils.js';
+import { getCurrentPage, getTotalPages, setCurrentPage, setTotalPages } from './components/pagination.js';
 import { getAlarmTypeQueryParameters, initAlarmTypeFilter } from './filters/alarm/type.js';
 import { getDateQueryParameters, initDateFilter } from './filters/date.js';
 import { getOriginQueryParameters, initOriginFilter } from './filters/origin.js';
@@ -36,15 +36,38 @@ function updateQueryParameters() {
     queryParameters = params.filter(item => item !== '').join('&');
 };
 
-function getQueryParameters(limit= 10, offset= 0) {
+function getQueryParameters(limit= 10, page= 0) {
     let params = [queryParameters];
     params.push(`limit=${limit}`);
-    params.push(`offset=${offset}`);
+    params.push(`page=${page}`);
     return params.filter(item => item !== '').join('&');
 };
 
-function updateAlarmTable(data) {
-    console.log(data); //TODO
+function getTableRow(alarm) {
+    const row = document.createElement('tr');
+    const formattedDate = formatDate(alarm.date);
+    row.innerHTML = `
+        <td>${formattedDate}</td>
+        <td>${escapeHtml(alarm.origin)}</td>
+        <td>${escapeHtml(alarm.alarm_type)}</td>
+        <td>${escapeHtml(alarm.message)}</td>
+    `;
+    return row;
+};
+
+async function updateAlarmTable(data) {
+    await clearAlarmTable();
+
+    const tbody = document.querySelector('#alarmsTable tbody');
+    if (!tbody) return;
+    if (!data || data.length === 0) return;
+
+    setCurrentPage(data.current_page);
+    setTotalPages(data.total_pages);
+    console.log(data);
+    data.alarms?.forEach(alarm => {
+        tbody.appendChild(getTableRow(alarm));
+    });    
 };
 
 async function clearAlarmTable() {
@@ -52,10 +75,12 @@ async function clearAlarmTable() {
     if (tbody) {
         tbody.innerHTML = '';
     }
+    setCurrentPage(0);
+    setTotalPages(0);
 };
 
-async function loadAlarms(limit= 10, offset= 0) {
-    const endpoint = `/api/alarm/?${getQueryParameters(limit, offset)}`;
+async function loadAlarms(limit= 10, page= 0) {
+    const endpoint = `/api/alarm/?${getQueryParameters(limit, page)}`;
     fetch(endpoint)
     .then(async (response) => {
         if (response.status === 404) {
@@ -88,25 +113,20 @@ async function initButtons() {
 
     document.getElementById('prevPageButton')?.addEventListener('click', async () => {
         const nAlarmsPage = 10; //TODO: insert a selector
-        const currentPage = getCurrentPage();
 
-        let offset = (currentPage - 1) * nAlarmsPage;
-        offset = offset < 0 ? 0 : offset;
+        let page = getCurrentPage() - 1;
+        page = page < 0 ? 0 : page;
 
-        await loadAlarms(nAlarmsPage, offset);
+        await loadAlarms(nAlarmsPage, page);
     });
 
     document.getElementById('nextPageButton')?.addEventListener('click', async () => {
         const nAlarmsPage = 10; //TODO: insert a selector
-        const totalPages = getTotalPages();
-        const currentPage = getCurrentPage();
 
-        const nextPage = Math.min(currentPage + 1, totalPages);
+        let nextPage = Math.min(getCurrentPage() + 1, getTotalPages());
+        nextPage = nextPage < 0 ? 0 : nextPage;
 
-        let offset = nextPage * nAlarmsPage;
-        offset = offset < 0 ? 0 : offset;
-
-        await loadAlarms(nAlarmsPage, offset);
+        await loadAlarms(nAlarmsPage, nextPage);
     });
 };
 

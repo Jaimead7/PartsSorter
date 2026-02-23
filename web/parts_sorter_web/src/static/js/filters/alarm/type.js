@@ -93,7 +93,7 @@ function getAlarmTypeQueryParameters() {
     let alarmTypeParams = [];
     alarmTypeOptions.forEach((checkbox) => {
         if (checkbox.checked) {
-            alarmTypeParams.push(`type=${encodeURIComponent(checkbox.value)}`);
+            alarmTypeParams.push(`alarm_type=${encodeURIComponent(checkbox.value)}`);
         }
     });
     return alarmTypeParams.join('&');
