@@ -36,7 +36,7 @@ function updateQueryParameters() {
     queryParameters = params.filter(item => item !== '').join('&');
 };
 
-function getQueryParameters(limit= 0, offset= 0) {
+function getQueryParameters(limit= 10, offset= 0) {
     let params = [queryParameters];
     params.push(`limit=${limit}`);
     params.push(`offset=${offset}`);
@@ -54,7 +54,7 @@ async function clearAlarmTable() {
     }
 };
 
-async function loadAlarms(limit= 0, offset= 0) {
+async function loadAlarms(limit= 10, offset= 0) {
     const endpoint = `/api/alarm/?${getQueryParameters(limit, offset)}`;
     fetch(endpoint)
     .then(async (response) => {
@@ -77,7 +77,8 @@ async function loadAlarms(limit= 0, offset= 0) {
 
 async function updateFilters() {
     updateQueryParameters();
-    await loadAlarms(0, 0);
+    const nAlarmsPage = 10; //TODO: insert a selector
+    await loadAlarms(nAlarmsPage, 0);
 };
 
 async function initButtons() {
