@@ -32,7 +32,7 @@ from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..dependencies.web_sockets import ImageStreamSocketManager
 from ..models.api import AlarmResponse
-from ..models.database import Alarm
+from ..models.database import Alarm, AlarmTypes
 
 alarms_router: APIRouter = APIRouter()
 
@@ -93,3 +93,13 @@ async def delete_alarms(
         session= session,
         alarms_uuids= uuids
     )
+
+@alarms_router.get(
+    '/types/',
+    response_model= list[str],
+    summary= 'Get all available types for the Alarms.',
+    response_description= 'The alarm types list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_alarm_types() -> Sequence[str]:
+    return AlarmTypes.get_all_names()

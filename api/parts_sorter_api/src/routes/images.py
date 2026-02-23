@@ -193,7 +193,7 @@ async def get_image_extensions(
 @images_router.get(
     '/status/',
     response_model= list[str],
-    summary= 'Get all status for the Images of the database.',
+    summary= 'Get all available status for the Images.',
     response_description= 'The status list.',
     status_code= status.HTTP_200_OK
 )
