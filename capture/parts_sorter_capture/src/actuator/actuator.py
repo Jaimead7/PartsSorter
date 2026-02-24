@@ -27,7 +27,8 @@ from gpio import EdgeType, detect_edge, write
 from remote.models import (ActuatorParamsResponse, AlarmType, ImageStatus,
                            ProcessImageResponse)
 from remote.requests import get_actuator_params, send_alarm, update_status
-from utils.config import ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, my_logger
+from utils.config import (ACTUATOR_PIN, ACTUATOR_SENSOR_PIN, QUEUE_MAX_ERRORS,
+                          my_logger)
 from utils.models import AsyncList
 
 
@@ -39,6 +40,7 @@ class ActuatorManager:
         self.next_part_to_push: ProcessImageResponse = ProcessImageResponse(
             result= False
         )
+        self._error_counter = 0
         self.last_push: datetime = datetime.now(timezone.utc).replace(tzinfo=None)
 
     @property
@@ -95,6 +97,7 @@ class ActuatorManager:
         while True:
             try:
                 next_result: ProcessImageResponse = await results_queue.check_first()
+                self._error_counter = 0
             except asyncio.QueueEmpty:
                 msg: str = 'Result lost. There are no results in the queue. The part will be pushed.'
                 asyncio.create_task(
@@ -104,6 +107,16 @@ class ActuatorManager:
                     )
                 )
                 my_logger.error(msg)
+                self._error_counter += 1
+                if self._error_counter > QUEUE_MAX_ERRORS:
+                    msg: str = 'Tried to recover so many images. Camera failure.'
+                    asyncio.create_task(
+                        send_alarm(
+                            alarm_type= AlarmType.CRITICAL,
+                            message= msg
+                        )
+                    )
+                    my_logger.critical(msg)
                 return ProcessImageResponse(
                     date= now,
                     result= True
