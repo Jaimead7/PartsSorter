@@ -1,13 +1,22 @@
-<footer class="w-100 d-flex justify-content-center align-items-center">
-    <button class="btn btn-md p-0 align-self-start" type="button" id="prevPageButton">
-        <span class="bi bi-caret-left-square fs-3"></span>
-    </button>
-    <p class="m-0 ms-1" data-default-text="-" id="currentPage">-</p>
-    <p class="m-0">/</p>
-    <p class="m-0 me-1" data-default-text="-" id="totalPages">-</p>
-    <button class="btn btn-md p-0 align-self-start" type="button" id="nextPageButton">
-        <span class="bi bi-caret-right-square fs-3"></span>
-    </button>
+<footer class="w-100 d-flex justify-content-between align-items-center" id="pagination">
+    <section class="d-flex justify-content-center align-items-center flex-grow-1">
+        <button class="btn btn-md p-0 align-self-start" type="button" name="prevPageBtn">
+            <span class="bi bi-caret-left-square fs-3"></span>
+        </button>
+        <p class="m-0 ms-1" data-default-text="-" name="currentPage">-</p>
+        <p class="m-0">/</p>
+        <p class="m-0 me-1" data-default-text="-" name="totalPages">-</p>
+        <button class="btn btn-md p-0 align-self-start" type="button" name="nextPageBtn">
+            <span class="bi bi-caret-right-square fs-3"></span>
+        </button>
+    </section>
+    <section class="">
+        <select class="form-select w-auto" name="nResults">
+            <option selected value="10">10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+    </section>
 
     <script
         src="{{ url_for('static', filename='js/components/pagination.js') }}"

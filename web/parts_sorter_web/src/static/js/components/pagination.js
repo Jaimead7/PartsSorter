@@ -19,8 +19,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+const footer = document.getElementById('pagination');
+
 function setCurrentPage(value) {
-    const element = document.getElementById('currentPage');
+    const element = footer.querySelector('[name="currentPage"]');
     if (element) {
         const defaultText = element.dataset.defaultText || '-';
         const text = value == null ? defaultText : value + 1;
@@ -29,13 +31,13 @@ function setCurrentPage(value) {
 };
 
 function getCurrentPage() {
-    const element = document.getElementById('currentPage');
+    const element = footer.querySelector('[name="currentPage"]');
     const parsedValue = element ? parseInt(element.textContent, 10) : 1;
     return isNaN(parsedValue) ? 0 : parsedValue - 1;
 };
 
 function setTotalPages(value) {
-    const element = document.getElementById('totalPages');
+    const element = footer.querySelector('[name="totalPages"]');
     if (element) {
         const defaultText = element.dataset.defaultText || '-';
         element.textContent = value || defaultText;
@@ -43,9 +45,36 @@ function setTotalPages(value) {
 };
 
 function getTotalPages() {
-    const element = document.getElementById('totalPages');
+    const element = footer.querySelector('[name="totalPages"]');
     const parsedValue = element ? parseInt(element.textContent, 10) : 0;
     return isNaN(parsedValue) ? 0 : parsedValue;
+};
+
+function setPrevPageBtnEvent(func) {
+    const btn = footer?.querySelector('[name="prevPageBtn"]');
+    if (btn) {
+        btn.addEventListener('click', func);
+    }
+};
+
+function setNextPageBtnEvent(func) {
+    const btn = footer?.querySelector('[name="nextPageBtn"]');
+    if (btn) {
+        btn.addEventListener('click', func);
+    }
+};
+
+function getResultsNumb() {
+    const element = footer?.querySelector('[name="nResults"]');
+    const parsedValue = element ? parseInt(element.value, 10) : 10;
+    return isNaN(parsedValue) ? 0 : parsedValue
+};
+
+function setResultsNumbEvent(func) {
+    const element = footer?.querySelector('[name="nResults"]');
+    if (element) {
+        element.addEventListener('change', func);
+    }
 };
 
 
@@ -53,5 +82,9 @@ export {
     setCurrentPage,
     getCurrentPage,
     setTotalPages,
-    getTotalPages
+    getTotalPages,
+    setPrevPageBtnEvent,
+    setNextPageBtnEvent,
+    getResultsNumb,
+    setResultsNumbEvent
 };

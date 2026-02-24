@@ -20,7 +20,16 @@
 
 
 import { showAlert, addAlarmsToTable, clearAlarmTable } from './utils.js';
-import { getCurrentPage, getTotalPages, setCurrentPage, setTotalPages } from './components/pagination.js';
+import {
+    getCurrentPage,
+    getTotalPages,
+    setCurrentPage,
+    setTotalPages,
+    setPrevPageBtnEvent,
+    setNextPageBtnEvent,
+    getResultsNumb,
+    setResultsNumbEvent
+} from './components/pagination.js';
 import { getAlarmTypeQueryParameters, initAlarmTypeFilter } from './filters/alarm/type.js';
 import { getDateQueryParameters, initDateFilter } from './filters/date.js';
 import { getOriginQueryParameters, initOriginFilter } from './filters/origin.js';
@@ -72,36 +81,40 @@ async function loadAlarms(limit= 10, page= 0) {
 
 async function updateFilters() {
     updateQueryParameters();
-    const nAlarmsPage = 10; //TODO: insert a selector
-    await loadAlarms(nAlarmsPage, 0);
+    await loadAlarms(getResultsNumb(), 0);
 };
 
-async function initButtons() {
+async function initEvents() {
     document.getElementById('applyFiltersBtn')?.addEventListener('click', async () => {
         await updateFilters();
     });
 
-    document.getElementById('prevPageButton')?.addEventListener('click', async () => {
-        const nAlarmsPage = 10; //TODO: insert a selector
+    setPrevPageBtnEvent(async (event) => {
+        event.preventDefault();
 
         let page = getCurrentPage() - 1;
         page = page < 0 ? 0 : page;
 
-        await loadAlarms(nAlarmsPage, page);
+        await loadAlarms(getResultsNumb(), page);
     });
 
-    document.getElementById('nextPageButton')?.addEventListener('click', async () => {
-        const nAlarmsPage = 10; //TODO: insert a selector
+    setNextPageBtnEvent(async (event) => {
+        event.preventDefault();
 
         let nextPage = Math.min(getCurrentPage() + 1, getTotalPages() - 1);
         nextPage = nextPage < 0 ? 0 : nextPage;
 
-        await loadAlarms(nAlarmsPage, nextPage);
+        await loadAlarms(getResultsNumb(), nextPage);
+    });
+
+    setResultsNumbEvent(async (event) => {
+        event.preventDefault();
+        await loadAlarms(getResultsNumb(), 0);
     });
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    initButtons();
+    initEvents();
 
     Promise.all([
         initDateFilter(),
@@ -110,8 +123,3 @@ document.addEventListener('DOMContentLoaded', () => {
     ])
     .then(() => updateFilters());
 });
-
-
-export {
-    addAlarmsToTable
-};
