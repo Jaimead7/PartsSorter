@@ -66,6 +66,7 @@ class ExtractorsWarnings(IntEnum):
 class ExtractedResult(BaseModel):
     id: Optional[int] = None
     trust: Optional[float] = None
+    warning: ExtractorsWarnings = ExtractorsWarnings.OK
 
     @field_validator('id')
     @classmethod
@@ -81,8 +82,8 @@ class ExtractedResult(BaseModel):
             raise ValueError(f'{cls.__name__}.trust must be [0, 1] or None.')
         return v
 
-    def unpack(self) -> tuple[Optional[int], Optional[float]]:
-        return (self.id, self.trust)
+    def unpack(self) -> tuple[Optional[int], Optional[float], ExtractorsWarnings]:
+        return (self.id, self.trust, self.warning)
 
 
 class ResultsExtractorFunction(Protocol):
@@ -135,7 +136,11 @@ def extract_first_result(results: ResultsType) -> ExtractedResult:
     if len(results_array) == 0:
         return ExtractedResult()
     first: np.ndarray = results_array[0]
-    return ExtractedResult(id = first[-1], trust = first[-2])
+    return ExtractedResult(
+        id = first[-1],
+        trust = first[-2],
+        warning= ExtractorsWarnings.OK
+    )
 
 @ResultsExtractorRegistry.register('ALONE')
 def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
@@ -145,7 +150,11 @@ def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
         return ExtractedResult()
     boxes: np.ndarray = results.boxes.data
     if boxes.shape[0] == 1:
-        return ExtractedResult(id= boxes[0,-1], trust= boxes[0,-2])
+        return ExtractedResult(
+            id= boxes[0,-1],
+            trust= boxes[0,-2],
+            warning= ExtractorsWarnings.OK
+        )
     boxes_norm: np.ndarray = np.column_stack([
         np.minimum(boxes[:, 0], boxes[:, 2]),
         np.minimum(boxes[:, 1], boxes[:, 3]),
@@ -154,12 +163,17 @@ def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
     ])
     base: np.ndarray = boxes_norm[0]
     others: np.ndarray = boxes_norm[1:]
+    warning: ExtractorsWarnings = ExtractorsWarnings.OK
     if squares_overlap(base, others):
-        return ExtractedResult(id= ExtractorsWarnings.OVERLAP.value, trust= None)
+        warning = ExtractorsWarnings.OVERLAP
     scale_array: np.ndarray = np.array([-threshold, -threshold, threshold, threshold])
     if squares_overlap(base + scale_array, others):
-        return ExtractedResult(id= ExtractorsWarnings.CLOSE.value, trust= None)
-    return ExtractedResult(id= boxes[0,-1], trust= boxes[0,-2])
+        warning = ExtractorsWarnings.CLOSE
+    return ExtractedResult(
+        id= boxes[0,-1],
+        trust= boxes[0,-2],
+        warning= warning
+    )
 
 def squares_overlap(base: np.ndarray, others: np.ndarray) -> bool:
     overlap_x: np.ndarray = np.maximum(base[0], others[:,0]) < np.minimum(base[2], others[:,2])
