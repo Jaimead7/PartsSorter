@@ -29,7 +29,7 @@ from pydantic import BaseModel, field_validator
 from pyUtils import NoInstantiable
 
 from ..dependencies.config import my_logger
-from ..dependencies.func import to_title
+from ..dependencies.func import to_snakecase, to_title
 from .results import ResultsType
 
 
@@ -57,10 +57,34 @@ class ExtractorsWarnings(IntEnum):
 
     @classmethod
     def validate_name(cls, name: str) -> Optional[str]:
-        name = to_title(name)
-        if name in cls.get_all_names():
+        name = to_snakecase(name).upper()
+        if name in cls.to_dict().keys():
             return name
         return None
+
+    @classmethod
+    def validate_value(cls, value: int | str) -> Optional[int]:
+        try:
+            value = int(value)
+        except ValueError:
+            return None
+        if value in cls.to_dict().values():
+            return value
+        return None
+
+    @classmethod
+    def get_value(cls, inp: Optional[str | int]) -> int:
+        if inp is None:
+            return cls.OK.value
+        if isinstance(inp, str):
+            name: Optional[str] = cls.validate_name(inp)
+            if name:
+                return cls.to_dict()[name]
+        value: Optional[int] = cls.validate_value(inp)
+        if value:
+            return value
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
+        return cls.OK
 
 
 class ExtractedResult(BaseModel):
