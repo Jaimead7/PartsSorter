@@ -34,6 +34,7 @@ from ..dependencies.config import (INTERNAL_IMAGES_FOLDER,
                                    INTERNAL_MODELS_FOLDER,
                                    STATIC_IMAGES_FOLDER, my_logger)
 from ..dependencies.func import to_snakecase, to_title
+from ..engine.results_extractors import ExtractorsWarnings
 from .metadata_files import ModelMetadataDict
 
 
@@ -278,6 +279,10 @@ class BaseImage(SQLModel):
     )
     status: int = Field(
         default= ImageStatus.captured,
+        nullable= False
+    )
+    warning: int = Field(
+        default= ExtractorsWarnings.NO_WARNING.value,
         nullable= False
     )
 

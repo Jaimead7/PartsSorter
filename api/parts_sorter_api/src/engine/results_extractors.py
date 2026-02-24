@@ -35,25 +35,17 @@ from .results import ResultsType
 
 @unique
 class ExtractorsWarnings(IntEnum):
-    OK = 0
+    NO_WARNING = 0
     OVERLAP = -1
     CLOSE = -2
 
-    @cache
     @classmethod
+    @cache
     def to_dict(cls) -> dict[str, int]:
         return {
             name: member.value
             for name, member in cls.__members__.items()
         }
-
-    @cache
-    @classmethod
-    def get_all_names(cls) -> list[str]:
-        return [
-            to_title(name)
-            for name in cls.to_dict().keys()
-        ]
 
     @classmethod
     def validate_name(cls, name: str) -> Optional[str]:
@@ -75,7 +67,7 @@ class ExtractorsWarnings(IntEnum):
     @classmethod
     def get_value(cls, inp: Optional[str | int]) -> int:
         if inp is None:
-            return cls.OK.value
+            return cls.NO_WARNING.value
         if isinstance(inp, str):
             name: Optional[str] = cls.validate_name(inp)
             if name:
@@ -84,13 +76,34 @@ class ExtractorsWarnings(IntEnum):
         if value:
             return value
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
-        return cls.OK
+        return cls.NO_WARNING
+
+    @classmethod
+    def get_name(cls, inp: Optional[str | int]) -> str:
+        if inp is None:
+            return 'No warning'
+        if cls.validate_value(inp) is not None:
+            for name, val in cls.to_dict().items():
+                if val == inp:
+                    return to_title(name)
+        if isinstance(inp, str) and cls.validate_name(inp) is not None:
+            return to_title(inp)
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
+        return 'No warning'
+
+    @classmethod
+    @cache
+    def get_all_names(cls) -> list[str]:
+        return [
+            to_title(name)
+            for name in cls.to_dict().keys()
+        ]
 
 
 class ExtractedResult(BaseModel):
     id: Optional[int] = None
     trust: Optional[float] = None
-    warning: ExtractorsWarnings = ExtractorsWarnings.OK
+    warning: ExtractorsWarnings = ExtractorsWarnings.NO_WARNING
 
     @field_validator('id')
     @classmethod
@@ -163,7 +176,7 @@ def extract_first_result(results: ResultsType) -> ExtractedResult:
     return ExtractedResult(
         id = first[-1],
         trust = first[-2],
-        warning= ExtractorsWarnings.OK
+        warning= ExtractorsWarnings.NO_WARNING
     )
 
 @ResultsExtractorRegistry.register('ALONE')
@@ -177,7 +190,7 @@ def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
         return ExtractedResult(
             id= boxes[0,-1],
             trust= boxes[0,-2],
-            warning= ExtractorsWarnings.OK
+            warning= ExtractorsWarnings.NO_WARNING
         )
     boxes_norm: np.ndarray = np.column_stack([
         np.minimum(boxes[:, 0], boxes[:, 2]),
@@ -187,12 +200,12 @@ def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
     ])
     base: np.ndarray = boxes_norm[0]
     others: np.ndarray = boxes_norm[1:]
-    warning: ExtractorsWarnings = ExtractorsWarnings.OK
-    if squares_overlap(base, others):
-        warning = ExtractorsWarnings.OVERLAP
+    warning: ExtractorsWarnings = ExtractorsWarnings.NO_WARNING
     scale_array: np.ndarray = np.array([-threshold, -threshold, threshold, threshold])
     if squares_overlap(base + scale_array, others):
         warning = ExtractorsWarnings.CLOSE
+    if squares_overlap(base, others):
+        warning = ExtractorsWarnings.OVERLAP
     return ExtractedResult(
         id= boxes[0,-1],
         trust= boxes[0,-2],

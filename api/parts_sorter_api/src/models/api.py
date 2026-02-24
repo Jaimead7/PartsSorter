@@ -42,7 +42,7 @@ class ProcessImageResult(BaseModel):
     model_name: Optional[str] = None
     inpection_result_name: Optional[str] = None
     trust: Optional[float] = None
-    warning: int = ExtractorsWarnings.OK.value
+    warning: int = ExtractorsWarnings.NO_WARNING.value
 
 
 class ImageFilters(BaseModel):
@@ -56,6 +56,7 @@ class ImageFilters(BaseModel):
     max_trust: Optional[float] = 1.
     models: list[Optional[str]] = []
     status: list[Optional[str | int]] = []
+    warnings: list[Optional[str | int]] = []
 
     @field_validator('inspection_results')
     @classmethod
@@ -118,6 +119,17 @@ class ImageFilters(BaseModel):
         return [
             ImageStatus.get_value(status_name)
             for status_name in status_names
+        ]
+
+    @field_validator('warnings')
+    @classmethod
+    def validate_warnings(
+        cls,
+        warnings: list[Optional[str | int]]
+    ) -> list[int]:
+        return [
+            ExtractorsWarnings.get_value(warning)
+            for warning in warnings
         ]
 
     def add_date_filter_to_statement(
@@ -243,6 +255,16 @@ class ImageFilters(BaseModel):
             )
         return statement
 
+    def add_warnings_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        if len(self.warnings) > 0:
+            statement = statement.where(
+                col(Image.warning).in_(self.warnings)
+            )
+        return statement
+
     def add_filters_to_statement(
         self,
         statement: SelectOfScalar[Any]
@@ -255,6 +277,7 @@ class ImageFilters(BaseModel):
         statement = self.add_models_filter_to_statement(statement)
         statement = self.add_true_results_filter_to_statement(statement)
         statement = self.add_status_filter_to_statement(statement)
+        statement = self.add_warnings_filter_to_statement(statement)
         return statement
 
 
@@ -299,6 +322,9 @@ class ImageResponse(BaseModel):
     true_result: Optional[str] = 'No result'
     trust: Optional[float] = 0.
     status: Optional[str | int] = ImageStatus.get_name(0)
+    warning: Optional[str | int] = ExtractorsWarnings.get_name(
+        ExtractorsWarnings.NO_WARNING.value
+    )
 
     @field_validator('type')
     @classmethod
@@ -333,6 +359,11 @@ class ImageResponse(BaseModel):
             v = ImageStatus.captured
         return ImageStatus.get_name(v)
 
+    @field_validator('warning')
+    @classmethod
+    def validate_warning(cls, v: Optional[str | int]) -> str:
+        return ExtractorsWarnings.get_name(v)
+
     @classmethod
     def from_image(
         cls,
@@ -346,7 +377,8 @@ class ImageResponse(BaseModel):
             model= image.model,
             true_result= image.true_result,
             trust= image.trust,
-            status= image.status
+            status= image.status,
+            warning= image.warning
         )
 
 
@@ -398,7 +430,6 @@ class ImageHistResponse(ImageResponse):
 class ImageStatusResponse(BaseModel):
     type: str = 'imgStatus'
     id: UUID
-    image_url: str
     status: str = 'Captured'
 
     @field_validator('type')
@@ -412,7 +443,6 @@ class ImageStatusResponse(BaseModel):
         image: Image
     ) -> Self:
         return cls(
-            image_url= image.external_relative_path,
             id= image.id,
             status= ImageStatus.get_name(image.status)
         )

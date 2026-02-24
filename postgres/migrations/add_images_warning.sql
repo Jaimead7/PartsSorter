@@ -1,0 +1,2 @@
+ALTER TABLE public.images
+ADD COLUMN warning INTEGER DEFAULT 0 NOT NULL;
