@@ -45,7 +45,6 @@ async def api_get_image_extensions() -> list[str]:
         my_logger.error(f'Error processing image extension from the api. {e}')
         return []
 
-
 async def api_get_status_list() -> list[str]:
     options: RequestOptions = RequestOptions(
         url= f'{API_URL}/image/status/',
@@ -61,4 +60,21 @@ async def api_get_status_list() -> list[str]:
         return [status for status in response.json()]
     except Exception as e:
         my_logger.error(f'Error processing image status from the api. {e}')
+        return []
+
+async def api_get_warnings_list() -> list[str]:
+    options: RequestOptions = RequestOptions(
+        url= f'{API_URL}/image/warnings/',
+        headers= {
+            'accept': 'application/json'
+        },
+        timeout= httpx.Timeout(timeout= 5.0)
+    )
+    response: Optional[httpx.Response] = await api_request(options)
+    if response is None:
+        return []
+    try:
+        return [warning for warning in response.json()]
+    except Exception as e:
+        my_logger.error(f'Error processing image warnings from the api. {e}')
         return []

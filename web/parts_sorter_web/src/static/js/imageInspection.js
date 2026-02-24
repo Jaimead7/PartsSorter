@@ -26,6 +26,7 @@ import { initOriginFilter, getOriginQueryParameters } from './filters/origin.js'
 import { initModelFilter, getModelQueryParameters } from './filters/model.js';
 import { initTrustFilter, getTrustQueryParameters } from './filters/image/trust.js';
 import { initStatusFilter, getStatusQueryParameters } from './filters/image/status.js';
+import { initWarningFilter, getWarningQueryParameters } from './filters/image/warning.js';
 import { initInspResultFilter, getInspResultQueryParameters } from './filters/image/inspResult.js';
 import { initTrueResultFilter, getTrueResultQueryParameters } from './filters/image/trueResult.js';
 import { setImgData, initImgButtons } from './components/images.js';
@@ -42,6 +43,7 @@ function getQueryParameters(index) {
     params.push(getStatusQueryParameters());
     params.push(getInspResultQueryParameters());
     params.push(getTrueResultQueryParameters());
+    params.push(getWarningQueryParameters());
     params.push(`index=${index}`);
     return params.filter(item => item !== '').join('&');
 };
@@ -201,7 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initTrustFilter(),
         initStatusFilter(),
         initInspResultFilter(),
-        initTrueResultFilter()
+        initTrueResultFilter(),
+        initWarningFilter()
     ])
     .then(() => getNewImageFromHist(0));
 });
