@@ -30,7 +30,7 @@ import numpy as np
 from gpio import EdgeType, detect_edge
 from remote.models import AlarmType, CameraParamsResponse, ProcessImageResponse
 from remote.requests import get_camera_params, process_image, send_alarm
-from utils.config import CAMERA_SENSOR_PIN, my_logger
+from utils.config import CAMERA_SENSOR_PIN, QUEUE_MAX_ERRORS, my_logger
 from utils.models import AsyncList
 
 
@@ -170,7 +170,17 @@ class CameraManager:
                     image= image,
                     date= date
                 )
-                await results_queue.put(result)
+                async with results_queue:
+                    await results_queue.put(result)
+                    if await results_queue.count() > QUEUE_MAX_ERRORS:
+                        msg: str = 'Too many images on the queue. Actuator failure.'
+                        asyncio.create_task(
+                            send_alarm(
+                                alarm_type= AlarmType.CRITICAL,
+                                message= msg
+                            )
+                        )
+                        my_logger.critical(msg)
                 my_logger.debug(f'Image captured with {result}.')
 
     async def cycle(
