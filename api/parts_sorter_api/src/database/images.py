@@ -241,29 +241,17 @@ async def db_process_image(
         )
         if db_image.origin_of_image is None or db_image.origin_of_image.model is None:
             my_logger.error(f'No model selected to process image.')
-            return ProcessImageResult(
-                model_name= None,
-                inpection_result_name= None,
-                trust= None
-            )
+            return ProcessImageResult()
         model_name = db_image.origin_of_image.model
     try:
         model_manager: ModelManager = ModelsContainer.get_model(INTERNAL_MODELS_FOLDER / model_name)
     except KeyError:
         my_logger.error(f'No model available to process image.')
-        return ProcessImageResult(
-            model_name= None,
-            inpection_result_name= None,
-            trust= None
-        )
+        return ProcessImageResult()
     results_list: list[ResultsType] = model_manager.inspect(db_image.internal_absolute_path)
     if len(results_list) < 1:
         my_logger.error(f'Error processing image.')
-        return ProcessImageResult(
-            model_name= model_name,
-            inpection_result_name= None,
-            trust= None
-        )
+        return ProcessImageResult(model_name= model_name)
     results: ResultsType = results_list[0]
     results = apply_results_sorters(
         results= results,
@@ -272,11 +260,7 @@ async def db_process_image(
     result: ExtractedResult = ResultsExtractorRegistry.extract(results, 'alone')  #TODO: use extractor by origin
     my_logger.info(f'Image "{db_image.file_name}" processed with Model "{model_name}".')
     if result.id is None:
-        return ProcessImageResult(
-                model_name= model_name,
-                inpection_result_name= None,
-                trust= None
-            )
+        return ProcessImageResult(model_name= model_name)
     try:
         inpection_result: InspectionResult = await db_get_model_inspection_result(
             session= session,
@@ -284,15 +268,12 @@ async def db_process_image(
             result_id= result.id
         )
     except HTTPException:
-        return ProcessImageResult(
-                model_name= model_name,
-                inpection_result_name= None,
-                trust= None
-            )
+        return ProcessImageResult(model_name= model_name)
     return ProcessImageResult(
         model_name= model_name,
         inpection_result_name= inpection_result.name,
-        trust= result.trust
+        trust= result.trust,
+        warning= result.warning.value
     )
 
 async def db_get_image_origin_result(

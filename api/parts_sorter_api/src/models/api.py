@@ -29,6 +29,7 @@ from sqlmodel import col, or_
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from typing_extensions import Self
 
+from ..engine.results_extractors import ExtractorsWarnings
 from .database import Alarm, AlarmTypes, Image, ImageStatus
 
 
@@ -38,9 +39,10 @@ class HealthResponse(BaseModel):
 
 
 class ProcessImageResult(BaseModel):
-    model_name: Optional[str]
-    inpection_result_name: Optional[str]
-    trust: Optional[float]
+    model_name: Optional[str] = None
+    inpection_result_name: Optional[str] = None
+    trust: Optional[float] = None
+    warning: int = ExtractorsWarnings.OK.value
 
 
 class ImageFilters(BaseModel):
