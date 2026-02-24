@@ -37,7 +37,8 @@ from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
 from ..engine.managers import ModelManager, ModelsContainer
 from ..engine.results import ResultsType
-from ..engine.results_extractors import ClassResult, ResultsExtractorRegistry
+from ..engine.results_extractors import (ExtractedResult,
+                                         ResultsExtractorRegistry)
 from ..engine.results_sorters import apply_results_sorters
 from ..models.api import ImageFilters, ProcessImageResult
 from ..models.database import (Image, ImageStatus, InspectionResult,
@@ -268,7 +269,7 @@ async def db_process_image(
         results= results,
         sorters= ('center',)  #TODO: use sorters by origin
     )
-    result: ClassResult = ResultsExtractorRegistry.extract(results, 'alone')  #TODO: use extractor by origin
+    result: ExtractedResult = ResultsExtractorRegistry.extract(results, 'alone')  #TODO: use extractor by origin
     my_logger.info(f'Image "{db_image.file_name}" processed with Model "{model_name}".')
     if result.id is None:
         return ProcessImageResult(

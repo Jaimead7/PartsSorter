@@ -27,7 +27,7 @@ import pytest
 from parts_sorter_api.src.engine.results import (BoxesType, MyBoxes, MyResults,
                                                  ResultsType, SpeedDict)
 from parts_sorter_api.src.engine.results_extractors import (
-    ClassResult, ClassResultErrors, ResultsExtractorFunction,
+    ClassResultErrors, ExtractedResult, ResultsExtractorFunction,
     ResultsExtractorRegistry, extract_first_result, extract_first_result_alone)
 
 
@@ -135,36 +135,36 @@ class TestClassResultErrors:
 
 class TestClassResult:
     def test_default(self) -> None:
-        res: ClassResult = ClassResult()
+        res: ExtractedResult = ExtractedResult()
         assert res.id is None
         assert res.trust is None
 
     def test_validate_id(self) -> None:
-        assert ClassResult(id= None).id is None
-        assert ClassResult(id= 0).id == 0
-        assert ClassResult(id= 1).id == 1
-        assert ClassResult(id= '1').id == 1  #type: ignore
-        assert ClassResult(id= -1).id == -1
+        assert ExtractedResult(id= None).id is None
+        assert ExtractedResult(id= 0).id == 0
+        assert ExtractedResult(id= 1).id == 1
+        assert ExtractedResult(id= '1').id == 1  #type: ignore
+        assert ExtractedResult(id= -1).id == -1
         with pytest.raises(ValueError):
-            _ = ClassResult(id= 'test')  #type: ignore
+            _ = ExtractedResult(id= 'test')  #type: ignore
 
     def test_validate_trust(self) -> None:
-        assert ClassResult(trust= None).trust is None
-        assert ClassResult(trust= 0.).trust == 0
-        assert ClassResult(trust= 1.).trust == 1
-        assert ClassResult(trust= 0.5).trust == 0.5
-        assert ClassResult(trust= '0.5').trust == 0.5  #type: ignore
+        assert ExtractedResult(trust= None).trust is None
+        assert ExtractedResult(trust= 0.).trust == 0
+        assert ExtractedResult(trust= 1.).trust == 1
+        assert ExtractedResult(trust= 0.5).trust == 0.5
+        assert ExtractedResult(trust= '0.5').trust == 0.5  #type: ignore
         with pytest.raises(ValueError):
-            _ = ClassResult(trust= -0.1)
+            _ = ExtractedResult(trust= -0.1)
         with pytest.raises(ValueError):
-            _ = ClassResult(trust= 1.1)  #type: ignore
+            _ = ExtractedResult(trust= 1.1)  #type: ignore
         with pytest.raises(ValueError):
-            _ = ClassResult(trust= 'test')  #type: ignore
+            _ = ExtractedResult(trust= 'test')  #type: ignore
 
     def test_unpack(self) -> None:
         id: Optional[int]
         trust: Optional[float]
-        id, trust = ClassResult(id= 1, trust= 0.5).unpack()
+        id, trust = ExtractedResult(id= 1, trust= 0.5).unpack()
         assert id == 1
         assert trust == 0.5
 
@@ -179,15 +179,15 @@ class TestResultsSorterRegistry:
         assert func == ResultsExtractorRegistry.no_extract
 
     def test_no_extract(self, random_results: ResultsType) -> None:
-        result: ClassResult = ResultsExtractorRegistry.no_extract(random_results)
+        result: ExtractedResult = ResultsExtractorRegistry.no_extract(random_results)
         assert result.id is None
         assert result.trust is None
 
     def test_register(self) -> None:
         try:
             @ResultsExtractorRegistry.register('test')
-            def fnc(results: ResultsType) -> ClassResult:
-                return ClassResult()
+            def fnc(results: ResultsType) -> ExtractedResult:
+                return ExtractedResult()
             assert ResultsExtractorRegistry.get('test') == fnc
             assert 'TEST' in ResultsExtractorRegistry.list()
         finally:
@@ -198,8 +198,8 @@ class TestResultsSorterRegistry:
         temp: dict[str, ResultsExtractorFunction] = ResultsExtractorRegistry._extractors.copy()
         try:
             @ResultsExtractorRegistry.register('test')
-            def fnc(results: ResultsType) -> ClassResult:
-                return ClassResult()
+            def fnc(results: ResultsType) -> ExtractedResult:
+                return ExtractedResult()
             ResultsExtractorRegistry.clear()
             assert ResultsExtractorRegistry._extractors == {}
         finally:
@@ -220,19 +220,19 @@ class TestExtractFirstResult:
         assert func == extract_first_result
 
     def test_empty(self, empty_result: ResultsType) -> None:
-        result: ClassResult = extract_first_result(empty_result)
+        result: ExtractedResult = extract_first_result(empty_result)
         assert result.id is None
         assert result.trust is None
 
     def test_one_result(self, one_result: ResultsType) -> None:
-        result: ClassResult = extract_first_result(one_result)
+        result: ExtractedResult = extract_first_result(one_result)
         if one_result.boxes is None:
             return
         assert result.id == one_result.boxes.data[0, -1]
         assert result.trust == one_result.boxes.data[0, -2]
 
     def test_random_results(self, random_results: ResultsType) -> None:
-        result: ClassResult = extract_first_result(random_results)
+        result: ExtractedResult = extract_first_result(random_results)
         if random_results.boxes is None:
             return
         assert result.id == random_results.boxes.data[0, -1]
@@ -253,19 +253,19 @@ class TestExtractFirsResultAlone:
         assert func == extract_first_result_alone
 
     def test_empty(self, empty_result: ResultsType) -> None:
-        result: ClassResult = extract_first_result_alone(empty_result)
+        result: ExtractedResult = extract_first_result_alone(empty_result)
         assert result.id is None
         assert result.trust is None
 
     def test_one_result(self, one_result: ResultsType) -> None:
-        result: ClassResult = extract_first_result_alone(one_result)
+        result: ExtractedResult = extract_first_result_alone(one_result)
         if one_result.boxes is None:
             return
         assert result.id == one_result.boxes.data[0, -1]
         assert result.trust == one_result.boxes.data[0, -2]
 
     def test_random_results(self, random_results: ResultsType) -> None:
-        result: ClassResult = extract_first_result(random_results)
+        result: ExtractedResult = extract_first_result(random_results)
         if random_results.boxes is None:
             return
         assert result.id == random_results.boxes.data[0, -1]
@@ -288,7 +288,7 @@ class TestExtractFirsResultAlone:
             boxes= boxes,
             speed= speed
         )
-        output: ClassResult = extract_first_result_alone(results)
+        output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == 1
         assert output.trust == 0.9
 
@@ -308,7 +308,7 @@ class TestExtractFirsResultAlone:
             boxes= boxes,
             speed= speed
         )
-        output: ClassResult = extract_first_result_alone(results)
+        output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == ClassResultErrors.OVERLAP.value
         assert output.trust is None
 
@@ -328,7 +328,7 @@ class TestExtractFirsResultAlone:
             boxes= boxes,
             speed= speed
         )
-        output: ClassResult = extract_first_result_alone(results)
+        output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == 1
         assert output.trust == 0.9
 
@@ -348,7 +348,7 @@ class TestExtractFirsResultAlone:
             boxes= boxes,
             speed= speed
         )
-        output: ClassResult = extract_first_result_alone(results)
+        output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == ClassResultErrors.CLOSE.value
         assert output.trust is None
 
@@ -368,7 +368,7 @@ class TestExtractFirsResultAlone:
             boxes= boxes,
             speed= speed
         )
-        output: ClassResult = extract_first_result_alone(results)
+        output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == ClassResultErrors.OVERLAP.value
         assert output.trust is None
 
@@ -389,7 +389,7 @@ class TestExtractFirsResultAlone:
             boxes= boxes,
             speed= speed
         )
-        output: ClassResult = extract_first_result_alone(results)
+        output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == ClassResultErrors.OVERLAP.value
         assert output.trust is None
 

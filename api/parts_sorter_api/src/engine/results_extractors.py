@@ -45,7 +45,7 @@ class ClassResultErrors(Enum):
             return False
 
 
-class ClassResult(BaseModel):
+class ExtractedResult(BaseModel):
     id: Optional[int] = None
     trust: Optional[float] = None
 
@@ -77,15 +77,15 @@ class ClassResult(BaseModel):
 
 
 class ResultsExtractorFunction(Protocol):
-    def __call__(self, results: ResultsType) -> ClassResult: ...
+    def __call__(self, results: ResultsType) -> ExtractedResult: ...
 
 
 class ResultsExtractorRegistry(NoInstantiable):
     _extractors: ClassVar[dict[str, ResultsExtractorFunction]] = {}
 
     @staticmethod
-    def no_extract(results: ResultsType) -> ClassResult:
-        return ClassResult()
+    def no_extract(results: ResultsType) -> ExtractedResult:
+        return ExtractedResult()
 
     @classmethod
     def register(cls, name: str) -> Callable[[ResultsExtractorFunction], ResultsExtractorFunction]:
@@ -113,30 +113,30 @@ class ResultsExtractorRegistry(NoInstantiable):
         cls._extractors.clear()
 
     @classmethod
-    def extract(cls, results: ResultsType, extractor: str) -> ClassResult:
+    def extract(cls, results: ResultsType, extractor: str) -> ExtractedResult:
         return cls.get(extractor)(results)
 
 
 @ResultsExtractorRegistry.register('FIRST')
-def extract_first_result(results: ResultsType) -> ClassResult:
+def extract_first_result(results: ResultsType) -> ExtractedResult:
     # [x0, y0, x1, y1, conf, id] x n
     if results.boxes is None:
-        return ClassResult()
+        return ExtractedResult()
     results_array: np.ndarray = results.boxes.data
     if len(results_array) == 0:
-        return ClassResult()
+        return ExtractedResult()
     first: np.ndarray = results_array[0]
-    return ClassResult(id = first[-1], trust = first[-2])
+    return ExtractedResult(id = first[-1], trust = first[-2])
 
 @ResultsExtractorRegistry.register('ALONE')
-def extract_first_result_alone(results: ResultsType) -> ClassResult:
+def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
     # [x0, y0, x1, y1, conf, id] x n
     threshold: int = 10  #TODO: use as param
     if results.boxes is None:
-        return ClassResult()
+        return ExtractedResult()
     boxes: np.ndarray = results.boxes.data
     if boxes.shape[0] == 1:
-        return ClassResult(id= boxes[0,-1], trust= boxes[0,-2])
+        return ExtractedResult(id= boxes[0,-1], trust= boxes[0,-2])
     boxes_norm: np.ndarray = np.column_stack([
         np.minimum(boxes[:, 0], boxes[:, 2]),
         np.minimum(boxes[:, 1], boxes[:, 3]),
@@ -146,11 +146,11 @@ def extract_first_result_alone(results: ResultsType) -> ClassResult:
     base: np.ndarray = boxes_norm[0]
     others: np.ndarray = boxes_norm[1:]
     if squares_overlap(base, others):
-        return ClassResult(id= ClassResultErrors.OVERLAP.value, trust= None)
+        return ExtractedResult(id= ClassResultErrors.OVERLAP.value, trust= None)
     scale_array: np.ndarray = np.array([-threshold, -threshold, threshold, threshold])
     if squares_overlap(base + scale_array, others):
-        return ClassResult(id= ClassResultErrors.CLOSE.value, trust= None)
-    return ClassResult(id= boxes[0,-1], trust= boxes[0,-2])
+        return ExtractedResult(id= ClassResultErrors.CLOSE.value, trust= None)
+    return ExtractedResult(id= boxes[0,-1], trust= boxes[0,-2])
 
 def squares_overlap(base: np.ndarray, others: np.ndarray) -> bool:
     overlap_x: np.ndarray = np.maximum(base[0], others[:,0]) < np.minimum(base[2], others[:,2])
