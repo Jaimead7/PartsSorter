@@ -149,23 +149,36 @@ function getTableRow(alarm) {
     const row = document.createElement('tr');
     const formattedDate = formatDate(alarm.date);
 
-    let colorClass = '';
+    const tdDate = document.createElement('td');
+    tdDate.textContent = formattedDate;
+    const tdOrigin = document.createElement('td');
+    tdOrigin.textContent = escapeHtml(alarm.origin);
+    const tdType = document.createElement('td');
+    tdType.textContent = escapeHtml(alarm.alarm_type);
+    const tdMsg = document.createElement('td');
+    tdMsg.textContent = escapeHtml(alarm.message);
+    tdMsg.classList.add('text-start');
+
     switch (toSnakeCase(alarm.alarm_type)) {
         case 'warning':
-            colorClass = 'table-warning';
+            tdType.classList.add('bg-warning', 'text-black');
             break;
         case 'error':
+            tdType.classList.add('bg-danger');
+            break;
         case 'critical':
-            colorClass = 'table-danger';
+            tdDate.classList.add('bg-danger');
+            tdOrigin.classList.add('bg-danger');
+            tdType.classList.add('bg-danger');
+            tdMsg.classList.add('bg-danger');
             break;
     }
 
-    row.innerHTML = `
-        <td>${formattedDate}</td>
-        <td>${escapeHtml(alarm.origin)}</td>
-        <td class="${colorClass}">${escapeHtml(alarm.alarm_type)}</td>
-        <td class="text-start">${escapeHtml(alarm.message)}</td>
-    `;
+    row.appendChild(tdDate);
+    row.appendChild(tdOrigin);
+    row.appendChild(tdType);
+    row.appendChild(tdMsg);
+
     return row;
 };
 
