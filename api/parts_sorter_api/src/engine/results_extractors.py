@@ -20,29 +20,47 @@
 
 
 from collections.abc import Callable
-from enum import Enum, unique
-from typing import Any, ClassVar, Optional, Protocol
+from enum import IntEnum, unique
+from functools import cache
+from typing import ClassVar, Optional, Protocol
 
 import numpy as np
 from pydantic import BaseModel, field_validator
 from pyUtils import NoInstantiable
 
 from ..dependencies.config import my_logger
+from ..dependencies.func import to_title
 from .results import ResultsType
 
 
 @unique
-class ClassResultErrors(Enum):
+class ExtractorsWarnings(IntEnum):
+    OK = 0
     OVERLAP = -1
     CLOSE = -2
 
+    @cache
     @classmethod
-    def validate(cls, v: Any) -> bool:
-        try:
-            cls(v)
-            return True
-        except ValueError:
-            return False
+    def to_dict(cls) -> dict[str, int]:
+        return {
+            name: member.value
+            for name, member in cls.__members__.items()
+        }
+
+    @cache
+    @classmethod
+    def get_all_names(cls) -> list[str]:
+        return [
+            to_title(name)
+            for name in cls.to_dict().keys()
+        ]
+
+    @classmethod
+    def validate_name(cls, name: str) -> Optional[str]:
+        name = to_title(name)
+        if name in cls.get_all_names():
+            return name
+        return None
 
 
 class ExtractedResult(BaseModel):
@@ -137,10 +155,10 @@ def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
     base: np.ndarray = boxes_norm[0]
     others: np.ndarray = boxes_norm[1:]
     if squares_overlap(base, others):
-        return ExtractedResult(id= ClassResultErrors.OVERLAP.value, trust= None)
+        return ExtractedResult(id= ExtractorsWarnings.OVERLAP.value, trust= None)
     scale_array: np.ndarray = np.array([-threshold, -threshold, threshold, threshold])
     if squares_overlap(base + scale_array, others):
-        return ExtractedResult(id= ClassResultErrors.CLOSE.value, trust= None)
+        return ExtractedResult(id= ExtractorsWarnings.CLOSE.value, trust= None)
     return ExtractedResult(id= boxes[0,-1], trust= boxes[0,-2])
 
 def squares_overlap(base: np.ndarray, others: np.ndarray) -> bool:
