@@ -52,7 +52,7 @@ class ExtractedResult(BaseModel):
     @field_validator('id')
     @classmethod
     def validate_id(cls, v: Optional[int]) -> Optional[int]:
-        if v is None or v >= 0 or ClassResultErrors.validate(v):
+        if v is None or v >= 0:
             return v
         raise ValueError(f'{cls.__name__}.id must be Optional[int].')
 
@@ -65,15 +65,6 @@ class ExtractedResult(BaseModel):
 
     def unpack(self) -> tuple[Optional[int], Optional[float]]:
         return (self.id, self.trust)
-
-    def is_error(self) -> bool:
-        return ClassResultErrors.validate(self.id)
-
-    def get_error_name(self) -> Optional[str]:
-        try:
-            return ClassResultErrors(self.id).name
-        except ValueError:
-            return None
 
 
 class ResultsExtractorFunction(Protocol):
