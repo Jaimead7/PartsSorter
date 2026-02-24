@@ -120,6 +120,87 @@ function toSnakeCase(str) {
     .replace(/_$/, '');
 };
 
+function escapeHtml(text) {
+    if (!text) return '';
+    
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+};
+
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+
+        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    } catch (e) {
+        return dateString;
+    }
+};
+
+function getTableRow(alarm) {
+    const row = document.createElement('tr');
+    const formattedDate = formatDate(alarm.date);
+
+    const tdDate = document.createElement('td');
+    tdDate.textContent = formattedDate;
+    const tdOrigin = document.createElement('td');
+    tdOrigin.textContent = escapeHtml(alarm.origin);
+    const tdType = document.createElement('td');
+    tdType.textContent = escapeHtml(alarm.alarm_type);
+    const tdMsg = document.createElement('td');
+    tdMsg.textContent = escapeHtml(alarm.message);
+    tdMsg.classList.add('text-start');
+
+    switch (toSnakeCase(alarm.alarm_type)) {
+        case 'warning':
+            tdType.classList.add('bg-warning', 'text-black');
+            break;
+        case 'error':
+            tdType.classList.add('bg-danger');
+            break;
+        case 'critical':
+            tdDate.classList.add('bg-danger');
+            tdOrigin.classList.add('bg-danger');
+            tdType.classList.add('bg-danger');
+            tdMsg.classList.add('bg-danger');
+            break;
+    }
+
+    row.appendChild(tdDate);
+    row.appendChild(tdOrigin);
+    row.appendChild(tdType);
+    row.appendChild(tdMsg);
+
+    return row;
+};
+
+async function addAlarmsToTable(data) {
+    await clearAlarmTable();
+
+    const tbody = document.querySelector('#alarmsTable tbody');
+    if (!tbody) return;
+    if (!data || data.length === 0) return;
+
+    data.forEach(alarm => {
+        tbody.appendChild(getTableRow(alarm));
+    });    
+};
+
+async function clearAlarmTable() {
+    const tbody = document.querySelector('#alarmsTable tbody');
+    if (tbody) {
+        tbody.innerHTML = '';
+    }
+};
+
 export {
     showAlert,
     initCollapseCard,
@@ -128,5 +209,9 @@ export {
     enableSubmitButton,
     stringToParamName,
     convertInputValue,
-    toSnakeCase
+    toSnakeCase,
+    escapeHtml,
+    formatDate,
+    addAlarmsToTable,
+    clearAlarmTable
 };

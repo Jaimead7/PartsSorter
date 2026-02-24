@@ -23,14 +23,14 @@ import asyncio
 import atexit
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Any, Generator, NoReturn, Optional
+from typing import Any, Generator, NoReturn
 
 import cv2
 import numpy as np
 from gpio import EdgeType, detect_edge
-from remote.models import CameraParamsResponse, ProcessImageResponse
-from remote.requests import get_camera_params, process_image
-from utils.config import CAMERA_SENSOR_PIN, my_logger
+from remote.models import AlarmType, CameraParamsResponse, ProcessImageResponse
+from remote.requests import get_camera_params, process_image, send_alarm
+from utils.config import CAMERA_SENSOR_PIN, QUEUE_MAX_ERRORS, my_logger
 from utils.models import AsyncList
 
 
@@ -53,11 +53,23 @@ class CameraManager:
             self._cap: cv2.VideoCapture = cv2.VideoCapture(self.device)
         except Exception as e:
             msg: str = f'Can\'t connect to the camera. {e}'
+            asyncio.create_task(
+                send_alarm(
+                    alarm_type= AlarmType.CRITICAL,
+                    message= msg
+                )
+            )
             my_logger.error(f'ConnectionError: {msg}.')
             raise ConnectionError(msg)
         try:
             if not self._cap.isOpened():
                 msg: str = 'Can\'t connect to the camera. VideoCapture is not open.'
+                asyncio.create_task(
+                    send_alarm(
+                        alarm_type= AlarmType.CRITICAL,
+                        message= msg
+                    )
+                )
                 my_logger.error(f'ConnectionError: {msg}')
                 raise ConnectionError(msg)
             self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -116,11 +128,23 @@ class CameraManager:
         for _ in range(2):
             if not cap.grab():
                 msg: str = 'Can\'t grab frame.'
+                asyncio.create_task(
+                    send_alarm(
+                        alarm_type= AlarmType.CRITICAL,
+                        message= msg
+                    )
+                )
                 my_logger.error(f'CameraReadError: {msg}')
                 raise CameraReadError(msg)
         ret, image = cap.retrieve()
         if not ret:
             msg: str = 'Can\'t retrieve frame.'
+            asyncio.create_task(
+                send_alarm(
+                    alarm_type= AlarmType.CRITICAL,
+                    message= msg
+                )
+            )
             my_logger.error(f'CameraReadError: {msg}')
             raise CameraReadError(msg)
         return image
@@ -146,7 +170,17 @@ class CameraManager:
                     image= image,
                     date= date
                 )
-                await results_queue.put(result)
+                async with results_queue:
+                    await results_queue.put(result)
+                    if await results_queue.count() > QUEUE_MAX_ERRORS:
+                        msg: str = 'Too many images on the queue. Actuator failure.'
+                        asyncio.create_task(
+                            send_alarm(
+                                alarm_type= AlarmType.CRITICAL,
+                                message= msg
+                            )
+                        )
+                        my_logger.critical(msg)
                 my_logger.debug(f'Image captured with {result}.')
 
     async def cycle(
@@ -161,11 +195,25 @@ class CameraManager:
                         my_logger.info(f'"{self.device}" cycle started.')
                         await self.loop(cap= cap, results_queue= results_queue)
                 except ConnectionError as e:
-                    my_logger.error(f'"{self.device}" ConnectionError. {e}')
+                    msg: str = f'"{self.device}" ConnectionError. {e}'
+                    asyncio.create_task(
+                        send_alarm(
+                            alarm_type= AlarmType.CRITICAL,
+                            message= msg
+                        )
+                    )
+                    my_logger.error(msg)
                     await asyncio.sleep(0.5)
                     my_logger.info(f'Trying to reconnect "{self.device}".')
                 except CameraReadError as e:
-                    my_logger.error(f'"{self.device}" loop error. {e}')
+                    msg: str = f'"{self.device}" loop error. {e}'
+                    asyncio.create_task(
+                        send_alarm(
+                            alarm_type= AlarmType.CRITICAL,
+                            message= msg
+                        )
+                    )
+                    my_logger.error(msg)
                     await asyncio.sleep(0.5)
                     my_logger.info(f'Trying to reconnect "{self.device}".')
         except asyncio.CancelledError:

@@ -22,13 +22,15 @@
 import asyncio
 from typing import Any, Generic, TypeVar
 
+from typing_extensions import Self
+
 T= TypeVar('T')
 
 
 class AsyncList(Generic[T]):
     def __init__(self) -> None:
         self._list: list[Any] = []
-        self._lock = asyncio.Lock()
+        self._lock: asyncio.Lock = asyncio.Lock()
 
     async def put(self, element: T) -> None:
         async with self._lock:
@@ -48,4 +50,50 @@ class AsyncList(Generic[T]):
 
     async def empty(self) -> bool:
         async with self._lock:
-            return len(self._list) > 0
+            return len(self._list) == 0
+
+    async def count(self) -> int:
+        async with self._lock:
+            return len(self._list)
+
+    async def __aenter__(self) -> Self:
+        await self._lock.acquire()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        self._lock.release()
+
+
+class AsyncCounter:
+    def __init__(self) -> None:
+        self._counter: int = 0
+        self._lock: asyncio.Lock = asyncio.Lock()
+
+    async def reset(self) -> None:
+        async with self._lock:
+            self._counter = 0
+
+    async def get(self) -> int:
+        async with self._lock:
+            return self._counter
+
+    async def set(self, value: int) -> None:
+        async with self._lock:
+            self._counter = value
+
+    async def inc(self, value: int = 1) -> int:
+        async with self._lock:
+            self._counter += value
+            return self._counter
+
+    async def dec(self, value: int = 1) -> int:
+        async with self._lock:
+            self._counter -= value
+            return self._counter
+
+    async def __aenter__(self) -> Self:
+        await self._lock.acquire()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        self._lock.release()

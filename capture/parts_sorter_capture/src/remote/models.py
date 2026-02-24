@@ -72,3 +72,12 @@ class ImageStatus(IntEnum):
     ERROR_OVERWRITE = -1
     ERROR_LOST = -2
     ERROR_SKIPPED = -3
+
+
+@unique
+class AlarmType(IntEnum):
+    UNKNOWN = 0
+    INFO = 1
+    WARNING = 2
+    ERROR = 3
+    CRITICAL = 4

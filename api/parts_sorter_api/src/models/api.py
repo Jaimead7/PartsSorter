@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from collections.abc import Sequence
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal, Optional, Protocol
 from uuid import UUID
@@ -28,7 +29,7 @@ from sqlmodel import col, or_
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from typing_extensions import Self
 
-from .database import Image, ImageStatus
+from .database import Alarm, AlarmTypes, Image, ImageStatus
 
 
 class HealthResponse(BaseModel):
@@ -295,7 +296,12 @@ class ImageResponse(BaseModel):
     model: Optional[str] = 'Unknown'
     true_result: Optional[str] = 'No result'
     trust: Optional[float] = 0.
-    status: Optional[str | int] = 'Captured'
+    status: Optional[str | int] = ImageStatus.get_name(0)
+
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'img'
 
     @field_validator('insp_result', 'true_result')
     @classmethod
@@ -320,7 +326,7 @@ class ImageResponse(BaseModel):
 
     @field_validator('status')
     @classmethod
-    def validate_captured(cls, v: Optional[str | int]) -> str:
+    def validate_status(cls, v: Optional[str | int]) -> str:
         if v is None:
             v = ImageStatus.captured
         return ImageStatus.get_name(v)
@@ -331,7 +337,7 @@ class ImageResponse(BaseModel):
         image: Image
     ) -> Self:
         return cls(
-            id = image.id,
+            id= image.id,
             url= image.external_relative_path,
             insp_result= image.inspection_result,
             origin= image.origin,
@@ -393,6 +399,11 @@ class ImageStatusResponse(BaseModel):
     image_url: str
     status: str = 'Captured'
 
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'imgStatus'
+
     @classmethod
     def from_image(
         cls,
@@ -403,3 +414,122 @@ class ImageStatusResponse(BaseModel):
             id= image.id,
             status= ImageStatus.get_name(image.status)
         )
+
+
+class AlarmResponse(BaseModel):
+    type: str = 'alarm'
+    date: datetime
+    origin: Optional[str]
+    alarm_type: Optional[str | int] = AlarmTypes.get_name(0)
+    message: str = ''
+
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'alarm'
+
+    @field_validator('alarm_type')
+    @classmethod
+    def validate_alarm_type(cls, v: Optional[str | int]) -> str:
+        if v is None:
+            v = AlarmTypes.unknown
+        return AlarmTypes.get_name(v)
+
+    @classmethod
+    def from_alarm(
+        cls,
+        alarm: Alarm
+    ) -> Self:
+        return cls(
+            date= alarm.date,
+            origin= alarm.origin,
+            alarm_type= alarm.alarm_type,
+            message= alarm.message
+        )
+
+
+class AlarmsListResponse(BaseModel):
+    type: str = 'alarmList'
+    alarms: Sequence[AlarmResponse]
+    current_page: int
+    total_pages: int
+
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, _: str) -> str:
+        return 'alarmList'
+
+
+class AlarmFilters(BaseModel):
+    start_date: Optional[datetime] = datetime.now(timezone.utc) - timedelta(days=30)
+    end_date: Optional[datetime] = datetime.now(timezone.utc)
+    origins: list[Optional[str]] = []
+    alarm_types: list[str | int] = []
+
+    @field_validator('origins')
+    @classmethod
+    def validate_origins(
+        cls,
+        origins: list[Optional[str]]
+    ) -> list[Optional[str]]:
+        return [
+            None
+            if origin == 'Unknown'
+            else origin
+            for origin in origins
+        ]
+
+    def add_date_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        if self.start_date:
+            statement = statement.where(
+                col(Alarm.date) >= self.start_date
+            )
+        if self.end_date:
+            statement = statement.where(
+                col(Alarm.date) <= self.end_date,
+            )
+        return statement
+
+    def add_origins_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        if len(self.origins) > 0:
+            if None in self.origins:
+                statement = statement.where(
+                    or_(
+                        col(Alarm.origin).in_(self.origins),
+                        col(Alarm.origin).is_(None)
+                    )
+                )
+            else:
+                statement = statement.where(
+                    col(Alarm.origin).in_(self.origins)
+                )
+        return statement
+
+    def add_type_filter_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        alarm_types_numbers: list[int] = [
+            AlarmTypes.get_value(v)
+            for v in self.alarm_types
+        ]
+        if len(alarm_types_numbers) > 0:
+            statement = statement.where(
+                col(Alarm.alarm_type).in_(alarm_types_numbers)
+            )
+        return statement
+
+    def add_filters_to_statement(
+        self,
+        statement: SelectOfScalar[Any]
+    ) -> SelectOfScalar[Any]:
+        statement = self.add_date_filter_to_statement(statement)
+        statement = self.add_origins_filter_to_statement(statement)
+        statement = self.add_type_filter_to_statement(statement)
+        return statement

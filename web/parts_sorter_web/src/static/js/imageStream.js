@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { showAlert } from './utils.js';
+import { showAlert, addAlarmsToTable } from './utils.js';
 import { getImgData, setImgData, initImgButtons } from './components/images.js';
 import { initOriginFilter, getOriginFilterOptions } from './filters/origin.js';
 
@@ -62,6 +62,9 @@ function connectWebSocket(url) {
             case 'imgStatus':
                 processNewImageStatus(data);
                 break;
+            case 'alarm':
+                processNewAlarm(data);
+                break;
         }
     };
 
@@ -72,6 +75,13 @@ function connectWebSocket(url) {
     ws.onclose = () => {
         scheduleReconnect('Websocket disconnected.', 'warning');
     };
+};
+
+async function processNewAlarm(data) {
+    const originOptions = getOriginFilterOptions();
+    if (originOptions.includes(data.origin)) {
+        await addAlarmsToTable([data]);
+    }
 };
 
 async function setNewImage(data) {
@@ -114,7 +124,10 @@ function transferImages() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    initOriginFilter();
     initImgButtons();
-    initWebSocket();
+
+    Promise.all([
+        initOriginFilter()
+    ])
+    .then(() => initWebSocket());
 });

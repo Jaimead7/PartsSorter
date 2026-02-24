@@ -19,10 +19,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-async function initInspResultFilter() {
+async function initAlarmTypeFilter() {
     // COLLAPSE
-    const collapseElement = document.getElementById('inspResultFilterCollapseCard');
-    const buttonIcon = document.querySelector('button[data-bs-target="#inspResultFilterCollapseCard"] .bi');
+    const collapseElement = document.getElementById('alarmTypeFilterCollapseCard');
+    const buttonIcon = document.querySelector('button[data-bs-target="#alarmTypeFilterCollapseCard"] .bi');
 
     collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
@@ -35,23 +35,23 @@ async function initInspResultFilter() {
     });
 
     // SELECT ALL
-    const selectAllCheckbox = document.getElementById('inspResultFilterSelectAll');
-    const inspResultOptions = document.querySelectorAll('input[name="inspResultFilterOption"]');
+    const selectAllCheckbox = document.getElementById('alarmTypeFilterSelectAll');
+    const alarmTypeOptions = document.querySelectorAll('input[name="alarmTypeFilterOption"]');
 
-    function saveInspResultOptions() {
-        const selectedInspResult = Array.from(inspResultOptions)
+    function saveAlarmTypesOptions() {
+        const selectedAlarmTypes = Array.from(alarmTypeOptions)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
-        localStorage.setItem('inspResultFilterOptions', JSON.stringify(selectedInspResult));
+        localStorage.setItem('alarmTypeFilterOptions', JSON.stringify(selectedAlarmTypes));
     };
 
-    function loadInspResultOptions() {
-        const savedInspResults = localStorage.getItem('inspResultFilterOptions');
+    function loadAlarmTypesOptions() {
+        const savedAlarmTypes = localStorage.getItem('alarmTypeFilterOptions');
 
-        if (savedInspResults) {
-            const selectedInspResults = JSON.parse(savedInspResults);
-            inspResultOptions.forEach((checkbox) => {
-                checkbox.checked = selectedInspResults.includes(checkbox.value);
+        if (savedAlarmTypes) {
+            const selectedAlarmTypes = JSON.parse(savedAlarmTypes);
+            alarmTypeOptions.forEach((checkbox) => {
+                checkbox.checked = selectedAlarmTypes.includes(checkbox.value);
             });
         }
     };
@@ -59,45 +59,45 @@ async function initInspResultFilter() {
     selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
-        inspResultOptions.forEach((checkbox) => {
+        alarmTypeOptions.forEach((checkbox) => {
             checkbox.checked = isChecked;
         });
 
         selectAllCheckbox.indeterminate = false;
 
-        saveInspResultOptions();
+        saveAlarmTypesOptions();
     });
 
     function updateSelectAllState() {
-        const allChecked = Array.from(inspResultOptions).every(checkbox => checkbox.checked);
-        const someChecked = Array.from(inspResultOptions).some(checkbox => checkbox.checked);
+        const allChecked = Array.from(alarmTypeOptions).every(checkbox => checkbox.checked);
+        const someChecked = Array.from(alarmTypeOptions).some(checkbox => checkbox.checked);
 
         if (selectAllCheckbox) {
             selectAllCheckbox.checked = allChecked;
             selectAllCheckbox.indeterminate = someChecked && !allChecked;
         }
 
-        saveInspResultOptions();
+        saveAlarmTypesOptions();
     };
 
-    inspResultOptions.forEach((checkbox) => {
+    alarmTypeOptions.forEach((checkbox) => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
-    loadInspResultOptions();
+    loadAlarmTypesOptions();
     updateSelectAllState();
 };
 
-function getInspResultQueryParameters() {
-    const inspResultOptions = document.querySelectorAll('input[name="inspResultFilterOption"]');
-    let inspResultParams = [];
-    inspResultOptions.forEach((checkbox) => {
+function getAlarmTypeQueryParameters() {
+    const alarmTypeOptions = document.querySelectorAll('input[name="alarmTypeFilterOption"]');
+    let alarmTypeParams = [];
+    alarmTypeOptions.forEach((checkbox) => {
         if (checkbox.checked) {
-            inspResultParams.push(`inspection_result=${encodeURIComponent(checkbox.value)}`);
+            alarmTypeParams.push(`alarm_type=${encodeURIComponent(checkbox.value)}`);
         }
     });
-    return inspResultParams.join('&');
+    return alarmTypeParams.join('&');
 };
 
 
-export { initInspResultFilter, getInspResultQueryParameters };
+export { initAlarmTypeFilter, getAlarmTypeQueryParameters };

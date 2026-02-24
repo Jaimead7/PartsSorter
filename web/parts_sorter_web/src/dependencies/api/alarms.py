@@ -19,9 +19,28 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .engine import api_request  #isort: skip
-from .alarms import api_get_alarms_types
-from .image import api_get_image_extensions, api_get_status_list
-from .inspection_result import api_get_inspection_results
-from .model import api_get_model, api_get_models
-from .origin import api_get_origin, api_get_origins
+from typing import Optional
+
+import httpx
+
+from ...dependencies.config import API_URL, my_logger
+from ...models.api import RequestOptions
+from . import api_request
+
+
+async def api_get_alarms_types() -> list[str]:
+    options: RequestOptions = RequestOptions(
+        url= f'{API_URL}/alarm/types/',
+        headers= {
+            'accept': 'application/json'
+        },
+        timeout= httpx.Timeout(timeout= 5.0)
+    )
+    response: Optional[httpx.Response] = await api_request(options)
+    if response is None:
+        return []
+    try:
+        return [alarm_type for alarm_type in response.json()]
+    except Exception as e:
+        my_logger.error(f'Error processing alarm types from the api. {e}')
+        return []

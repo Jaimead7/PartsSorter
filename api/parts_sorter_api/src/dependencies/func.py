@@ -19,9 +19,16 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from .engine import api_request  #isort: skip
-from .alarms import api_get_alarms_types
-from .image import api_get_image_extensions, api_get_status_list
-from .inspection_result import api_get_inspection_results
-from .model import api_get_model, api_get_models
-from .origin import api_get_origin, api_get_origins
+def to_snakecase(name: str) -> str:
+    name = name.strip()
+    name = name.lower()
+    for char in ' -!@#$%^&*()+=[]{}|;:,.<>?/~`':
+        name = name.replace(char, '_')
+    while '__' in name:
+        name = name.replace('__', '_')
+    return name
+
+def to_title(name:str) -> str:
+        name = name.replace('_', ' ')
+        name = name.title()
+        return name

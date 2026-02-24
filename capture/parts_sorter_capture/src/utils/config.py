@@ -33,6 +33,7 @@ class EnvVars(Enum):
     ORIGIN_NAME = 'ORIGIN_NAME'
     API_URL = 'API_URL'
     LOGGING_LVL = 'LOGGING_LVL'
+    QUEUE_MAX_ERRORS = 'QUEUE_MAX_ERRORS'
     ACTUATOR_PIN = 'ACTUATOR_PIN'
     CAMERA_SENSOR_PIN = 'CAMERA_SENSOR_PIN'
     ACTUATOR_SENSOR_PIN = 'ACTUATOR_SENSOR_PIN'
@@ -76,9 +77,12 @@ if _env_aux is None:
     my_logger.critical(f'ImportError: {msg}')
     raise ImportError(msg)
 API_URL: Optional[str] = getenv(EnvVars.API_URL.value, None)
-del(_env_aux)
-
-# CONFIG
+_env_aux: Optional[str] = getenv(EnvVars.QUEUE_MAX_ERRORS.value, None)
+if _env_aux is None:
+    msg: str = f'Could not import "{EnvVars.QUEUE_MAX_ERRORS.value}" from env vars.'
+    my_logger.critical(f'ImportError: {msg}')
+    raise ImportError(msg)
+QUEUE_MAX_ERRORS: int = int(_env_aux)
 CAMERA_DEVICE: str = '/dev/main-camera'
 GPIO_CHIP: str = '/dev/gpiochip4'
 _env_aux: Optional[str] = getenv(EnvVars.ACTUATOR_PIN.value, None)

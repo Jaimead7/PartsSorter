@@ -30,8 +30,8 @@ from fastapi.staticfiles import StaticFiles
 from .database.manager import initDB
 from .dependencies.config import (SERVER_IP, SERVER_PORT, STATIC_PATH, TAGS,
                                   my_logger)
-from .routes import (config, images, inspection_results, model_classes, models,
-                     origin_results, origins, web_sockets)
+from .routes import (alarms, config, images, inspection_results, model_classes,
+                     models, origin_results, origins, web_sockets)
 
 
 @asynccontextmanager
@@ -83,6 +83,11 @@ app.include_router(
     origin_results.origin_results_router,
     prefix= '/origin-result',
     tags= [TAGS.ORIGIN_RESULTS]
+)
+app.include_router(
+    alarms.alarms_router,
+    prefix= '/alarm',
+    tags= [TAGS.ALARMS]
 )
 
 STATIC_PATH.mkdir(parents= True, exist_ok= True)

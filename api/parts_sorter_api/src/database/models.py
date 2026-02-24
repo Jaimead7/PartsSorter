@@ -19,11 +19,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import asyncio
 from pathlib import Path
 from shutil import rmtree
-from types import CoroutineType
-from typing import Any, Optional, Sequence
+from typing import Optional, Sequence
 
 import yaml
 from fastapi import HTTPException, UploadFile, status
@@ -152,20 +150,20 @@ async def db_delete_models(
     session: AsyncSession,
     models: list[Model]
 ) -> None:
-    db_models: Sequence[Model] = await db_get_models(
-        session= session,
-        models= models,
-        limit= len(models),
-        offset= 0
-    )
-    tasks: list[CoroutineType[Any, Any, Path]] = [
-        db_delete_model_dir(db_model)
-        for db_model in db_models
-    ]
-    await asyncio.gather(*tasks)
+    try:
+        db_models: Sequence[Model] = await db_get_models(
+            session= session,
+            models= models,
+            limit= len(models),
+            offset= 0
+        )
+    except HTTPException:
+        my_logger.warning('No Models found to delete.')
+        return
     for db_model in db_models:
         await session.delete(db_model)
     await session.commit()
+    my_logger.info(f'Deleted models {[model.name for model in models]}.')
 
 async def db_get_model(
     session: AsyncSession,
@@ -303,4 +301,5 @@ async def db_delete_model_dir(
     dir_path: Path = model.internal_absolute_path
     if dir_path.is_dir():
         rmtree(dir_path)
+    my_logger.info(f'Model "{model.name}" deleted.')
     return dir_path

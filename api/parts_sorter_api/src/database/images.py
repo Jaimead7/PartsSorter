@@ -19,21 +19,19 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import asyncio
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
-from types import CoroutineType
-from typing import Any, Optional, Sequence, Tuple
+from typing import Optional
 from uuid import UUID
 
 import aiofiles
 from fastapi import HTTPException, UploadFile, status
 from pyUtils import ImageFileValidator, Styles
-from sqlalchemy import Delete, Result, ScalarResult
+from sqlalchemy import Result, ScalarResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import col, delete, func, select
+from sqlmodel import col, func, select
 from sqlmodel.sql._expression_select_cls import SelectOfScalar
 
 from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
@@ -153,22 +151,18 @@ async def db_delete_images_by_id(
     images_uuids: list[UUID]
 ) -> None:
     # Files are deleted by event after_delete
-    db_images: Sequence[Image] = await db_get_images_by_ids(
-        session= session,
-        images_uuids= images_uuids,
-        limit= len(images_uuids),
-        offset= 0
-    )
-    tasks: list[CoroutineType[Any, Any, Path]] = [
-        db_delete_image_file(db_image)
-        for db_image in db_images
-    ]
-    await asyncio.gather(*tasks)
-    statement: Delete = (
-        delete(Image)
-        .where(col(Image.id).in_(images_uuids))
-    )
-    await session.execute(statement)
+    try:
+        db_images: Sequence[Image] = await db_get_images_by_ids(
+            session= session,
+            images_uuids= images_uuids,
+            limit= len(images_uuids),
+            offset= 0
+        )
+    except HTTPException:
+        my_logger.warning('No Images found to delete.')
+        return
+    for db_image in db_images:
+        await session.delete(db_image)
     await session.commit()
     my_logger.info(f'Deleted images {images_uuids}.')
 
@@ -325,7 +319,7 @@ async def db_create_and_process_new_image(
     session: AsyncSession,
     file: UploadFile,
     origin_name: Optional[str]
-) -> Tuple[Image, bool]:
+) -> tuple[Image, bool]:
     db_image: Image = await db_create_new_image(
         session= session,
         file= file,
@@ -394,7 +388,7 @@ async def db_get_count_images_with_filters(
 ) -> int:
     statement: SelectOfScalar[int] = select(func.count(col(Image.id)))
     statement = filters.add_filters_to_statement(statement)
-    result: Result[Tuple[int]] = await session.execute(statement)
+    result: Result[tuple[int]] = await session.execute(statement)
     return result.scalar_one()
 
 async def db_get_images_with_filters(

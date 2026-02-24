@@ -25,7 +25,7 @@ import httpx
 from quart import Blueprint, redirect, render_template, request
 from werkzeug import Response
 
-from ..dependencies.api import (api_get_image_extensions,
+from ..dependencies.api import (api_get_alarms_types, api_get_image_extensions,
                                 api_get_inspection_results, api_get_models,
                                 api_get_origins, api_get_status_list)
 from ..models.api import (InspectionResultResponse, ModelResponse,
@@ -76,4 +76,19 @@ async def image_inspection() -> Response | str:
         classes= classes,
         image_extensions= image_extensions,
         status_list= status_list
+    )
+
+@inspection_bp.route('/alarms/')
+async def alarms_list() -> str:
+    try:
+        origins: list[OriginResponse] = await api_get_origins()
+        alarm_types: list[str] = await api_get_alarms_types()
+    except httpx.ConnectError:
+        origins = []
+        alarm_types = []
+    return await render_template(
+        'alarms.html',
+        page_title= 'Alarms',
+        origins= origins,
+        alarm_types= alarm_types
     )

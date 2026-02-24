@@ -20,7 +20,7 @@
 
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import cv2
 import httpx
@@ -28,8 +28,8 @@ import numpy as np
 from pydantic import ValidationError
 from utils.config import API_URL, ORIGIN_NAME, my_logger
 
-from .models import (ActuatorParamsResponse, CameraParamsResponse, ImageStatus,
-                     ProcessImageResponse)
+from .models import (ActuatorParamsResponse, AlarmType, CameraParamsResponse,
+                     ImageStatus, ProcessImageResponse)
 
 
 async def get_origin_params() -> httpx.Response:
@@ -96,15 +96,37 @@ async def update_status(
     status: ImageStatus
 ) -> bool:
     async with httpx.AsyncClient() as client:
-        response: httpx.Response = await client.post(
-            url= f'{API_URL}/image/{uuid}/',
+        response: httpx.Response = await client.put(
+            url= f'{API_URL}/image/{uuid}/status/',
             headers= {
-                'accept': 'application/json'
+                'accept': 'application/json',
+                'Content-Type': 'application/json'
             },
-            data= {
+            json= {
                 'status': status.value
             },
-            timeout= httpx.Timeout(timeout= 10.0)
+            timeout= httpx.Timeout(timeout= 5.0)
+        )
+        my_logger.debug(f'Response from server: {response}')
+    return response.is_success
+
+async def send_alarm(
+    alarm_type: AlarmType = AlarmType.UNKNOWN,
+    message: str = ''
+) -> bool:
+    async with httpx.AsyncClient() as client:
+        response: httpx.Response = await client.post(
+            url= f'{API_URL}/alarm/',
+            headers= {
+                'accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            json= {
+                'origin': ORIGIN_NAME,
+                'alarm_type': alarm_type.value,
+                'message': message
+            },
+            timeout= httpx.Timeout(timeout= 5.0)
         )
         my_logger.debug(f'Response from server: {response}')
     return response.is_success
