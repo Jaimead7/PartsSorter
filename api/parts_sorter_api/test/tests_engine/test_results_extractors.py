@@ -121,10 +121,59 @@ def empty_result(
 
 
 class TestExtractorsWarnings:
-    ... #TODO
+    def test_validate_to_dict(self) -> None:
+        assert isinstance(ExtractorsWarnings.to_dict(), dict)
+        for key, value in ExtractorsWarnings.to_dict().items():
+            assert isinstance(key, str)
+            assert isinstance(value, int)
+
+    @pytest.mark.parametrize(
+        'name',
+        [
+            ('no_warning'),
+            ('NO_WARNING'),
+            ('no warning'),
+            (' No wArNing  '),
+            ('No-wArNiNG'),
+        ]
+    )
+    def test_validate_name(self, name: str) -> None:
+        assert ExtractorsWarnings.validate_name(name) == 'NO_WARNING'
+
+    def test_validate_name_error(self) -> None:
+        assert ExtractorsWarnings.validate_name('not a warning') is None
+
+    def test_validate_value(self) -> None:
+        assert ExtractorsWarnings.validate_value(0) == 0
+        assert ExtractorsWarnings.validate_value('0') == 0
+        assert ExtractorsWarnings.validate_value(1000) is None
+        assert ExtractorsWarnings.validate_value('not a value') is None
+
+    @pytest.mark.parametrize(
+        'inp',
+        [
+            (None),
+            ('NO_WARNING'),
+            (0),
+            ('0'),
+        ]
+    )
+    def test_get_value(self, inp: Optional[str | int]) -> None:
+        assert ExtractorsWarnings.get_value(inp) == 0
+
+    @pytest.mark.parametrize(
+        'inp',
+        [
+            (None),
+            ('NO_WARNING'),
+            (0),
+            ('0'),
+        ]
+    )
+    def test_get_name(self, inp: Optional[str | int]) -> None:
+        assert ExtractorsWarnings.get_name(inp) == 'No Warning'
 
 
-#TODO: Add warning to tests
 class TestExtractedResult:
     def test_default(self) -> None:
         res: ExtractedResult = ExtractedResult()
@@ -138,7 +187,7 @@ class TestExtractedResult:
         assert ExtractedResult(id= 1).id == 1
         assert ExtractedResult(id= '1').id == 1  #type: ignore
         with pytest.raises(ValueError):
-            _ = ExtractedResult(id= -1).id == -1
+            assert ExtractedResult(id= -1).id == -1
             _ = ExtractedResult(id= 'test')  #type: ignore
 
     def test_validate_trust(self) -> None:
@@ -155,7 +204,9 @@ class TestExtractedResult:
             _ = ExtractedResult(trust= 'test')  #type: ignore
 
     def test_validate_warning(self) -> None:
-        ... #TODO
+        assert ExtractedResult().warning == ExtractorsWarnings.NO_WARNING
+        assert ExtractedResult(warning= ExtractorsWarnings.NO_WARNING).warning == ExtractorsWarnings.NO_WARNING
+        assert ExtractedResult(warning= 0).warning == ExtractorsWarnings.NO_WARNING  #type: ignore
 
     def test_unpack(self) -> None:
         id: Optional[int]
