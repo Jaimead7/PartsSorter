@@ -27,7 +27,8 @@ from werkzeug import Response
 
 from ..dependencies.api import (api_get_alarms_types, api_get_image_extensions,
                                 api_get_inspection_results, api_get_models,
-                                api_get_origins, api_get_status_list)
+                                api_get_origins, api_get_status_list,
+                                api_get_warnings_list)
 from ..models.api import (InspectionResultResponse, ModelResponse,
                           OriginResponse)
 
@@ -57,14 +58,16 @@ async def image_inspection() -> Response | str:
         origins: list[OriginResponse]
         models: list[ModelResponse]
         classes: list[InspectionResultResponse]
-        image_extensions: list[str]
+        extensions: list[str]
         status_list: list[str]
-        origins, models, classes, image_extensions, status_list = await asyncio.gather(
+        warnings: list[str]
+        origins, models, classes, extensions, status_list, warnings = await asyncio.gather(
             api_get_origins(),
             api_get_models(),
             api_get_inspection_results(),
             api_get_image_extensions(),
-            api_get_status_list()
+            api_get_status_list(),
+            api_get_warnings_list()
         )
     except httpx.ConnectError:
         return redirect('/', 302)
@@ -74,8 +77,9 @@ async def image_inspection() -> Response | str:
         origins= origins,
         models= models,
         classes= classes,
-        image_extensions= image_extensions,
-        status_list= status_list
+        extensions= extensions,
+        status_list= status_list,
+        warnings= warnings
     )
 
 @inspection_bp.route('/alarms/')

@@ -20,39 +20,95 @@
 
 
 from collections.abc import Callable
-from enum import Enum, unique
-from typing import Any, ClassVar, Optional, Protocol
+from enum import IntEnum, unique
+from functools import cache
+from typing import ClassVar, Optional, Protocol
 
 import numpy as np
 from pydantic import BaseModel, field_validator
 from pyUtils import NoInstantiable
 
 from ..dependencies.config import my_logger
+from ..dependencies.func import to_snakecase, to_title
 from .results import ResultsType
 
 
 @unique
-class ClassResultErrors(Enum):
+class ExtractorsWarnings(IntEnum):
+    NO_WARNING = 0
     OVERLAP = -1
     CLOSE = -2
 
     @classmethod
-    def validate(cls, v: Any) -> bool:
+    @cache
+    def to_dict(cls) -> dict[str, int]:
+        return {
+            name: member.value
+            for name, member in cls.__members__.items()
+        }
+
+    @classmethod
+    def validate_name(cls, name: str) -> Optional[str]:
+        name = to_snakecase(name).upper()
+        if name in cls.to_dict().keys():
+            return name
+        return None
+
+    @classmethod
+    def validate_value(cls, value: int | str) -> Optional[int]:
         try:
-            cls(v)
-            return True
+            value = int(value)
         except ValueError:
-            return False
+            return None
+        if value in cls.to_dict().values():
+            return value
+        return None
+
+    @classmethod
+    def get_value(cls, inp: Optional[str | int]) -> int:
+        if inp is None:
+            return cls.NO_WARNING.value
+        if isinstance(inp, str):
+            name: Optional[str] = cls.validate_name(inp)
+            if name:
+                return cls.to_dict()[name]
+        value: Optional[int] = cls.validate_value(inp)
+        if value:
+            return value
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
+        return cls.NO_WARNING
+
+    @classmethod
+    def get_name(cls, inp: Optional[str | int]) -> str:
+        if inp is None:
+            return 'No warning'
+        if cls.validate_value(inp) is not None:
+            for name, val in cls.to_dict().items():
+                if val == inp:
+                    return to_title(name)
+        if isinstance(inp, str) and cls.validate_name(inp) is not None:
+            return to_title(inp)
+        my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
+        return 'No warning'
+
+    @classmethod
+    @cache
+    def get_all_names(cls) -> list[str]:
+        return [
+            to_title(name)
+            for name in cls.to_dict().keys()
+        ]
 
 
-class ClassResult(BaseModel):
+class ExtractedResult(BaseModel):
     id: Optional[int] = None
     trust: Optional[float] = None
+    warning: ExtractorsWarnings = ExtractorsWarnings.NO_WARNING
 
     @field_validator('id')
     @classmethod
     def validate_id(cls, v: Optional[int]) -> Optional[int]:
-        if v is None or v >= 0 or ClassResultErrors.validate(v):
+        if v is None or v >= 0:
             return v
         raise ValueError(f'{cls.__name__}.id must be Optional[int].')
 
@@ -63,29 +119,20 @@ class ClassResult(BaseModel):
             raise ValueError(f'{cls.__name__}.trust must be [0, 1] or None.')
         return v
 
-    def unpack(self) -> tuple[Optional[int], Optional[float]]:
-        return (self.id, self.trust)
-
-    def is_error(self) -> bool:
-        return ClassResultErrors.validate(self.id)
-
-    def get_error_name(self) -> Optional[str]:
-        try:
-            return ClassResultErrors(self.id).name
-        except ValueError:
-            return None
+    def unpack(self) -> tuple[Optional[int], Optional[float], ExtractorsWarnings]:
+        return (self.id, self.trust, self.warning)
 
 
 class ResultsExtractorFunction(Protocol):
-    def __call__(self, results: ResultsType) -> ClassResult: ...
+    def __call__(self, results: ResultsType) -> ExtractedResult: ...
 
 
 class ResultsExtractorRegistry(NoInstantiable):
     _extractors: ClassVar[dict[str, ResultsExtractorFunction]] = {}
 
     @staticmethod
-    def no_extract(results: ResultsType) -> ClassResult:
-        return ClassResult()
+    def no_extract(results: ResultsType) -> ExtractedResult:
+        return ExtractedResult()
 
     @classmethod
     def register(cls, name: str) -> Callable[[ResultsExtractorFunction], ResultsExtractorFunction]:
@@ -113,30 +160,38 @@ class ResultsExtractorRegistry(NoInstantiable):
         cls._extractors.clear()
 
     @classmethod
-    def extract(cls, results: ResultsType, extractor: str) -> ClassResult:
+    def extract(cls, results: ResultsType, extractor: str) -> ExtractedResult:
         return cls.get(extractor)(results)
 
 
 @ResultsExtractorRegistry.register('FIRST')
-def extract_first_result(results: ResultsType) -> ClassResult:
+def extract_first_result(results: ResultsType) -> ExtractedResult:
     # [x0, y0, x1, y1, conf, id] x n
     if results.boxes is None:
-        return ClassResult()
+        return ExtractedResult()
     results_array: np.ndarray = results.boxes.data
     if len(results_array) == 0:
-        return ClassResult()
+        return ExtractedResult()
     first: np.ndarray = results_array[0]
-    return ClassResult(id = first[-1], trust = first[-2])
+    return ExtractedResult(
+        id = first[-1],
+        trust = first[-2],
+        warning= ExtractorsWarnings.NO_WARNING
+    )
 
 @ResultsExtractorRegistry.register('ALONE')
-def extract_first_result_alone(results: ResultsType) -> ClassResult:
+def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
     # [x0, y0, x1, y1, conf, id] x n
     threshold: int = 10  #TODO: use as param
     if results.boxes is None:
-        return ClassResult()
+        return ExtractedResult()
     boxes: np.ndarray = results.boxes.data
     if boxes.shape[0] == 1:
-        return ClassResult(id= boxes[0,-1], trust= boxes[0,-2])
+        return ExtractedResult(
+            id= boxes[0,-1],
+            trust= boxes[0,-2],
+            warning= ExtractorsWarnings.NO_WARNING
+        )
     boxes_norm: np.ndarray = np.column_stack([
         np.minimum(boxes[:, 0], boxes[:, 2]),
         np.minimum(boxes[:, 1], boxes[:, 3]),
@@ -145,12 +200,17 @@ def extract_first_result_alone(results: ResultsType) -> ClassResult:
     ])
     base: np.ndarray = boxes_norm[0]
     others: np.ndarray = boxes_norm[1:]
-    if squares_overlap(base, others):
-        return ClassResult(id= ClassResultErrors.OVERLAP.value, trust= None)
+    warning: ExtractorsWarnings = ExtractorsWarnings.NO_WARNING
     scale_array: np.ndarray = np.array([-threshold, -threshold, threshold, threshold])
     if squares_overlap(base + scale_array, others):
-        return ClassResult(id= ClassResultErrors.CLOSE.value, trust= None)
-    return ClassResult(id= boxes[0,-1], trust= boxes[0,-2])
+        warning = ExtractorsWarnings.CLOSE
+    if squares_overlap(base, others):
+        warning = ExtractorsWarnings.OVERLAP
+    return ExtractedResult(
+        id= boxes[0,-1],
+        trust= boxes[0,-2],
+        warning= warning
+    )
 
 def squares_overlap(base: np.ndarray, others: np.ndarray) -> bool:
     overlap_x: np.ndarray = np.maximum(base[0], others[:,0]) < np.minimum(base[2], others[:,2])

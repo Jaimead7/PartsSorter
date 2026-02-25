@@ -36,6 +36,7 @@ from ..database.images import (db_create_and_process_new_image,
 from ..database.manager import get_session
 from ..dependencies.config import DATABASE_GET_LIMIT
 from ..dependencies.web_sockets import ImageStreamSocketManager
+from ..engine.results_extractors import ExtractorsWarnings
 from ..models.api import (ImageFilters, ImageHistResponse,
                           ImageProcessedResponse, ImageResponse,
                           ImageStatusResponse)
@@ -148,6 +149,7 @@ async def get_next_hist_image(
     min_trust: Annotated[Optional[float], Query()] = None,
     max_trust: Annotated[Optional[float], Query()] = None,
     status: Annotated[list[Optional[str | int]], Query()] = [],
+    warning: Annotated[list[Optional[str | int]], Query()] = [],
     index: Annotated[int, Query()] = 0
 )-> ImageHistResponse:
     filters: ImageFilters = ImageFilters(
@@ -160,7 +162,8 @@ async def get_next_hist_image(
         true_results= true_result,
         min_trust= min_trust,
         max_trust= max_trust,
-        status= status
+        status= status,
+        warnings= warning
     )
     db_image: Image
     i: int
@@ -199,6 +202,16 @@ async def get_image_extensions(
 )
 async def get_image_status() -> Sequence[str]:
     return ImageStatus.get_all_names()
+
+@images_router.get(
+    '/warnings/',
+    response_model= list[str],
+    summary= 'Get all available warnings for the Images.',
+    response_description= 'The warnings list.',
+    status_code= status.HTTP_200_OK
+)
+async def get_image_warnings() -> Sequence[str]:
+    return ExtractorsWarnings.get_all_names()
 
 @images_router.get(
     '/{uuid}/',
@@ -247,7 +260,8 @@ async def update_image(
     origin: Annotated[Optional[str], Body(embed= True)] = None,
     true_result: Annotated[Optional[str], Body(embed= True)] = None,
     trust: Annotated[Optional[float], Body(embed= True)] = None,
-    status: Annotated[Optional[str | int], Body(embed= True)] = ImageStatus.captured
+    status: Annotated[Optional[str | int], Body(embed= True)] = ImageStatus.captured,
+    warning: Annotated[Optional[str | int], Body(embed= True)] = ExtractorsWarnings.NO_WARNING.value
 ) -> ImageResponse:
     
     image = Image(
@@ -256,7 +270,8 @@ async def update_image(
         origin= origin,
         true_result= true_result,
         trust= trust,
-        status= ImageStatus.get_value(status)
+        status= ImageStatus.get_value(status),
+        warning= ExtractorsWarnings.get_value(warning)
     )
     db_image: Image = await db_update_image(
         session= session,

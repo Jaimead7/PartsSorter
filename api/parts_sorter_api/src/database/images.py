@@ -37,7 +37,8 @@ from sqlmodel.sql._expression_select_cls import SelectOfScalar
 from ..dependencies.config import INTERNAL_MODELS_FOLDER, my_logger
 from ..engine.managers import ModelManager, ModelsContainer
 from ..engine.results import ResultsType
-from ..engine.results_extractors import ClassResult, ResultsExtractorRegistry
+from ..engine.results_extractors import (ExtractedResult,
+                                         ResultsExtractorRegistry)
 from ..engine.results_sorters import apply_results_sorters
 from ..models.api import ImageFilters, ProcessImageResult
 from ..models.database import (Image, ImageStatus, InspectionResult,
@@ -134,6 +135,7 @@ async def db_update_image(
     )
     db_image.trust = image.trust
     db_image.status = image.status
+    db_image.warning = image.warning
     if update_date:
         db_image.processed_date = datetime.now(timezone.utc).replace(tzinfo=None)
     db_image = await _db_add_image_and_commit(
@@ -240,42 +242,30 @@ async def db_process_image(
         )
         if db_image.origin_of_image is None or db_image.origin_of_image.model is None:
             my_logger.error(f'No model selected to process image.')
-            return ProcessImageResult(
-                model_name= None,
-                inpection_result_name= None,
-                trust= None
-            )
+            return ProcessImageResult()
         model_name = db_image.origin_of_image.model
     try:
-        model_manager: ModelManager = ModelsContainer.get_model(INTERNAL_MODELS_FOLDER / model_name)
+        model_manager: ModelManager = ModelsContainer.get_model(
+            model_path= INTERNAL_MODELS_FOLDER / model_name
+        )
     except KeyError:
         my_logger.error(f'No model available to process image.')
-        return ProcessImageResult(
-            model_name= None,
-            inpection_result_name= None,
-            trust= None
-        )
-    results_list: list[ResultsType] = model_manager.inspect(db_image.internal_absolute_path)
+        return ProcessImageResult()
+    results_list: list[ResultsType] = model_manager.inspect(
+        source= db_image.internal_absolute_path
+    )
     if len(results_list) < 1:
         my_logger.error(f'Error processing image.')
-        return ProcessImageResult(
-            model_name= model_name,
-            inpection_result_name= None,
-            trust= None
-        )
+        return ProcessImageResult(model_name= model_name)
     results: ResultsType = results_list[0]
     results = apply_results_sorters(
         results= results,
         sorters= ('center',)  #TODO: use sorters by origin
     )
-    result: ClassResult = ResultsExtractorRegistry.extract(results, 'alone')  #TODO: use extractor by origin
+    result: ExtractedResult = ResultsExtractorRegistry.extract(results, 'alone')  #TODO: use extractor by origin
     my_logger.info(f'Image "{db_image.file_name}" processed with Model "{model_name}".')
     if result.id is None:
-        return ProcessImageResult(
-                model_name= model_name,
-                inpection_result_name= None,
-                trust= None
-            )
+        return ProcessImageResult(model_name= model_name)
     try:
         inpection_result: InspectionResult = await db_get_model_inspection_result(
             session= session,
@@ -283,15 +273,12 @@ async def db_process_image(
             result_id= result.id
         )
     except HTTPException:
-        return ProcessImageResult(
-                model_name= model_name,
-                inpection_result_name= None,
-                trust= None
-            )
+        return ProcessImageResult(model_name= model_name)
     return ProcessImageResult(
         model_name= model_name,
         inpection_result_name= inpection_result.name,
-        trust= result.trust
+        trust= result.trust,
+        warning= result.warning.value
     )
 
 async def db_get_image_origin_result(
@@ -332,6 +319,7 @@ async def db_create_and_process_new_image(
     db_image.inspection_result = process_image_result.inpection_result_name
     db_image.trust = process_image_result.trust
     db_image.model = process_image_result.model_name
+    db_image.warning = process_image_result.warning
     result: bool = await db_get_image_origin_result(
         session= session,
         image= db_image

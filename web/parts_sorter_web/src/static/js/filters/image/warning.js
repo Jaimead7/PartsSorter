@@ -19,10 +19,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-async function initExtensionFilter() {
+async function initWarningFilter() {
     // COLLAPSE
-    const collapseElement = document.getElementById('extensionFilterCollapseCard');
-    const buttonIcon = document.querySelector('button[data-bs-target="#extensionFilterCollapseCard"] .bi');
+    const collapseElement = document.getElementById('warningFilterCollapseCard');
+    const buttonIcon = document.querySelector('button[data-bs-target="#warningFilterCollapseCard"] .bi');
 
     collapseElement?.addEventListener('show.bs.collapse', () => {
         buttonIcon.classList.remove('bi-caret-down-square');
@@ -35,23 +35,23 @@ async function initExtensionFilter() {
     });
 
     // SELECT ALL
-    const selectAllCheckbox = document.getElementById('extensionFilterSelectAll');
-    const imageExtensionOptions = document.querySelectorAll('input[name="extensionFilterOption"]');
+    const selectAllCheckbox = document.getElementById('warningFilterSelectAll');
+    const warningOptions = document.querySelectorAll('input[name="warningFilterOption"]');
 
-    function saveImageExtensionsOptions() {
-        const selectedImageExtensions = Array.from(imageExtensionOptions)
+    function saveWarningsOptions() {
+        const selectedWarnings = Array.from(warningOptions)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
-        localStorage.setItem('extensionFilterOptions', JSON.stringify(selectedImageExtensions));
+        localStorage.setItem('warningFilterOptions', JSON.stringify(selectedWarnings));
     };
 
-    function loadImageExtensionsOptions() {
-        const savedImageExtensions = localStorage.getItem('extensionFilterOptions');
+    function loadWarningsOptions() {
+        const savedWarnings = localStorage.getItem('warningFilterOptions');
 
-        if (savedImageExtensions) {
-            const selectedImageExtensions = JSON.parse(savedImageExtensions);
-            imageExtensionOptions.forEach((checkbox) => {
-                checkbox.checked = selectedImageExtensions.includes(checkbox.value);
+        if (savedWarnings) {
+            const selectedWarnings = JSON.parse(savedWarnings);
+            warningOptions.forEach((checkbox) => {
+                checkbox.checked = selectedWarnings.includes(checkbox.value);
             });
         }
     };
@@ -59,45 +59,45 @@ async function initExtensionFilter() {
     selectAllCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
-        imageExtensionOptions.forEach((checkbox) => {
+        warningOptions.forEach((checkbox) => {
             checkbox.checked = isChecked;
         });
 
         selectAllCheckbox.indeterminate = false;
 
-        saveImageExtensionsOptions();
+        saveWarningsOptions();
     });
 
     function updateSelectAllState() {
-        const allChecked = Array.from(imageExtensionOptions).every(checkbox => checkbox.checked);
-        const someChecked = Array.from(imageExtensionOptions).some(checkbox => checkbox.checked);
+        const allChecked = Array.from(warningOptions).every(checkbox => checkbox.checked);
+        const someChecked = Array.from(warningOptions).some(checkbox => checkbox.checked);
 
         if (selectAllCheckbox) {
             selectAllCheckbox.checked = allChecked;
             selectAllCheckbox.indeterminate = someChecked && !allChecked;
         }
 
-        saveImageExtensionsOptions();
+        saveWarningsOptions();
     };
 
-    imageExtensionOptions.forEach((checkbox) => {
+    warningOptions.forEach((checkbox) => {
         checkbox.addEventListener('change', updateSelectAllState);
     });
 
-    loadImageExtensionsOptions();
+    loadWarningsOptions();
     updateSelectAllState();
 };
 
-function getExtensionQueryParameters() {
-    const extensionOptions = document.querySelectorAll('input[name="extensionFilterOption"]');
-    let extensionParams = [];
-    extensionOptions.forEach((checkbox) => {
+function getWarningQueryParameters() {
+    const warningOptions = document.querySelectorAll('input[name="warningFilterOption"]');
+    let warningParams = [];
+    warningOptions.forEach((checkbox) => {
         if (checkbox.checked) {
-            extensionParams.push(`extension=${encodeURIComponent(checkbox.value)}`);
+            warningParams.push(`warning=${encodeURIComponent(checkbox.value)}`);
         }
     });
-    return extensionParams.join('&');
+    return warningParams.join('&');
 };
 
 
-export { initExtensionFilter, getExtensionQueryParameters };
+export { initWarningFilter, getWarningQueryParameters };
