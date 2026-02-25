@@ -81,7 +81,7 @@ class ExtractorsWarnings(IntEnum):
     @classmethod
     def get_name(cls, inp: Optional[str | int]) -> str:
         if inp is None:
-            return 'No warning'
+            return 'No Warning'
         if cls.validate_value(inp) is not None:
             for name, val in cls.to_dict().items():
                 if val == inp:
@@ -89,7 +89,7 @@ class ExtractorsWarnings(IntEnum):
         if isinstance(inp, str) and cls.validate_name(inp) is not None:
             return to_title(inp)
         my_logger.warning(f'"{inp}" is not in {cls.__name__}.')
-        return 'No warning'
+        return 'No Warning'
 
     @classmethod
     @cache
