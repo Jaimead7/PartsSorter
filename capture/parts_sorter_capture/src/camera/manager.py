@@ -170,17 +170,16 @@ class CameraManager:
                     image= image,
                     date= date
                 )
-                async with results_queue:
-                    await results_queue.put(result)
-                    if await results_queue.count() > QUEUE_MAX_ERRORS:
-                        msg: str = 'Too many images on the queue. Actuator failure.'
-                        asyncio.create_task(
-                            send_alarm(
-                                alarm_type= AlarmType.CRITICAL,
-                                message= msg
-                            )
+                await results_queue.put(result)
+                if await results_queue.count() > QUEUE_MAX_ERRORS:
+                    msg: str = 'Too many images on the queue. Actuator failure.'
+                    asyncio.create_task(
+                        send_alarm(
+                            alarm_type= AlarmType.CRITICAL,
+                            message= msg
                         )
-                        my_logger.critical(msg)
+                    )
+                    my_logger.critical(msg)
                 my_logger.debug(f'Image captured with {result}.')
 
     async def cycle(

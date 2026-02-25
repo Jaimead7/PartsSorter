@@ -19,7 +19,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import { toSnakeCase } from '../utils.js';
+import { toSnakeCase, showAlert } from '../utils.js';
 
 
 function formatTrust(value) {

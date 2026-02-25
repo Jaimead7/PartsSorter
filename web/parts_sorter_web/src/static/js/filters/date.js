@@ -108,14 +108,23 @@ async function initDateFilter() {
 function getDateQueryParameters() {
     if (!startDateFieldElement || !endDateFieldElement) {
         console.error('No date elements found.');
-        return;
+        return '';
     }
 
-    const startDateUTC = new Date(startDateFieldElement.value).toISOString().substring(0, 16);;
-    const start = startDateCheckElement.checked ? `start_date=${encodeURIComponent(startDateUTC)}` : '';
-    const endDateUTC = new Date(endDateFieldElement.value).toISOString().substring(0, 16);;
-    const end = endDateCheckElement.checked ? `end_date=${encodeURIComponent(endDateUTC)}` : '';
-
+    let start = '';
+    let end = '';
+    try {
+        const startDateUTC = new Date(startDateFieldElement.value).toISOString().substring(0, 16);
+        start = startDateCheckElement.checked ? `start_date=${encodeURIComponent(startDateUTC)}` : '';
+    } catch (err) {
+        start = '';
+    }
+    try {
+        const endDateUTC = new Date(endDateFieldElement.value).toISOString().substring(0, 16);
+        end = endDateCheckElement.checked ? `end_date=${encodeURIComponent(endDateUTC)}` : '';
+    } catch (err) {
+        end = '';
+    }
     return [start, end].filter(part => part !== '').join('&');
 };
 

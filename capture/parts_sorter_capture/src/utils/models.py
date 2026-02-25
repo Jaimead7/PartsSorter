@@ -56,13 +56,6 @@ class AsyncList(Generic[T]):
         async with self._lock:
             return len(self._list)
 
-    async def __aenter__(self) -> Self:
-        await self._lock.acquire()
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        self._lock.release()
-
 
 class AsyncCounter:
     def __init__(self) -> None:

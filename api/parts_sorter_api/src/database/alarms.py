@@ -87,7 +87,7 @@ async def _db_get_alarms(
 ) -> Sequence[Alarm]:
     statement: SelectOfScalar[Alarm] = select(Alarm)
     statement = filters.add_filters_to_statement(statement)
-    statement.order_by(col(Alarm.date).asc())
+    statement = statement.order_by(col(Alarm.date).desc())
     statement = statement.offset(page * limit).limit(limit)
     return (await session.scalars(statement)).all()
 

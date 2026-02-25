@@ -155,9 +155,9 @@ class ActuatorManager:
             my_logger.debug(f'New part on the actuator with {result}.')
             push: ImageStatus
             if result.result:
-                push = ImageStatus.ACTUATOR_PASS
-            else:
                 push = ImageStatus.ACTUATOR_PUSH
+            else:
+                push = ImageStatus.ACTUATOR_PASS
             asyncio.create_task(
                     update_status(
                         uuid= next_result.id,
