@@ -91,6 +91,7 @@ function getImgData(imgId) {
     const trust = article?.querySelector('[name="imgTrust"]');
     const model = article?.querySelector('[name="imgModel"]');
     const status = article?.querySelector('[name="imgStatus"]');
+    const warning = article?.querySelector('[name="warningIcon"]');
 
     return {
         url: img && img.hasAttribute('src') ? img.getAttribute('src') : '',
@@ -99,7 +100,8 @@ function getImgData(imgId) {
         insp_result: insp_result ? insp_result.textContent : 'No result',
         trust: trust ? trust.textContent : '0.00%',
         model: model ? model.textContent : 'Unknown',
-        status: status ? status.textContent : 'Unknown'
+        status: status ? status.textContent : 'Unknown',
+        warning: warning?.hidden ? 'No Warning' : 'Warning'
     };
 };
 
@@ -116,6 +118,7 @@ function setImgData(imgId, imgData) {
     const trust = article.querySelector('[name="imgTrust"]');
     const model = article.querySelector('[name="imgModel"]');
     const status = article.querySelector('[name="imgStatus"]');
+    const warning = article?.querySelector('[name="warningIcon"]');
 
     if (img && alt) {
         if (imgData.url) {
@@ -154,6 +157,13 @@ function setImgData(imgId, imgData) {
         setBorderClasses(imgSection, borderClasses);
         const defaultText = status.dataset.defaultText || 'Unknown';
         status.textContent = imgData.status || defaultText;
+    }
+    if (warning) {
+        if (imgData.warning === 'No Warning') {
+            warning.hidden = true;
+        } else {
+            warning.hidden = false;
+        }
     }
 };
 
