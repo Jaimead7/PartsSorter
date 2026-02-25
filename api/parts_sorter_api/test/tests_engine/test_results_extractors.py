@@ -20,7 +20,7 @@
 
 
 from random import randint, random
-from typing import Any, Optional
+from typing import Optional
 
 import numpy as np
 import pytest
@@ -120,32 +120,25 @@ def empty_result(
     )
 
 
-class TestClassResultErrors:
-    @pytest.mark.parametrize(
-        'value',
-        [
-            ('error'),
-            (0),
-            (1),
-        ]
-    )
-    def test_validate_errors(self, value: Any) -> None:
-        assert not ExtractorsWarnings.validate(value)
+class TestExtractorsWarnings:
+    ... #TODO
 
 
-class TestClassResult:
+#TODO: Add warning to tests
+class TestExtractedResult:
     def test_default(self) -> None:
         res: ExtractedResult = ExtractedResult()
         assert res.id is None
         assert res.trust is None
+        assert res.warning == ExtractorsWarnings.NO_WARNING
 
     def test_validate_id(self) -> None:
         assert ExtractedResult(id= None).id is None
         assert ExtractedResult(id= 0).id == 0
         assert ExtractedResult(id= 1).id == 1
         assert ExtractedResult(id= '1').id == 1  #type: ignore
-        assert ExtractedResult(id= -1).id == -1
         with pytest.raises(ValueError):
+            _ = ExtractedResult(id= -1).id == -1
             _ = ExtractedResult(id= 'test')  #type: ignore
 
     def test_validate_trust(self) -> None:
@@ -161,12 +154,21 @@ class TestClassResult:
         with pytest.raises(ValueError):
             _ = ExtractedResult(trust= 'test')  #type: ignore
 
+    def test_validate_warning(self) -> None:
+        ... #TODO
+
     def test_unpack(self) -> None:
         id: Optional[int]
         trust: Optional[float]
-        id, trust = ExtractedResult(id= 1, trust= 0.5).unpack()
+        warning: ExtractorsWarnings
+        id, trust, warning = ExtractedResult(
+            id= 1,
+            trust= 0.5,
+            warning= ExtractorsWarnings.OVERLAP
+        ).unpack()
         assert id == 1
         assert trust == 0.5
+        assert warning == ExtractorsWarnings.OVERLAP
 
 
 class TestResultsSorterRegistry:
@@ -223,6 +225,7 @@ class TestExtractFirstResult:
         result: ExtractedResult = extract_first_result(empty_result)
         assert result.id is None
         assert result.trust is None
+        assert result.warning == ExtractorsWarnings.NO_WARNING
 
     def test_one_result(self, one_result: ResultsType) -> None:
         result: ExtractedResult = extract_first_result(one_result)
@@ -230,6 +233,7 @@ class TestExtractFirstResult:
             return
         assert result.id == one_result.boxes.data[0, -1]
         assert result.trust == one_result.boxes.data[0, -2]
+        assert result.warning == ExtractorsWarnings.NO_WARNING
 
     def test_random_results(self, random_results: ResultsType) -> None:
         result: ExtractedResult = extract_first_result(random_results)
@@ -237,6 +241,7 @@ class TestExtractFirstResult:
             return
         assert result.id == random_results.boxes.data[0, -1]
         assert result.trust == random_results.boxes.data[0, -2]
+        assert result.warning == ExtractorsWarnings.NO_WARNING
 
 
 class TestExtractFirsResultAlone:
@@ -256,6 +261,7 @@ class TestExtractFirsResultAlone:
         result: ExtractedResult = extract_first_result_alone(empty_result)
         assert result.id is None
         assert result.trust is None
+        assert result.warning == ExtractorsWarnings.NO_WARNING
 
     def test_one_result(self, one_result: ResultsType) -> None:
         result: ExtractedResult = extract_first_result_alone(one_result)
@@ -263,6 +269,7 @@ class TestExtractFirsResultAlone:
             return
         assert result.id == one_result.boxes.data[0, -1]
         assert result.trust == one_result.boxes.data[0, -2]
+        assert result.warning == ExtractorsWarnings.NO_WARNING
 
     def test_random_results(self, random_results: ResultsType) -> None:
         result: ExtractedResult = extract_first_result(random_results)
@@ -270,6 +277,7 @@ class TestExtractFirsResultAlone:
             return
         assert result.id == random_results.boxes.data[0, -1]
         assert result.trust == random_results.boxes.data[0, -2]
+        assert result.warning == ExtractorsWarnings.NO_WARNING
 
     def test_no_overlap_far_away(
         self,
@@ -291,6 +299,7 @@ class TestExtractFirsResultAlone:
         output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == 1
         assert output.trust == 0.9
+        assert output.warning == ExtractorsWarnings.NO_WARNING
 
     def test_direct_overlap(
         self,
@@ -309,8 +318,9 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ExtractedResult = extract_first_result_alone(results)
-        assert output.id == ExtractorsWarnings.OVERLAP.value
-        assert output.trust is None
+        assert output.id == 1
+        assert output.trust == 0.9
+        assert output.warning == ExtractorsWarnings.OVERLAP
 
     def test_threshold_proximity_overlap(
         self,
@@ -331,6 +341,7 @@ class TestExtractFirsResultAlone:
         output: ExtractedResult = extract_first_result_alone(results)
         assert output.id == 1
         assert output.trust == 0.9
+        assert output.warning == ExtractorsWarnings.NO_WARNING
 
     def test_within_threshold_range(
         self,
@@ -349,8 +360,9 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ExtractedResult = extract_first_result_alone(results)
-        assert output.id == ExtractorsWarnings.CLOSE.value
-        assert output.trust is None
+        assert output.id == 1
+        assert output.trust == 0.9
+        assert output.warning == ExtractorsWarnings.CLOSE
 
     def test_reversed_coordinates(
         self,
@@ -369,8 +381,9 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ExtractedResult = extract_first_result_alone(results)
-        assert output.id == ExtractorsWarnings.OVERLAP.value
-        assert output.trust is None
+        assert output.id == 1
+        assert output.trust == 0.9
+        assert output.warning == ExtractorsWarnings.OVERLAP
 
     def test_multiple_overlaps(
         self,
@@ -390,8 +403,9 @@ class TestExtractFirsResultAlone:
             speed= speed
         )
         output: ExtractedResult = extract_first_result_alone(results)
-        assert output.id == ExtractorsWarnings.OVERLAP.value
-        assert output.trust is None
+        assert output.id == 1
+        assert output.trust == 0.9
+        assert output.warning == ExtractorsWarnings.OVERLAP
 
 
 if __name__ == '__main__':
