@@ -40,7 +40,7 @@ async def get_origin_params() -> httpx.Response:
                 'accept': 'application/json'
             }
         )
-    if response.status_code // 100 != 2:
+    if not response.is_success:
         msg: str = f'Could not obtain the origin parameters from "{API_URL}". {response}.'
         my_logger.error(msg)
         raise RuntimeError(msg)
@@ -84,11 +84,17 @@ async def process_image(
             timeout= httpx.Timeout(timeout= 10.0)
         )
         my_logger.debug(f'Response from server: {response}')
-    response_json: dict = response.json()
+    if response.is_success:
+        response_json: dict = response.json()
+        return ProcessImageResponse(
+            date= date,
+            id= response_json['id'],
+            result= response_json['result']
+        )
     return ProcessImageResponse(
         date= date,
-        id= response_json['id'],
-        result= response_json['result']
+        id= None,
+        result= True
     )
 
 async def update_status(

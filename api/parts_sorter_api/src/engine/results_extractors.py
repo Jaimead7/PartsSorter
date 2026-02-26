@@ -186,6 +186,8 @@ def extract_first_result_alone(results: ResultsType) -> ExtractedResult:
     if results.boxes is None:
         return ExtractedResult()
     boxes: np.ndarray = results.boxes.data
+    if boxes.shape[0] == 0:
+        return ExtractedResult()
     if boxes.shape[0] == 1:
         return ExtractedResult(
             id= boxes[0,-1],
